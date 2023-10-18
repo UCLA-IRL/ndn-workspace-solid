@@ -28,12 +28,23 @@ export type DocType = {
 }
 export type DocumentsType = { [docId: string]: DocType }
 
+export type Aincraft = {
+  items: {
+    x: number,
+    y: number,
+    z: number,
+    color: string,
+    id: string,
+  }[]
+}
+
 export type RootDocType = {
   documents: DocumentsType,
   calendar: Calendar,
   latex: {
     root: ProjFolder
-  }
+  },
+  aincraft: Aincraft
 }
 
 export type Calendar = { [time: string]: CalEvent[] }
@@ -51,6 +62,7 @@ export function initRootDoc() {
     documents: {},
     calendar: {},
     latex: {},
+    aincraft: {},
   } as RootDocType)
 }
 

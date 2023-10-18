@@ -1,20 +1,17 @@
 import { Observer, reactive } from "@reactivedata/reactive"
-import { Setter, from } from "solid-js"
+import { from } from "solid-js"
 
+// Not working as expected
 export function createSyncedStore<T>(syncedObject: T) {
-  let set: Setter<T | undefined> | undefined
-  const observer = new Observer(() => {
-    if (set) {
-      set(() => store)
-    }
-  })
-  const store = reactive(syncedObject, observer)
+  return from<T>((set) => {
+    const store = reactive(syncedObject, new Observer(() => {
+      //@ts-ignore
+      set(store)
+    }))
 
-  return from<T>((newSet) => {
-    set = newSet
+    //@ts-ignore
+    set(store)
 
-    return () => {
-      set = undefined
-    }
+    return () => {}
   })
 }

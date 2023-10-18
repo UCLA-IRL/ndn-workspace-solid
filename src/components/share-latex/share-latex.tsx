@@ -8,6 +8,7 @@ import { useParams, useNavigate } from '@solidjs/router'
 import { initEvent, rootDoc } from '../../backend/main'
 import { ProjDoc, ProjFileDesc, ProjFolder, exportAsZip, latexFileAt } from '../../backend/models'
 import { Match, Switch, createEffect, createSignal } from 'solid-js'
+import { observeDeep } from '@syncedstore/core'
 
 type ModalState = '' | 'folder' | 'doc' | 'upload'
 
@@ -20,6 +21,7 @@ export default function ShareLatex(props: {
   const pathNames = () => path() ? path().split('/') : []
   const pathUri = () => (path() ? `${props.rootUri}/${path()}` : props.rootUri)
   const [item, setItem] = createSignal<ProjFileDesc>()
+  const [folderCopy, setFolderCopy] = createSignal<ProjFolder>()
   const [modalState, setModalState] = createSignal<ModalState>('')
 
   // TODO: Refresh after folder change. Note that useSyncedStore may cause unnecessary rerenser. Need investigate.
@@ -32,6 +34,23 @@ export default function ShareLatex(props: {
     initEvent.then(() => {
       setItem(latexFileAt(rootDoc.latex, curPathNames))
     })
+  })
+
+  createEffect(() => {
+    const cur = item()
+    const curPathNames = pathNames()
+    if (cur !== undefined && cur.kind === 'folder') {
+      setFolderCopy({ kind: 'folder', name: cur.name, items: cur.items })
+      return observeDeep(cur, () => {
+        const obj = latexFileAt(rootDoc.latex, curPathNames)
+        if (obj?.kind === 'folder') {
+          // Create a shallow copy to force the page refresh
+          setFolderCopy({ kind: 'folder', name: cur.name, items: cur.items })
+        } else {
+          console.error('What happened?!')
+        }
+      })
+    }
   })
 
   const createItem = (name: string) => {
@@ -113,10 +132,10 @@ export default function ShareLatex(props: {
           { name: 'Download as zip', onClick: onExportZip },
         ]} />
       <Switch fallback={<></>}>
-        <Match when={item()?.kind === 'folder'}>
+        <Match when={folderCopy() !== undefined}>
           <FileList
             pathUri={pathUri()}
-            folder={item() as ProjFolder}
+            folder={folderCopy()!}
           />
         </Match>
         <Match when={item()?.kind === 'doc'}>

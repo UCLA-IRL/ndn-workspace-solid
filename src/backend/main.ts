@@ -98,6 +98,7 @@ export const initEvent = (async () => {
       name: 'main.tex',
       text: new Y.Text(),
     })
+    rootDoc.aincraft.items = []
   }
 
   // Start Sync
