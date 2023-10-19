@@ -1,20 +1,76 @@
-import { Dialog, Button, DialogTitle, DialogContent, DialogActions, TextField } from '@suid/material'
-import { createSignal } from 'solid-js'
+import {
+  AttachFile as AttachFileIcon,
+  Clear as ClearIcon,
+  CloudUpload as CloudUploadIcon
+} from '@suid/icons-material'
+import {
+  Dialog,
+  Button,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  InputAdornment,
+  IconButton,
+  styled
+} from '@suid/material'
+import { Show, createSignal } from 'solid-js'
+
+export type ModalState = '' | 'folder' | 'doc' | 'upload'
+
+const VisuallyHiddenInput = styled('input')({
+  clip: 'rect(0 0 0 0)',
+  clipPath: 'inset(50%)',
+  height: 1,
+  overflow: 'hidden',
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  whiteSpace: 'nowrap',
+  width: 1,
+})
 
 export default function NewItemModal(props: {
-  visible: boolean,
-  title: string,
-  onSubmit: (name: string) => void,
+  modalState: ModalState,
+  onSubmit: (name: string, state: ModalState, blob?: Uint8Array) => void,
   onCancel: () => void,
 }) {
   const [name, setName] = createSignal('')
+  const [inputRef, setInputRef] = createSignal<HTMLInputElement>()
+  const [fileName, setFileName] = createSignal('')
+  const [blob, setBlob] = createSignal(new Uint8Array())
+  const title = () => {
+    switch (props.modalState) {
+      case 'folder':
+        return 'New folder'
+      case 'doc':
+        return 'New .tex file'
+      case 'upload':
+        return 'Upload blob file'
+      default:
+        return ''
+    }
+  }
+
+  const onUpload = () => {
+    const files = inputRef()?.files
+    if (files && files.length > 0) {
+      setFileName(files[0].name)
+      if (name() === '') {
+        setName(files[0].name)
+      }
+      files[0].arrayBuffer().then(arrayBuf => {
+        setBlob(new Uint8Array(arrayBuf))
+      })
+    }
+  }
 
   return (
     <Dialog
-      open={props.visible}
+      open={props.modalState !== ''}
     >
       <DialogTitle>
-        {props.title}
+        {title()}
       </DialogTitle>
       <DialogContent>
         <TextField
@@ -25,6 +81,32 @@ export default function NewItemModal(props: {
           value={name()}
           onChange={(event) => setName(event.target.value)}
         />
+        <Show when={props.modalState === 'upload'}>
+          <TextField
+            fullWidth
+            label='File Attachment'
+            margin='normal'
+            variant='filled'
+            value={fileName()}
+            InputProps={{
+              readOnly: true,
+              startAdornment:
+                <InputAdornment position="start">
+                  <AttachFileIcon />
+                </InputAdornment>,
+              endAdornment:
+                <InputAdornment position="end">
+                  <IconButton>
+                    <ClearIcon />
+                  </IconButton>
+                </InputAdornment>,
+            }}
+          />
+          <Button component="label" variant="contained" startIcon={<CloudUploadIcon />}>
+            Upload file
+            <VisuallyHiddenInput type="file" ref={setInputRef} onChange={onUpload} />
+          </Button>
+        </Show>
       </DialogContent>
       <DialogActions>
         <Button
@@ -34,8 +116,14 @@ export default function NewItemModal(props: {
         </Button>
         <Button
           type="submit"
-          onClick={() => props.onSubmit(name())}
-          disabled={name() === ''}
+          onClick={() => {
+            if(props.modalState === 'upload') {
+              props.onSubmit(name(), props.modalState, blob())
+            } else {
+              props.onSubmit(name(), props.modalState)
+            }
+          }}
+          disabled={name() === '' || (props.modalState === 'upload' && blob().length <= 0)}
           autofocus>
           Add
         </Button>

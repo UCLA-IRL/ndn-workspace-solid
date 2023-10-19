@@ -1,6 +1,9 @@
 import { syncedStore } from "@syncedstore/core"
 import * as Y from 'yjs'
 import JSZip from 'jszip'
+import { syncAgent } from "./main"
+import { Decoder } from "@ndn/tlv"
+import { Name } from "@ndn/packet"
 
 export type ProjFolder = {
   kind: 'folder'
@@ -17,7 +20,7 @@ export type ProjDoc = {
 export type ProjBlob = {
   kind: 'blob'
   name: string
-  version: number
+  blobName: string
 }
 
 export type ProjFileDesc = ProjFolder | ProjDoc | ProjBlob
@@ -81,22 +84,30 @@ export function latexFileAt(root: Partial<{ root: ProjFolder }>, pathNames: stri
   }, root.root)
 }
 
-export function exportAsZip(root: Partial<{ root: ProjFolder }>) {
+export async function exportAsZip(root: Partial<{ root: ProjFolder }>) {
   const zip = new JSZip()
-  const examine = (path: string, items: ProjFileDesc[]) => {
-    items.forEach(item => {
+  const examine = async (path: string, items: ProjFileDesc[]) => {
+    for await (const item of items) {
       const fullName = path + item.name
       if (item.kind === 'folder') {
         examine(fullName + '/', item.items)
       } else if (item.kind === 'doc') {
         zip.file(fullName, item.text.toString())
       } else if (item.kind === 'blob') {
-        console.error('TODO: blob files are not implemented yet')
+        try {
+          const blobName = new Name(item.blobName)
+          const blob = await syncAgent.getBlob(blobName)
+          if(blob !== undefined) {
+            zip.file(fullName, blob)
+          }
+        } catch (e) {
+          console.error(`Unable to pack blob file ${fullName}: ${e}`)
+        }
       }
-    })
+    }
   }
   if (root.root) {
-    examine('', root.root?.items)
+    await examine('', root.root?.items)
   }
   return zip
 }

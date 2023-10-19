@@ -2,15 +2,17 @@ import * as Y from 'yjs'
 import AppTools from './app-tools'
 import FileList from './file-list'
 import LatexDoc from './latex-doc'
-import NewItemModal from './new-item-modal'
-import { Typography } from '@suid/material'
+import NewItemModal, { ModalState } from './new-item-modal'
+import { Button, Typography } from '@suid/material'
 import { useParams, useNavigate } from '@solidjs/router'
-import { initEvent, rootDoc } from '../../backend/main'
+import { initEvent, rootDoc, syncAgent } from '../../backend/main'
 import { ProjDoc, ProjFileDesc, ProjFolder, exportAsZip, latexFileAt } from '../../backend/models'
-import { Match, Switch, createEffect, createSignal } from 'solid-js'
+import { Match, Show, Switch, createEffect, createSignal } from 'solid-js'
 import { observeDeep } from '@syncedstore/core'
+import { Name } from '@ndn/packet'
+import { bytesToBase64 } from '../../utils/base64'
 
-type ModalState = '' | 'folder' | 'doc' | 'upload'
+// TODO: Switch to context instead of using exported variables
 
 export default function ShareLatex(props: {
   rootUri: string
@@ -50,13 +52,15 @@ export default function ShareLatex(props: {
           console.error('What happened?!')
         }
       })
+    } else {
+      setFolderCopy()
     }
   })
 
-  const createItem = (name: string) => {
+  const createItem = (name: string, state: ModalState, blob?: Uint8Array) => {
     const cur = item()  // Convenient for TS check
     if (name !== '' && cur?.kind === 'folder') {
-      if (modalState() === 'folder') {
+      if (state === 'folder') {
         const to = pathUri() + '/' + name
         if (cur.items.findIndex(obj => obj.name === name) == -1) {
           cur.items.push({
@@ -66,7 +70,7 @@ export default function ShareLatex(props: {
           })
           navigate(to, { replace: true })
         }
-      } else if (modalState() === 'doc') {
+      } else if (state === 'doc') {
         // Cannot do this because there are .bib, .sty, etc.
         // const newName = name.endsWith('.tex') ? name : name + '.tex'
         const to = pathUri() + '/' + name
@@ -78,21 +82,34 @@ export default function ShareLatex(props: {
           })
           navigate(to, { replace: true })
         }
+      } else if (state === 'upload' && blob !== undefined && blob.length > 0) {
+        if (cur.items.findIndex(obj => obj.name === name) == -1) {
+          syncAgent.publishBlob('latexBlob', blob).then(blobName => {
+            // TODO: support replace existing file
+            // TODO: how to handle two files with the same name? Use uuid instead of filenames?
+            cur.items.push({
+              kind: 'blob',
+              name: name,
+              blobName: blobName.toString()
+            })
+          })
+        }
       }
     }
     setModalState('')
   }
 
   const onExportZip = () => {
-    const zip = exportAsZip(rootDoc.latex)
-    zip.generateAsync({ type: "base64" }).then(b64File => {
-      (window as Window).location = "data:application/zip;base64," + b64File
+    exportAsZip(rootDoc.latex).then(zip => {
+      zip.generateAsync({ type: "base64" }).then(b64File => {
+        (window as Window).location = "data:application/zip;base64," + b64File
+      })
     })
   }
 
   const onCompile = () => {
     (async () => {
-      const zip = exportAsZip(rootDoc.latex)
+      const zip = await exportAsZip(rootDoc.latex)
       const blobFile = await zip.generateAsync({ type: "blob" })
       const formData = new FormData();
       formData.append("file", new File([blobFile], 'upload.zip', {
@@ -113,14 +130,34 @@ export default function ShareLatex(props: {
     })()
   }
 
+  const onDownloadBlob = () => {
+    (async () => {
+      const curItem = item()
+      if (curItem?.kind === 'blob') {
+        try {
+          const blobName = new Name(curItem.blobName)
+          const blob = await syncAgent.getBlob(blobName)
+          if (blob !== undefined) {
+            const b64 = bytesToBase64(blob)
+            const win = window as Window
+            win.location = "data:application/octet-stream;base64," + b64
+          }
+        } catch (e) {
+          console.error(`Unable to fetch blob file: ${e}`)
+        }
+      }
+    })()
+  }
+
   return (
     <>
-      <NewItemModal
-        visible={modalState() === 'folder' || modalState() === 'doc'}
-        title={modalState() === 'folder' ? 'New folder' : 'New .tex file'}
-        onCancel={() => setModalState('')}
-        onSubmit={createItem}
-      />
+      <Show when={modalState() !== ''}>
+        <NewItemModal
+          modalState={modalState()}
+          onCancel={() => setModalState('')}
+          onSubmit={createItem}
+        />
+      </Show>
       <AppTools
         rootPath={props.rootUri}
         pathNames={pathNames()}
@@ -128,6 +165,7 @@ export default function ShareLatex(props: {
         menuItems={[
           { name: 'New folder', onClick: () => setModalState('folder') },
           { name: 'New tex', onClick: () => setModalState('doc') },
+          { name: 'Upload blob', onClick: () => setModalState('upload') },
           { name: 'divider' },
           { name: 'Download as zip', onClick: onExportZip },
         ]} />
@@ -142,9 +180,9 @@ export default function ShareLatex(props: {
           <LatexDoc doc={(item() as ProjDoc).text} />
         </Match>
         <Match when={item()?.kind === 'blob'}>
-          <Typography variant='button' color='error'>
-            TODO: Not implemented for kind blob
-          </Typography>
+          <Button onClick={onDownloadBlob}>
+            DOWNLOAD
+          </Button>
         </Match>
       </Switch>
     </>

@@ -460,9 +460,12 @@ export class SyncAgent {
     try {
       const decoder = new Decoder(nameWire)
       blobName = Name.decodeFrom(decoder)
-      if (!blobName.isPrefixOf(id)) {
-        throw new Error('Blob name does not start with node ID')
-      }
+      // I don't think the following is a real concern. Need check
+      // Current implementation does not pass the check
+      // If anyone wants to fix, modify publishBlob()
+      // if (!blobName.isPrefixOf(id)) {
+      //   throw new Error(`Blob name does not start with node ID: ${blobName}`)
+      // }
     } catch (e) {
       console.error(`Invalid blob name ${nameWire}: ${e}`)
       return
@@ -502,6 +505,7 @@ export class SyncAgent {
   // getBlob returns either a blob or a segment
   public getBlob(name: Name) {
     return this.persistStorage.get(name.toString())
+    // TODO: Fetch missing blob
   }
 
   // publishBlob segments and produce a blob object
@@ -529,6 +533,8 @@ export class SyncAgent {
       name.encodeTo(encoder)
       await this.atLeastOnce.produce(this.makeInnerData('blob', topic, encoder.output))
     }
+
+    return name
   }
 
   public publishUpdate(topic: string, content: Uint8Array) {

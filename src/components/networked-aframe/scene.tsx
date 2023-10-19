@@ -66,7 +66,6 @@ export default function Scene() {
     if (curRoot !== undefined) {
       setItems((curRoot.items ?? []).map(x => x))
       return observeDeep(curRoot, () => {
-        console.log('HIT')
         setItems((curRoot.items ?? []).map(x => x))
       })
     }
@@ -84,7 +83,7 @@ export default function Scene() {
       <a-sky id="background" src="#skyTexture" radius="30" theta-length="90" />
       <a-camera id="camera">
         <a-cursor id="cursor"
-          intersection-spawn="event: click; offset: 0.25 0.25 0.25; snap: 0.5 0.5 0.5; mixin: voxel" />
+          intersection-spawn="event: click; offset: 0.25 0.25 0.25; snap: 0.5 0.5 0.5" />
       </a-camera>
       <For each={items()}>{(obj) =>
         <a-entity
