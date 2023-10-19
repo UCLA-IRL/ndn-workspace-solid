@@ -1,4 +1,4 @@
-import { For, createEffect, createSignal } from "solid-js"
+import { For, createEffect, createSignal, onCleanup } from "solid-js"
 import { initEvent, rootDoc } from '../../backend/main'
 import { Aincraft } from "../../backend/models"
 import { observeDeep } from "@syncedstore/core"
@@ -65,9 +65,10 @@ export default function Scene() {
     const curRoot = root()
     if (curRoot !== undefined) {
       setItems((curRoot.items ?? []).map(x => x))
-      return observeDeep(curRoot, () => {
+      const cancel = observeDeep(curRoot, () => {
         setItems((curRoot.items ?? []).map(x => x))
       })
+      onCleanup(cancel)
     }
   })
 

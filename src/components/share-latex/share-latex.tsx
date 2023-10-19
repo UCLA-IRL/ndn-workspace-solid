@@ -3,11 +3,11 @@ import AppTools from './app-tools'
 import FileList from './file-list'
 import LatexDoc from './latex-doc'
 import NewItemModal, { ModalState } from './new-item-modal'
-import { Button, Typography } from '@suid/material'
+import { Button } from '@suid/material'
 import { useParams, useNavigate } from '@solidjs/router'
 import { initEvent, rootDoc, syncAgent } from '../../backend/main'
 import { ProjDoc, ProjFileDesc, ProjFolder, exportAsZip, latexFileAt } from '../../backend/models'
-import { Match, Show, Switch, createEffect, createSignal } from 'solid-js'
+import { Match, Show, Switch, createEffect, createSignal, onCleanup } from 'solid-js'
 import { observeDeep } from '@syncedstore/core'
 import { Name } from '@ndn/packet'
 import { bytesToBase64 } from '../../utils/base64'
@@ -26,7 +26,6 @@ export default function ShareLatex(props: {
   const [folderCopy, setFolderCopy] = createSignal<ProjFolder>()
   const [modalState, setModalState] = createSignal<ModalState>('')
 
-  // TODO: Refresh after folder change. Note that useSyncedStore may cause unnecessary rerenser. Need investigate.
   // TODO: Make modal logic correct
   // TODO: Use UndoManager to handle Undo
   // const content = () => ()
@@ -43,7 +42,8 @@ export default function ShareLatex(props: {
     const curPathNames = pathNames()
     if (cur !== undefined && cur.kind === 'folder') {
       setFolderCopy({ kind: 'folder', name: cur.name, items: cur.items })
-      return observeDeep(cur, () => {
+      // TODO: Use non-nested data structure to avoid dependencies issue
+      const cancel = observeDeep(cur, () => {
         const obj = latexFileAt(rootDoc.latex, curPathNames)
         if (obj?.kind === 'folder') {
           // Create a shallow copy to force the page refresh
@@ -52,6 +52,7 @@ export default function ShareLatex(props: {
           console.error('What happened?!')
         }
       })
+      onCleanup(cancel)
     } else {
       setFolderCopy()
     }
