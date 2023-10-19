@@ -5,7 +5,7 @@ import { CertStorage } from './cert-storage'
 import { Data, Interest, Name } from '@ndn/packet'
 import { PeerJsListener } from '../adaptors/peerjs-transport'
 import { fromUtf8, toUtf8 } from '@ndn/util'
-import { RootDocType, initRootDoc } from './models'
+import { RootDocStore, RootDocType, initRootDoc } from './models'
 import { syncedStore, getYjsDoc } from '@syncedstore/core'
 import { NdnSvsAdaptor } from "../adaptors/yjs-ndn-adaptor"
 import { v4 as uuidv4 } from "uuid"
@@ -31,7 +31,7 @@ export let endpoint: Endpoint
 // TODO: Separate CRDT document with data packets. Add data storage to store updates from other peers.
 // TODO: Setup persistent storage using IndexDB
 export let rootDocId: string = ''
-export let rootDoc: ReturnType<typeof syncedStore<RootDocType>>
+export let rootDoc: RootDocStore
 export let yjsAdaptor: NdnSvsAdaptor
 export let persistStore: InMemoryStorage
 export let syncAgent: SyncAgent

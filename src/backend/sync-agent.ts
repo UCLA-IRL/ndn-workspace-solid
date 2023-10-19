@@ -92,6 +92,9 @@ export abstract class SyncDelivery {
         this._onUpdate = await onUpdatePromise
         await this._startPromise
       }
+    }).then(value => {
+      // Force trigger the SvSync to fire
+      (value as any).resetTimer(true)
     })
   }
 
@@ -117,10 +120,6 @@ export abstract class SyncDelivery {
       if (this._startPromiseResolve !== undefined) {
         this._startPromiseResolve()
       }
-      // Force trigger the SvSync to fire
-      setTimeout(() => {
-        (this._syncInst as any).resetTimer(true)  // @ts-ignore
-      }, 100)
     }
   }
 
@@ -153,6 +152,9 @@ export abstract class SyncDelivery {
           this._syncNode = this._syncInst.add(nodeId)
           // this._ready should already be true
         }
+      }).then(value => {
+        // Force trigger the SvSync to fire
+        (value as any).resetTimer(true)
       })
     })
   }
@@ -335,6 +337,7 @@ export class AtMostOnceDelivery extends SyncDelivery {
 
 export type ChannelType = 'update' | 'blob' | 'status'
 
+// TODO: Fix infinite SyncInterest problem when there are 3+ peers
 export class SyncAgent {
   private _ready = false
   readonly listeners: { [key: string]: (content: Uint8Array, id: Name) => void } = {}

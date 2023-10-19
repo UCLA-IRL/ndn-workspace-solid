@@ -49,6 +49,7 @@ export type RootDocType = {
   },
   aincraft: Aincraft
 }
+export type RootDocStore = ReturnType<typeof syncedStore<RootDocType>>
 
 export type Calendar = { [time: string]: CalEvent[] }
 

@@ -1,7 +1,8 @@
-import { For, createEffect, createSignal, onCleanup } from "solid-js"
-import { initEvent, rootDoc } from '../../backend/main'
-import { Aincraft } from "../../backend/models"
-import { observeDeep } from "@syncedstore/core"
+import { For } from "solid-js"
+import { rootDoc } from '../../backend/main'
+import { useNdnWorkspace } from "../../Context"
+import { createSyncedStoreSig } from "../../adaptors/solid-synced-store"
+import { type Aincraft } from "../../backend/models"
 
 
 function getRandomColor() {
@@ -52,25 +53,8 @@ AFRAME.registerComponent('intersection-spawn', {
 })
 
 export default function Scene() {
-  const [root, setRoot] = createSignal<Partial<Aincraft>>()
-  const [items, setItems] = createSignal<Aincraft['items']>([])
-
-  createEffect(() => {
-    initEvent.then(() => {
-      setRoot(rootDoc.aincraft)
-    })
-  })
-
-  createEffect(() => {
-    const curRoot = root()
-    if (curRoot !== undefined) {
-      setItems((curRoot.items ?? []).map(x => x))
-      const cancel = observeDeep(curRoot, () => {
-        setItems((curRoot.items ?? []).map(x => x))
-      })
-      onCleanup(cancel)
-    }
-  })
+  const { rootDoc: rootDocSig } = useNdnWorkspace()!
+  const items = createSyncedStoreSig<Aincraft['items']>(() => rootDocSig()?.aincraft?.items)
 
   return (
     <a-scene embedded>
@@ -86,7 +70,7 @@ export default function Scene() {
         <a-cursor id="cursor"
           intersection-spawn="event: click; offset: 0.25 0.25 0.25; snap: 0.5 0.5 0.5" />
       </a-camera>
-      <For each={items()}>{(obj) =>
+      <For each={items()?.value}>{(obj) =>
         <a-entity
           mixin='voxel'
           attr: position={`${obj.x} ${obj.y} ${obj.z}`}

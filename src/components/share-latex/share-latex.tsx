@@ -5,18 +5,19 @@ import LatexDoc from './latex-doc'
 import NewItemModal, { ModalState } from './new-item-modal'
 import { Button } from '@suid/material'
 import { useParams, useNavigate } from '@solidjs/router'
-import { initEvent, rootDoc, syncAgent } from '../../backend/main'
 import { ProjDoc, ProjFileDesc, ProjFolder, exportAsZip, latexFileAt } from '../../backend/models'
 import { Match, Show, Switch, createEffect, createSignal, onCleanup } from 'solid-js'
 import { observeDeep } from '@syncedstore/core'
 import { Name } from '@ndn/packet'
 import { bytesToBase64 } from '../../utils/base64'
+import { useNdnWorkspace } from '../../Context'
 
 // TODO: Switch to context instead of using exported variables
 
 export default function ShareLatex(props: {
   rootUri: string
 }) {
+  const { rootDoc, syncAgent } = useNdnWorkspace()!
   const navigate = useNavigate()
   const params = useParams<{ path: string }>()
   const path = () => params.path
@@ -31,10 +32,10 @@ export default function ShareLatex(props: {
   // const content = () => ()
 
   createEffect(() => {
-    const curPathNames = pathNames()  // Explicitly trigger the dependency
-    initEvent.then(() => {
-      setItem(latexFileAt(rootDoc.latex, curPathNames))
-    })
+    const rootDocVal = rootDoc()
+    if (rootDocVal !== undefined) {
+      setItem(latexFileAt(rootDocVal.latex, pathNames()))
+    }
   })
 
   createEffect(() => {
@@ -44,7 +45,7 @@ export default function ShareLatex(props: {
       setFolderCopy({ kind: 'folder', name: cur.name, items: cur.items })
       // TODO: Use non-nested data structure to avoid dependencies issue
       const cancel = observeDeep(cur, () => {
-        const obj = latexFileAt(rootDoc.latex, curPathNames)
+        const obj = latexFileAt(rootDoc()!.latex, curPathNames)
         if (obj?.kind === 'folder') {
           // Create a shallow copy to force the page refresh
           setFolderCopy({ kind: 'folder', name: cur.name, items: cur.items })
@@ -85,7 +86,7 @@ export default function ShareLatex(props: {
         }
       } else if (state === 'upload' && blob !== undefined && blob.length > 0) {
         if (cur.items.findIndex(obj => obj.name === name) == -1) {
-          syncAgent.publishBlob('latexBlob', blob).then(blobName => {
+          syncAgent()!.publishBlob('latexBlob', blob).then(blobName => {
             // TODO: support replace existing file
             // TODO: how to handle two files with the same name? Use uuid instead of filenames?
             cur.items.push({
@@ -101,7 +102,7 @@ export default function ShareLatex(props: {
   }
 
   const onExportZip = () => {
-    exportAsZip(rootDoc.latex).then(zip => {
+    exportAsZip(rootDoc()!.latex).then(zip => {
       zip.generateAsync({ type: "base64" }).then(b64File => {
         (window as Window).location = "data:application/zip;base64," + b64File
       })
@@ -110,7 +111,7 @@ export default function ShareLatex(props: {
 
   const onCompile = () => {
     (async () => {
-      const zip = await exportAsZip(rootDoc.latex)
+      const zip = await exportAsZip(rootDoc()!.latex)
       const blobFile = await zip.generateAsync({ type: "blob" })
       const formData = new FormData();
       formData.append("file", new File([blobFile], 'upload.zip', {
@@ -137,7 +138,7 @@ export default function ShareLatex(props: {
       if (curItem?.kind === 'blob') {
         try {
           const blobName = new Name(curItem.blobName)
-          const blob = await syncAgent.getBlob(blobName)
+          const blob = await syncAgent()!.getBlob(blobName)
           if (blob !== undefined) {
             const b64 = bytesToBase64(blob)
             const win = window as Window
