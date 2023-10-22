@@ -2,7 +2,6 @@ import { For } from "solid-js"
 import { rootDoc } from '../../backend/main'
 import { useNdnWorkspace } from "../../Context"
 import { createSyncedStoreSig } from "../../adaptors/solid-synced-store"
-import { type Aincraft } from "../../backend/models"
 
 
 function getRandomColor() {
@@ -54,7 +53,7 @@ AFRAME.registerComponent('intersection-spawn', {
 
 export default function Scene() {
   const { rootDoc: rootDocSig } = useNdnWorkspace()!
-  const items = createSyncedStoreSig<Aincraft['items']>(() => rootDocSig()?.aincraft?.items)
+  const items = createSyncedStoreSig(() => rootDocSig()?.aincraft?.items)
 
   return (
     <a-scene embedded>

@@ -5,8 +5,8 @@ import { CertStorage } from './cert-storage'
 import { Data, Interest, Name } from '@ndn/packet'
 import { PeerJsListener } from '../adaptors/peerjs-transport'
 import { fromUtf8, toUtf8 } from '@ndn/util'
-import { RootDocStore, RootDocType, initRootDoc } from './models'
-import { syncedStore, getYjsDoc } from '@syncedstore/core'
+import { RootDocStore, initRootDoc } from './models'
+import { getYjsDoc } from '@syncedstore/core'
 import { NdnSvsAdaptor } from "../adaptors/yjs-ndn-adaptor"
 import { v4 as uuidv4 } from "uuid"
 import * as Y from 'yjs'

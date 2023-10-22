@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+// OBSOLETE
 // Copied from networked-aframe/src/adapters
 type Occupants = { [id: string]: JSONObject }
 
@@ -125,6 +126,7 @@ export default class NafNdnAdaptor implements NafInterface {
   }
 
   /////////// TODO: Need status channel ///////////////////
+  //  UPDATE: naf does not give a good programming interface, abandoned for now.
   // ref: https://github.com/networked-aframe/naf-firebase-adapter/blob/master/src/index.js
   // We may use average peer time as offset
   updateTimeOffset() {
