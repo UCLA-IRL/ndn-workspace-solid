@@ -10,14 +10,33 @@ import {
   CssBaseline,
   useMediaQuery
 } from "@suid/material"
-import DescriptionIcon from "@suid/icons-material/Description"
-import ViewInArIcon from '@suid/icons-material/ViewInAr'
+import {
+  Description as DescriptionIcon,
+  ViewInAr as ViewInArIcon,
+  Apps as AppsIcon,
+} from "@suid/icons-material"
 import { createTheme, ThemeProvider } from "@suid/material/styles"
 import { Outlet, Link } from "@solidjs/router"
+import { For, JSX } from "solid-js";
 
 const drawerWidth = 200;
 
-export default function Root() {
+function RouteItem(props: { icon: JSX.Element, title: string, href: string }) {
+  return (
+    <ListItem disablePadding>
+      <ListItemButton component={Link} href={props.href}>
+        <ListItemIcon>
+          {props.icon}
+        </ListItemIcon>
+        <ListItemText primary={props.title} />
+      </ListItemButton>
+    </ListItem>
+  )
+}
+
+export default function Root(props: {
+  routes: Array<{ icon: JSX.Element, title: string, href: string }>
+}) {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
   const darkTheme = createTheme({
     palette: {
@@ -25,6 +44,7 @@ export default function Root() {
     },
   })
 
+  // TODO: MUI's Tab may be better?
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
@@ -42,22 +62,9 @@ export default function Root() {
           anchor="left"
         >
           <List>
-            <ListItem disablePadding>
-              <ListItemButton component={Link} href='/latex'>
-                <ListItemIcon>
-                  <DescriptionIcon />
-                </ListItemIcon>
-                <ListItemText primary='LaTeX' />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton component={Link} href='/aframe'>
-                <ListItemIcon>
-                  <ViewInArIcon />
-                </ListItemIcon>
-                <ListItemText primary='A-Frame' />
-              </ListItemButton>
-            </ListItem>
+            <For each={props.routes}>{item =>
+              <RouteItem icon={item.icon} href={item.href} title={item.title} />
+            }</For>
           </List>
         </Drawer>
         <Box

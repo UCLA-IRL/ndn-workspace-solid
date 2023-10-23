@@ -33,7 +33,11 @@ export class SyncAgent {
     // @ndn/repo/DataStore may be a better choice, but needs more time to write code
     endpoint.produce(appPrefix, interest => {
       return this.serve(interest)
-    }, { describe: 'SyncAgent.serve', routeCapture: false })
+    }, { 
+      describe: 'SyncAgent.serve',
+      routeCapture: false,
+      announcement: appPrefix,
+     })
   }
 
   public destroy() {
@@ -268,6 +272,14 @@ export class SyncAgent {
       console.error(`Data in storage is not decodable: ${intName.toString()}`)
       return undefined
     }
+  }
+
+  /**
+   * Trigger the SVS to fire a Sync Interest
+   */
+  public fire() {
+    this.atLeastOnce.fire()
+    this.latestOnly.fire()
   }
 
   static async create(

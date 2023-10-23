@@ -17,7 +17,7 @@ import { useNdnWorkspace } from '../../Context'
 export default function ShareLatex(props: {
   rootUri: string
 }) {
-  const { rootDoc, syncAgent } = useNdnWorkspace()!
+  const { rootDoc, syncAgent, booted } = useNdnWorkspace()!
   const navigate = useNavigate()
   const params = useParams<{ path: string }>()
   const path = () => params.path
@@ -26,6 +26,10 @@ export default function ShareLatex(props: {
   const [item, setItem] = createSignal<ProjFileDesc>()
   const [folderCopy, setFolderCopy] = createSignal<ProjFolder>()
   const [modalState, setModalState] = createSignal<ModalState>('')
+
+  if (!booted()) {
+    navigate('/', { replace: true })
+  }
 
   // TODO: Make modal logic correct
   // TODO: Use UndoManager to handle Undo

@@ -2,6 +2,7 @@ import { For } from "solid-js"
 import { rootDoc } from '../../backend/main'
 import { useNdnWorkspace } from "../../Context"
 import { createSyncedStoreSig } from "../../adaptors/solid-synced-store"
+import { useNavigate } from "@solidjs/router"
 
 
 function getRandomColor() {
@@ -52,8 +53,13 @@ AFRAME.registerComponent('intersection-spawn', {
 })
 
 export default function Scene() {
-  const { rootDoc: rootDocSig } = useNdnWorkspace()!
+  const { rootDoc: rootDocSig, booted } = useNdnWorkspace()!
+  const navigate = useNavigate()
   const items = createSyncedStoreSig(() => rootDocSig()?.aincraft?.items)
+
+  if (!booted()) {
+    navigate('/', { replace: true })
+  }
 
   return (
     <a-scene embedded>

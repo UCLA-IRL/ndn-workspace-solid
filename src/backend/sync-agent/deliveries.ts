@@ -138,6 +138,12 @@ export abstract class SyncDelivery {
     })
   }
 
+  public fire() {
+    if(this._syncInst !== undefined && this._ready) {
+      (this._syncInst as any).resetTimer(true)
+    }
+  }
+
   protected async setSyncState(nodeId: Name, seq: number, storage?: Storage) {
     if (this.state !== undefined) {
       this.state.set(nodeId, seq)
