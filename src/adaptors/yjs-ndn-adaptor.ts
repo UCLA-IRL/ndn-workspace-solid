@@ -2,13 +2,20 @@ import { SyncAgent } from "../backend/sync-agent"
 import * as Y from 'yjs'
 
 export class NdnSvsAdaptor {
+  private readonly callback = this.docUpdateHandler.bind(this)
+
   constructor(
     public syncAgent: SyncAgent,
     public readonly doc: Y.Doc,
     public readonly topic: string
   ) {
     syncAgent.register('update', topic, (content) => this.handleSyncUpdate(content))
-    doc.on('update', this.docUpdateHandler.bind(this))
+    doc.on('update', this.callback)
+  }
+
+  public destroy() {
+    this.syncAgent.unregister('update', this.topic)
+    this.doc.off('update', this.callback)
   }
 
   private docUpdateHandler(update: Uint8Array, origin: undefined) {

@@ -2,9 +2,10 @@ import { syncedStore } from "@syncedstore/core"
 import * as Y from 'yjs'
 import JSZip from 'jszip'
 import { syncAgent } from "./main"
-import { Decoder } from "@ndn/tlv"
 import { Name } from "@ndn/packet"
 
+// TODO: Make this recursive free. Use uuid to identify sub-items
+// items: string[]
 export type ProjFolder = {
   kind: 'folder'
   name: string
@@ -97,7 +98,7 @@ export async function exportAsZip(root: Partial<{ root: ProjFolder }>) {
       } else if (item.kind === 'blob') {
         try {
           const blobName = new Name(item.blobName)
-          const blob = await syncAgent.getBlob(blobName)
+          const blob = await syncAgent!.getBlob(blobName)
           if(blob !== undefined) {
             zip.file(fullName, blob)
           }

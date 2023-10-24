@@ -17,6 +17,7 @@ import ShareLatex from './components/share-latex'
 import Scene from './components/networked-aframe/scene'
 import { NdnWorkspaceProvider } from './Context'
 import Connect from './components/connect'
+import Workspace from './components/workspace'
 
 const root = document.getElementById('root')
 
@@ -35,6 +36,7 @@ render(
             <Route path="/latex/*path" element={<ShareLatex rootUri='/latex' />} />
             <Route path="/aframe" component={Scene} />
             <Route path="/connection" component={Connect} />
+            <Route path="/workspace" component={Workspace} />
           </Route>
         </Routes>
       </Router>

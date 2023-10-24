@@ -6,32 +6,34 @@ import { ControlCommand } from "@ndn/nfdmgmt"
 import { FwFace } from "@ndn/fw"
 import { WsTransport } from "@ndn/ws-transport"
 import { getYjsDoc } from '@syncedstore/core'
-import { v4 as uuidv4 } from "uuid"
 import * as Y from 'yjs'
 import { NdnSvsAdaptor } from "../adaptors/yjs-ndn-adaptor"
 import { PeerJsListener } from '../adaptors/peerjs-transport'
-import { CertStorage } from './cert-storage'
+import { CertStorage } from './security/cert-storage'
 import { RootDocStore, initRootDoc } from './models'
 import { InMemoryStorage, SyncAgent } from "./sync-agent"
+import { Certificate } from "@ndn/keychain"
 
-export const nodeId = '/node-' + Array.from(crypto.getRandomValues(new Uint8Array(4)))
-  .map(v => v.toString(16).padStart(2, '0'))
-  .join('')
-export const appPrefix = '/example/testYjs'
+export const endpoint: Endpoint = new Endpoint()
 
-export let initialized = false
-export let certStorage: CertStorage
-export let endpoint: Endpoint
+export let bootstrapping = false  // To prevent double click
+export let bootstrapped = false
+export let persistStore: InMemoryStorage | undefined
+export let certStorage: CertStorage | undefined
+export let syncAgent: SyncAgent | undefined
+export let appPrefix: Name | undefined
+
 // TODO: Decouple backend with frontend. Consider Redux?
 // TODO: Separate CRDT document with data packets. Add data storage to store updates from other peers.
 // TODO: Setup persistent storage using IndexDB
-export let rootDocId: string = ''
-export let rootDoc: RootDocStore
-export let yjsAdaptor: NdnSvsAdaptor
-export let persistStore: InMemoryStorage
-export let syncAgent: SyncAgent
+export let rootDoc: RootDocStore | undefined
+export let yjsAdaptor: NdnSvsAdaptor | undefined
+
 export let listener: PeerJsListener | undefined = undefined
 export let nfdWsFace: FwFace | undefined = undefined
+let commandPrefix = ControlCommand.localhopPrefix
+
+// ============= Connectivity =============
 
 export async function connectNfdWs(uri: string, isLocal: boolean) {
   if (nfdWsFace !== undefined) {
@@ -39,7 +41,7 @@ export async function connectNfdWs(uri: string, isLocal: boolean) {
     return
   }
   nfdWsFace = await WsTransport.createFace({}, uri)
-  let commandPrefix = ControlCommand.localhopPrefix
+  commandPrefix = ControlCommand.localhopPrefix
   if (isLocal) {
     // Force ndnts to register the prefix correctly using localhost
     // SA: https://redmine.named-data.net/projects/nfd/wiki/ScopeControl#local-face
@@ -49,18 +51,7 @@ export async function connectNfdWs(uri: string, isLocal: boolean) {
   // Note: the following code does not work. NDNts seems to only work when producers are created after the face.
   // enableNfdPrefixReg(nfdWsFace)
   // nfdWsFace.addAnnouncement(appPrefix)
-  const cr = await ControlCommand.call("rib/register", {
-    name: new Name(appPrefix),
-    origin: 65,  // client
-    cost: 0,
-    flags: 0x02,  // CAPTURE
-  }, {
-    endpoint: endpoint,
-    commandPrefix: commandPrefix,
-  })
-  if (cr.statusCode !== 200) {
-    throw new Error(`Unable to register route: ${cr.statusCode} ${cr.statusText}`);
-  }
+  await checkPrefixRegistration(false)
   return nfdWsFace
 }
 
@@ -89,59 +80,44 @@ export async function disconnectPeerJs() {
   listener = undefined
 }
 
-export const initEvent = (async () => {
-  if (initialized) {
+// ============= Bootstrapping =============
+
+export async function bootstrapWorkspace(opts: {
+  trustAnchor: Certificate,
+  prvKey: Uint8Array,
+  ownCertificate: Certificate,
+  createNew: boolean,
+}) {
+  if (bootstrapping) {
+    console.error('Bootstrapping in progress or done')
     return
   }
-  initialized = true
+  bootstrapping = true
 
   // Certificates
-  certStorage = new CertStorage(new Name(appPrefix + nodeId))
+  persistStore = new InMemoryStorage()
+  // NOTE: CertStorage does not have a producer to serve certificates. This reuses the SyncAgent's responder.
+  // certStore = new InMemoryStorage()
+  certStorage = new CertStorage(opts.trustAnchor, opts.ownCertificate, persistStore, endpoint, opts.prvKey)
   await certStorage.readyEvent
 
-  // Create a PeerJs listener.
-  //
-  // A route for "/" prefix is added automatically.
-  // You may customize the route prefixes via addRoutes property in the first argument.
-  // listener = await PeerJsListener.listen(opts)
-  // await listener.connectToKnownPeers()
-
-  // Construct an Endpoint on the default Forwarder instance.
-  endpoint = new Endpoint()
-
-  // Fetch docId and see if we are the first one
-  rootDocId = ''
-  // if (listener.faces.length > 0) {
-  //   try {
-  //     const data = await endpoint.consume(appPrefix + '/docId', {})
-  //     rootDocId = fromUtf8(data.content)
-  //   } catch (err) {
-  //     console.error(`Unable to fetch document ID: ${err}. New document will be created.`)
-  //     rootDocId = ''
-  //   }
-  // } else {
-  //   rootDocId = ''
-  // }
-
-  // Sync agent
-  persistStore = new InMemoryStorage()
-  syncAgent = await SyncAgent.create(persistStore, endpoint, certStorage.signer!, certStorage)
-
+  // Sync Agents
+  syncAgent = await SyncAgent.create(
+    opts.ownCertificate.name.getPrefix(opts.ownCertificate.name.length - 4),
+    persistStore, endpoint, certStorage.signer!, certStorage.verifier,
+  )
 
   // Root doc using CRDT and Sync
   rootDoc = initRootDoc()
   yjsAdaptor = new NdnSvsAdaptor(
     syncAgent,
     getYjsDoc(rootDoc),
-    'latex'
+    'doc'
   )
 
   // Load or create
-  if (rootDocId) {
-    console.log(`Loaded document: ${rootDocId}`)
-  } else {
-    rootDocId = uuidv4()
-    console.log(`Created document: ${rootDocId}`)
+  if (opts.createNew) {
+    console.log(`Created document`)
     rootDoc.latex.root = {
       kind: 'folder',
       name: 'ROOT',
@@ -157,4 +133,61 @@ export const initEvent = (async () => {
 
   // Start Sync
   syncAgent.ready = true
-})()
+
+  // Register prefix if the connection is already there
+  appPrefix = opts.trustAnchor.name.getPrefix(opts.trustAnchor.name.length - 4)
+  await checkPrefixRegistration(false)
+
+  // Mark success
+  bootstrapped = true
+}
+
+export async function stopWorkspace() {
+  if (!bootstrapped) {
+    console.error('No workspace is bootstrapped yet')
+    return
+  }
+  bootstrapped = false
+
+  await checkPrefixRegistration(true)
+  appPrefix = undefined
+
+  syncAgent!.ready = false
+
+  yjsAdaptor!.destroy()
+  yjsAdaptor = undefined
+
+  syncAgent!.destroy()
+  syncAgent = undefined
+
+  rootDoc = undefined
+  certStorage = undefined
+  persistStore = undefined
+
+  bootstrapping = false
+}
+
+async function checkPrefixRegistration(cancel: boolean) {
+  if (cancel && nfdWsFace !== undefined) {
+    await ControlCommand.call("rib/unregister", {
+      name: appPrefix!,
+      origin: 65,  // client
+    }, {
+      endpoint: endpoint,
+      commandPrefix: commandPrefix,
+    })
+  } else if (!cancel && nfdWsFace !== undefined && bootstrapped) {
+    const cr = await ControlCommand.call("rib/register", {
+      name: appPrefix!,
+      origin: 65,  // client
+      cost: 0,
+      flags: 0x02,  // CAPTURE
+    }, {
+      endpoint: endpoint,
+      commandPrefix: commandPrefix,
+    })
+    if (cr.statusCode !== 200) {
+      console.error(`Unable to register route: ${cr.statusCode} ${cr.statusText}`);
+    }
+  }
+}

@@ -1,14 +1,11 @@
 import { type Endpoint } from "@ndn/endpoint"
 import { SvSync, type SyncNode, type SyncUpdate } from "@ndn/sync"
-import { type Name, Data, digestSigning, type Verifier } from "@ndn/packet"
+import { type Name, Data, digestSigning, type Verifier, Signer } from "@ndn/packet"
 import { SequenceNum } from "@ndn/naming-convention2"
-import { type NamedSigner } from "@ndn/keychain"
 import { Decoder, Encoder } from "@ndn/tlv"
-// @ts-ignore
-import { SvStateVector } from "@ndn/sync/lib/svs/state-vector_browser"
+import { SvStateVector } from "@ndn/sync"
 import { getNamespace } from "./namespace"
 import { Storage } from "./storages"
-
 
 export function encodeSyncState(state: SvStateVector): Uint8Array {
   const encoder = new Encoder()
@@ -41,14 +38,15 @@ export abstract class SyncDelivery {
   private _startPromiseResolve?: () => void
 
   constructor(
+    readonly nodeId: Name,
     readonly endpoint: Endpoint,
     readonly syncPrefix: Name,
-    readonly signer: NamedSigner<true>,
+    readonly signer: Signer,
     readonly verifier: Verifier,
     onUpdatePromise: Promise<UpdateEvent>,
     protected state?: SvStateVector,
   ) {
-    const nodeId = getNamespace().nodeIdFromSigner(this.signer.name)
+    // const nodeId = getNamespace().nodeIdFromSigner(this.signer.name)
     this.baseName = getNamespace().baseName(nodeId, syncPrefix)
     this._startPromise = new Promise(resolve => {
       this._startPromiseResolve = resolve
@@ -70,7 +68,8 @@ export abstract class SyncDelivery {
         await this._startPromise
       }
     }).then(value => {
-      // Force trigger the SvSync to fire
+      // Force triggering the SvSync to fire
+      // NOTE: NDNts does not expose a way to trigger the SVS manually
       (value as any).resetTimer(true)
     })
   }
@@ -127,8 +126,8 @@ export abstract class SyncDelivery {
         initialize: async (svSync) => {
           this._syncInst = svSync
           this._syncInst.addEventListener("update", update => this.handleSyncUpdate(update))
-          const nodeId = getNamespace().nodeIdFromSigner(this.signer.name)
-          this._syncNode = this._syncInst.add(nodeId)
+          // const nodeId = getNamespace().nodeIdFromSigner(this.signer.name)
+          this._syncNode = this._syncInst.add(this.nodeId)
           // this._ready should already be true
         }
       }).then(value => {
@@ -139,7 +138,7 @@ export abstract class SyncDelivery {
   }
 
   public fire() {
-    if(this._syncInst !== undefined && this._ready) {
+    if (this._syncInst !== undefined && this._ready) {
       (this._syncInst as any).resetTimer(true)
     }
   }
@@ -165,9 +164,9 @@ export abstract class SyncDelivery {
     return this.syncNode!.seqNum
   }
 
-  get nodeId() {
-    return this.syncNode!.id
-  }
+  // get nodeId() {
+  //   return this.syncNode!.id
+  // }
 
   abstract handleSyncUpdate(update: SyncUpdate<Name>): Promise<void>
 
@@ -179,15 +178,16 @@ export abstract class SyncDelivery {
 // Note: storage is not necessarily a real storage.
 export class AtLeastOnceDelivery extends SyncDelivery {
   constructor(
+    readonly nodeId: Name,
     readonly endpoint: Endpoint,
     readonly syncPrefix: Name,
-    readonly signer: NamedSigner<true>,
+    readonly signer: Signer,
     readonly verifier: Verifier,
     readonly storage: Storage,
     onUpdatePromise: Promise<UpdateEvent>,
     protected state?: SvStateVector,
   ) {
-    super(endpoint, syncPrefix, signer, verifier, onUpdatePromise, state)
+    super(nodeId, endpoint, syncPrefix, signer, verifier, onUpdatePromise, state)
   }
 
   override async handleSyncUpdate(update: SyncUpdate<Name>) {
@@ -212,6 +212,7 @@ export class AtLeastOnceDelivery extends SyncDelivery {
         // Mark as persist
         lastHandled = i
       } catch (error) {
+        // TODO: Find a better way to handle this
         console.error(`Unable to fetch or verify ${name.toString()} due to: ${error}`)
         console.warn('The current SVS protocol cannot recover from this error. A reset is scheduled in 10 min.')
         this.reset()
@@ -246,27 +247,28 @@ export class AtLeastOnceDelivery extends SyncDelivery {
     this.storage.put(name.toString(), encoder.output)
 
     // Save my own state to prevent reuse the sync number
-    if (this.state.get(this.syncNode.id) < seqNum) {
+    if (this.state!.get(this.syncNode.id) < seqNum) {
       this.setSyncState(this.syncNode.id, seqNum, this.storage)
     }
   }
 
   static async create(
+    nodeId: Name,
     endpoint: Endpoint,
     syncPrefix: Name,
-    signer: NamedSigner<true>,
+    signer: Signer,
     verifier: Verifier,
     storage: Storage,
     onUpdatePromise: Promise<UpdateEvent>,
   ) {
-    const nodeId = getNamespace().nodeIdFromSigner(signer.name)
+    // const nodeId = getNamespace().nodeIdFromSigner(signer.name)
     const baseName = getNamespace().baseName(nodeId, syncPrefix)
     const encoded = await storage.get(getNamespace().syncStateKey(baseName))
     let syncState = new SvStateVector()
     if (encoded) {
       syncState = parseSyncState(encoded)
     }
-    return new AtLeastOnceDelivery(endpoint, syncPrefix, signer, verifier, storage, onUpdatePromise, syncState)
+    return new AtLeastOnceDelivery(nodeId, endpoint, syncPrefix, signer, verifier, storage, onUpdatePromise, syncState)
   }
 
   override destroy() {
@@ -278,16 +280,17 @@ export class AtLeastOnceDelivery extends SyncDelivery {
 // This delivery does not persists anything.
 export class LatestOnlyDelivery extends SyncDelivery {
   constructor(
+    readonly nodeId: Name,
     readonly endpoint: Endpoint,
     readonly syncPrefix: Name,
-    readonly signer: NamedSigner<true>,
+    readonly signer: Signer,
     readonly verifier: Verifier,
     readonly pktStorage: Storage,
     readonly stateStorage: Storage,
     readonly onUpdatePromise: Promise<UpdateEvent>,
     protected state?: SvStateVector,
   ) {
-    super(endpoint, syncPrefix, signer, verifier, onUpdatePromise, state)
+    super(nodeId, endpoint, syncPrefix, signer, verifier, onUpdatePromise, state)
   }
 
   override async handleSyncUpdate(update: SyncUpdate<Name>) {
@@ -333,22 +336,23 @@ export class LatestOnlyDelivery extends SyncDelivery {
     this.pktStorage.put(getNamespace().latestOnlyKey(name), encoder.output)
 
     // Save my own state to prevent reuse the sync number
-    if (this.state.get(this.syncNode.id) < seqNum) {
+    if (this.state!.get(this.syncNode.id) < seqNum) {
       this.setSyncState(this.syncNode.id, seqNum, this.stateStorage)
     }
   }
 
   static async create(
+    nodeId: Name,
     endpoint: Endpoint,
     syncPrefix: Name,
-    signer: NamedSigner<true>,
+    signer: Signer,
     verifier: Verifier,
     pktStorage: Storage,
     stateStorage: Storage,
     onUpdatePromise: Promise<UpdateEvent>,
   ) {
     // Load state is still required to avoid sequence number conflict
-    const nodeId = getNamespace().nodeIdFromSigner(signer.name)
+    // const nodeId = getNamespace().nodeIdFromSigner(signer.name)
     const baseName = getNamespace().baseName(nodeId, syncPrefix)
     const encoded = await stateStorage.get(getNamespace().syncStateKey(baseName))
     let syncState = new SvStateVector()
@@ -356,7 +360,7 @@ export class LatestOnlyDelivery extends SyncDelivery {
       syncState = parseSyncState(encoded)
     }
     return new LatestOnlyDelivery(
-      endpoint, syncPrefix, signer, verifier, pktStorage, stateStorage, onUpdatePromise, syncState
+      nodeId, endpoint, syncPrefix, signer, verifier, pktStorage, stateStorage, onUpdatePromise, syncState
     )
   }
 

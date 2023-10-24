@@ -46,7 +46,7 @@ AFRAME.registerComponent('intersection-spawn', {
         color: getRandomColor(),
         id: `box-${Date.now()}`
       }
-      rootDoc.aincraft.items?.push(newBox)
+      rootDoc?.aincraft.items?.push(newBox)
       console.debug(`Created box: ${JSON.stringify(newBox)}`)
     })
   }

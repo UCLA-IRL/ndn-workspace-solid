@@ -4,6 +4,8 @@ import { v4 as uuidv4 } from "uuid"
 
 let currentNamespace: SyncAgentNamespace | undefined = undefined
 
+// WARN: Please be aware that not every part of the application uses this interface
+// TODO: Globally use a namespace manager
 export type SyncAgentNamespace = {
   /**
    * Extract the node ID from the key name of the signer
@@ -16,6 +18,12 @@ export type SyncAgentNamespace = {
    * @param signerName the signer's name used in KeyLocator. e.g. /ndn-app/alice/KEY/1
    */
   appPrefixFromSigner(signerName: Name): Name
+
+  /**
+   * Extract the application prefix from the node ID
+   * @param nodeId the Node ID, e.g. /ndn-app/node/1
+   */
+  appPrefixFromNodeId(nodeId: Name): Name
 
   /**
    * Extract the storage key name to store a packet from the packet name.
@@ -72,10 +80,13 @@ export function setNamespace(namespace: SyncAgentNamespace) {
 function createDefaultNamespace(): SyncAgentNamespace {
   return {
     nodeIdFromSigner(signerName: Name): Name {
-      return signerName.getPrefix(signerName.length - 2)
+      return signerName.getPrefix(signerName.length - 4)
     },
     appPrefixFromSigner(signerName: Name): Name {
-      return signerName.getPrefix(signerName.length - 3)
+      return signerName.getPrefix(signerName.length - 5)
+    },
+    appPrefixFromNodeId(nodeId: Name): Name {
+      return nodeId.getPrefix(nodeId.length - 1)
     },
     latestOnlyKey(pktName: Name): string {
       // Remove the sequence number

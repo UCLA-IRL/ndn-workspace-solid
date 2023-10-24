@@ -1,6 +1,5 @@
 import { Endpoint } from "@ndn/endpoint"
-import { Name, Data, type Interest, type Verifier } from "@ndn/packet"
-import { type NamedSigner } from "@ndn/keychain"
+import { Name, Data, type Interest, type Verifier, Signer } from "@ndn/packet"
 import { Decoder, Encoder } from "@ndn/tlv"
 import { fetch, DataProducer, makeChunkSource } from "@ndn/segmented-object"
 import { v4 as uuidv4 } from "uuid"
@@ -22,7 +21,7 @@ export class SyncAgent {
     readonly persistStorage: Storage,
     readonly tempStorage: Storage,
     readonly endpoint: Endpoint,
-    readonly signer: NamedSigner<true>,
+    readonly signer: Signer,
     readonly verifier: Verifier,
     readonly atLeastOnce: AtLeastOnceDelivery,
     readonly latestOnly: LatestOnlyDelivery
@@ -246,7 +245,7 @@ export class SyncAgent {
       // Sync interest should not be answered
       return undefined
     }
-    const isLatestOnly = intName.get(intName.length - 2)?.equals(getNamespace().syncKeyword)
+    const isLatestOnly = intName.get(intName.length - 2)?.equals(getNamespace().latestOnlyKeyword)
     let wire: Uint8Array | undefined = undefined
     if (isLatestOnly) {
       const key = intName.getPrefix(intName.length - 1).toString()
@@ -283,24 +282,25 @@ export class SyncAgent {
   }
 
   static async create(
+    nodeId: Name,
     persistStorage: Storage,
     endpoint: Endpoint,
-    signer: NamedSigner<true>,
+    signer: Signer,
     verifier: Verifier,
   ) {
     const tempStorage = new InMemoryStorage()
     // Note: we need the signer name to be /[appPrefix]/<nodeId>/KEY/<keyID>
     // TODO: In future we plan to have each device of user named as /[appPrefix]/<nodeId>/<keyID>
-    const appPrefix = getNamespace().appPrefixFromSigner(signer.name)
-    const nodeId = getNamespace().nodeIdFromSigner(signer.name)
+    const appPrefix = getNamespace().appPrefixFromNodeId(nodeId)
+    // const nodeId = getNamespace().nodeIdFromSigner(signer.name)
     const aloSyncPrefix = appPrefix.append(getNamespace().syncKeyword, getNamespace().atLeastOnceKeyword)
     const lateSyncPrefix = appPrefix.append(getNamespace().syncKeyword, getNamespace().latestOnlyKeyword)
     let resolver: ((event: UpdateEvent) => void) | undefined = undefined
     const onUpdatePromise = new Promise<UpdateEvent>(resolve => resolver = resolve)
     const latestOnly = await LatestOnlyDelivery.create(
-      endpoint, lateSyncPrefix, signer, verifier, tempStorage, persistStorage, onUpdatePromise)
+      nodeId, endpoint, lateSyncPrefix, signer, verifier, tempStorage, persistStorage, onUpdatePromise)
     const atLeastOnce = await AtLeastOnceDelivery.create(
-      endpoint, aloSyncPrefix, signer, verifier, persistStorage, onUpdatePromise
+      nodeId, endpoint, aloSyncPrefix, signer, verifier, persistStorage, onUpdatePromise
     )
     const ret = new SyncAgent(
       nodeId,

@@ -22,6 +22,7 @@ export default function LatexDoc(props: {
   // One cannot create extension in a createEffect
   createExtension(basicSetup)
   createExtension(StreamLanguage.define(stex))
+  // eslint-disable-next-line solid/reactivity
   createExtension(yCollab(props.doc, null))
 
   return (
