@@ -46,6 +46,8 @@ type ContextType = {
     createNew: boolean,
   }) => Promise<void>,
   stopWorkspace: () => Promise<void>,
+  trustAnchor: () => Certificate | undefined,
+  ownCertificate: () => Certificate | undefined,
 }
 
 const NdnWorkspaceContext = createContext<ContextType>()
@@ -139,6 +141,11 @@ export function NdnWorkspaceProvider(props: ParentProps<unknown>) {
     },
     bootstrapWorkspace: bootstrapWorkspace,
     stopWorkspace: stopWorkspace,
+    trustAnchor: () => {
+      console.debug(main.trustAnchor)
+      return main.trustAnchor
+    },
+    ownCertificate: () => main.ownCertificate,
   }
 
   return (

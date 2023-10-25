@@ -23,6 +23,9 @@ export let certStorage: CertStorage | undefined
 export let syncAgent: SyncAgent | undefined
 export let appPrefix: Name | undefined
 
+export let trustAnchor: Certificate | undefined
+export let ownCertificate: Certificate | undefined
+
 // TODO: Decouple backend with frontend. Consider Redux?
 // TODO: Separate CRDT document with data packets. Add data storage to store updates from other peers.
 // TODO: Setup persistent storage using IndexDB
@@ -93,6 +96,9 @@ export async function bootstrapWorkspace(opts: {
     return
   }
   bootstrapping = true
+
+  trustAnchor = opts.trustAnchor
+  ownCertificate = opts.ownCertificate
 
   // Certificates
   persistStore = new InMemoryStorage()

@@ -11,32 +11,34 @@ import {
   ExpandLess as ExpandLessIcon,
   ExpandMore as ExpandMoreIcon,
 } from '@suid/icons-material'
-import { Show, createEffect, createSignal } from "solid-js"
-import { base64ToBytes } from "../../utils/base64"
-import { Decoder } from "@ndn/tlv"
+import { Show, createEffect, createSignal, onMount } from "solid-js"
+import { base64ToBytes, bytesToBase64 } from "../../utils/base64"
+import { Decoder, Encoder } from "@ndn/tlv"
 import { Data } from "@ndn/packet"
 import { Certificate } from "@ndn/keychain"
 
 export default function AppNamespace(props: {
   trustAnchor: Certificate | undefined,
   setTrustAnchor: (value: Certificate | undefined) => void,
+  readOnly: boolean,
 }) {
   const [expanded, setExpanded] = createSignal(true)
-  // TODO: Use existing value if possible
   const [value, setValue] = createSignal('')
   const [nameStr, setNameStr] = createSignal('')
   const [errorText, setErrorText] = createSignal('')
+  const [edited, setEdited] = createSignal(false)
 
-  // TODO: Disable when bootstrapped
-  const readOnly = () => false
   // const readyToImport = () => !readOnly() && nameStr().length === 0
 
+  // Parse trust anchor on input
   createEffect(() => {
     const b64Value = value()
     if (b64Value.length === 0) {
       setErrorText(`Trust anchor is empty`)
       setNameStr('')
-      props.setTrustAnchor(undefined)
+      if (!props.readOnly) {
+        props.setTrustAnchor(undefined)
+      }
       return
     }
     let wire
@@ -45,14 +47,18 @@ export default function AppNamespace(props: {
     } catch (e) {
       setErrorText(`Not valid base64 string`)
       setNameStr('')
-      props.setTrustAnchor(undefined)
+      if (!props.readOnly) {
+        props.setTrustAnchor(undefined)
+      }
       return
     }
     try {
       const decoder = new Decoder(wire)
       const data = Data.decodeFrom(decoder)
       const cert = Certificate.fromData(data)
-      props.setTrustAnchor(cert)
+      if (!props.readOnly) {
+        props.setTrustAnchor(cert)
+      }
     } catch (e) {
       setErrorText(`Unable to parse certificate`)
       setNameStr('')
@@ -60,6 +66,7 @@ export default function AppNamespace(props: {
     }
   })
 
+  // Set name when a trust anchor is parsed
   createEffect(() => {
     const cert = props.trustAnchor
     if (cert !== undefined) {
@@ -70,7 +77,30 @@ export default function AppNamespace(props: {
       } catch (e) {
         setErrorText(`Invalid certificate name`)
         setNameStr('')
-        props.setTrustAnchor(undefined)
+        if (!props.readOnly) {
+          props.setTrustAnchor(undefined)
+        }
+      }
+    }
+  })
+
+  const onChange = (newValue: string) => {
+    if (!props.readOnly) {
+      setValue(newValue)
+      setEdited(true)
+    }
+  }
+
+  // Load existing trust anchor, but only on loading
+  createEffect(() => {
+    if (!edited()) {
+      const cert = props.trustAnchor
+      if (cert !== undefined) {
+        const encoder = new Encoder
+        cert.data.encodeTo(encoder)
+        const b64Text = bytesToBase64(encoder.output)
+        const b64Breaks = b64Text.replace(/(.{64})/g, "$1\n")
+        setValue(b64Breaks)
       }
     }
   })
@@ -111,19 +141,13 @@ export default function AppNamespace(props: {
               "white-space": "nowrap"
             }
           }}
-          disabled={readOnly()}
+          // disabled={readOnly()}  // disabled not working with multiline
           helperText={errorText()}
           error={errorText() != ''}
           value={value()}
-          onChange={event => setValue(event.target.value)}
+          onChange={event => onChange(event.target.value)}
         />
       </CardContent>
-      {/* <Divider />
-      <CardActions sx={{ justifyContent: 'flex-end' }}>
-        <Button variant="text" color="primary" disabled={readyToImport()}>
-          IMPORT
-        </Button>
-      </CardActions> */}
     </Show >
   </Card >
 }

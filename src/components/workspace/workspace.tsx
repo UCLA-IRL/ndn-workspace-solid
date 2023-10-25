@@ -7,15 +7,18 @@ import { Certificate, ECDSA, createVerifier } from "@ndn/keychain"
 import OwnCertificate from "./own-certificate"
 
 export default function Workspace() {
-  const { booted, bootstrapWorkspace, stopWorkspace } = useNdnWorkspace()!
-  const [trustAnchor, setTrustAnchor] = createSignal<Certificate>()
-  const [certificate, setCertificate] = createSignal<Certificate>()
+  const {
+    booted,
+    bootstrapWorkspace,
+    stopWorkspace,
+    trustAnchor: initAnchor,
+    ownCertificate: initCertificate,
+  } = useNdnWorkspace()!
+  const [trustAnchor, setTrustAnchor] = createSignal<Certificate | undefined>(initAnchor())
+  const [certificate, setCertificate] = createSignal<Certificate | undefined>(initCertificate())
   const [prvKeyBytes, setPrvKeyBytes] = createSignal<Uint8Array>(new Uint8Array())
   const [readyToStart, setReadyToStart] = createSignal(false)
   const [inProgress, setInProgress] = createSignal(false)
-
-  // TODO: Need to load existing certificates and trust anchors
-  // if already bootstrapped
 
   createEffect(() => {
     const prvKeyBits = prvKeyBytes()
@@ -80,12 +83,15 @@ export default function Workspace() {
     <Stack spacing={2}>
       <AppNamespace
         trustAnchor={trustAnchor()}
-        setTrustAnchor={setTrustAnchor} />
+        setTrustAnchor={setTrustAnchor}
+        readOnly={inProgress() || booted()}
+      />
       <Switch>
         <Match when={!booted()}>
           <BootSafebag
             setCertificate={setCertificate}
             setPrvKeyBytes={setPrvKeyBytes}
+            inProgress={inProgress()}
           />
           <Stack direction="row" spacing={2} justifyContent='flex-end'>
             <Button

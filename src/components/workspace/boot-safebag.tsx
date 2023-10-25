@@ -21,6 +21,7 @@ import { Certificate } from "@ndn/keychain"
 export default function BootSafebag(props: {
   setCertificate: (value: Certificate | undefined) => void,
   setPrvKeyBytes: (value: Uint8Array) => void,
+  inProgress: boolean,
 }) {
   const [expanded, setExpanded] = createSignal(true)
   const [safebagText, setSafebagText] = createSignal('')
@@ -30,8 +31,8 @@ export default function BootSafebag(props: {
   const [pwdErrorText, setPwdErrorText] = createSignal('')
   const [safeBag, setSafeBag] = createSignal<SafeBag>()
 
-  // TODO: Disable when bootstrapping
-  const readOnly = () => false
+  // Disable when bootstrapping
+  const readOnly = () => props.inProgress
 
   createEffect(() => {
     const b64Value = safebagText()
@@ -147,12 +148,6 @@ export default function BootSafebag(props: {
           />
         </Stack>
       </CardContent>
-      {/* <Divider />
-      <CardActions sx={{ justifyContent: 'flex-end' }}>
-        <Button variant="text" color="primary" disabled={readyToImport()}>
-          IMPORT
-        </Button>
-      </CardActions> */}
     </Show>
   </Card>
 }
