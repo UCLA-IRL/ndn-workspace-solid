@@ -3,6 +3,7 @@ import solid from 'vite-plugin-solid'
 import suidPlugin from "@suid/vite-plugin"
 // import devtools from 'solid-devtools/vite'
 import pluginRewriteAll from 'vite-plugin-rewrite-all'
+import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
   plugins: [
@@ -11,7 +12,41 @@ export default defineConfig({
     //   autoname: true,
     // }),
     solid(),
-    pluginRewriteAll()
+    pluginRewriteAll(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      devOptions: {
+        enabled: true
+      },
+      includeAssets: ['ndn_app.png', 'ndn.svg'],
+      manifest: {
+        "name": "NDN Workspace",
+        "short_name": "NDN Workspace",
+        "icons": [
+          {
+            "src": "/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+          },
+          {
+            "src": "/icons/icon-384x384.png",
+            "sizes": "384x384",
+            "type": "image/png"
+          },
+          {
+            "src": "/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+          }
+        ],
+        "theme_color": "#ce93d8",
+        "background_color": "#121212",
+        "start_url": "/",
+        "display": "standalone",
+        "orientation": "portrait"
+      }
+    })
   ],
   appType: 'spa',
   optimizeDeps: {

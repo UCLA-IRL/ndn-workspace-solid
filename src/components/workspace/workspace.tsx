@@ -14,6 +14,9 @@ export default function Workspace() {
   const [readyToStart, setReadyToStart] = createSignal(false)
   const [inProgress, setInProgress] = createSignal(false)
 
+  // TODO: Need to load existing certificates and trust anchors
+  // if already bootstrapped
+
   createEffect(() => {
     const prvKeyBits = prvKeyBytes()
     const cert = certificate()

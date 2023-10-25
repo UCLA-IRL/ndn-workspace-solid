@@ -7,7 +7,8 @@ import {
   Description as DescriptionIcon,
   ViewInAr as ViewInArIcon,
   Apps as AppsIcon,
-  SettingsEthernet as SettingsEthernetIcon
+  SettingsEthernet as SettingsEthernetIcon,
+  Home as HomeIcon,
 } from "@suid/icons-material"
 
 // import './index.css'
@@ -27,6 +28,7 @@ render(
       <Router>
         <Routes>
           <Route path="/" element={<Root routes={[
+            { icon: <HomeIcon />, href: '/', title: 'Home' },
             { icon: <AppsIcon />, href: '/workspace', title: 'Workspace' },
             { icon: <SettingsEthernetIcon />, href: '/connection', title: 'Connection' },
             { icon: <DescriptionIcon />, href: '/latex', title: 'LaTeX' },
