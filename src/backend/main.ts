@@ -11,14 +11,15 @@ import { NdnSvsAdaptor } from "../adaptors/yjs-ndn-adaptor"
 import { PeerJsListener } from '../adaptors/peerjs-transport'
 import { CertStorage } from './security/cert-storage'
 import { RootDocStore, initRootDoc } from './models'
-import { InMemoryStorage, SyncAgent } from "./sync-agent"
+import { FsStorage, InMemoryStorage, type Storage } from "./storage"
+import { SyncAgent } from './sync-agent'
 import { Certificate } from "@ndn/keychain"
 
 export const endpoint: Endpoint = new Endpoint()
 
 export let bootstrapping = false  // To prevent double click
 export let bootstrapped = false
-export let persistStore: InMemoryStorage | undefined
+export let persistStore: Storage | undefined
 export let certStorage: CertStorage | undefined
 export let syncAgent: SyncAgent | undefined
 export let appPrefix: Name | undefined
@@ -102,6 +103,13 @@ export async function bootstrapWorkspace(opts: {
 
   // Certificates
   persistStore = new InMemoryStorage()
+  // To switch to persistent storage:
+  // TODO: Store YJS document in this storage
+  // However, y-indexeddb seems to only replay all stored updates, until it reaches some point and
+  // use `encodeStateAsUpdate` to reduce.
+  // const handle = await navigator.storage.getDirectory() 
+  // persistStore = new FsStorage(handle)
+
   // NOTE: CertStorage does not have a producer to serve certificates. This reuses the SyncAgent's responder.
   // certStore = new InMemoryStorage()
   certStorage = new CertStorage(opts.trustAnchor, opts.ownCertificate, persistStore, endpoint, opts.prvKey)
@@ -168,6 +176,8 @@ export async function stopWorkspace() {
 
   rootDoc = undefined
   certStorage = undefined
+
+  persistStore?.close()
   persistStore = undefined
 
   bootstrapping = false

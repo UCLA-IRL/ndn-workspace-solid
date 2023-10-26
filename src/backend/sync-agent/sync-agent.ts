@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from "uuid"
 import { concatBuffers } from "@ndn/util"
 import { AtLeastOnceDelivery, LatestOnlyDelivery, UpdateEvent } from "./deliveries"
 import { getNamespace } from "./namespace"
-import { InMemoryStorage, Storage } from "./storages"
+import { InMemoryStorage, Storage } from "../storage"
 
 
 export type ChannelType = 'update' | 'blob' | 'status'
@@ -157,7 +157,7 @@ export class SyncAgent {
         // TODO: Check with NDNts maintainer if there is a way to obtain the raw segment wire
         const encoder = new Encoder()
         encoder.encode(segment)
-        this.persistStorage.put(segment.name.toString(), encoder.output)
+        this.persistStorage.set(segment.name.toString(), encoder.output)
 
         // Reassemble
         buffers.push(segment.content)
@@ -169,7 +169,7 @@ export class SyncAgent {
     const blob = concatBuffers(buffers)
 
     // Save blob (SA getBlob())
-    await this.persistStorage.put(blobName.toString(), blob)
+    await this.persistStorage.set(blobName.toString(), blob)
   }
 
   public register(channel: ChannelType, topic: string, handler: (content: Uint8Array, id: Name) => void) {
@@ -194,7 +194,7 @@ export class SyncAgent {
     if (name === undefined) {
       name = getNamespace().genBlobName(this.appPrefix)
     }
-    await this.persistStorage.put(name.toString(), blobContent)
+    await this.persistStorage.set(name.toString(), blobContent)
 
     // Put segmented packets
     const producer = DataProducer.create(makeChunkSource(blobContent), name, { signer: this.signer })
@@ -203,7 +203,7 @@ export class SyncAgent {
       // Or maybe the problem disappers after shifting to @ndn/repo/DataStore.
       const encoder = new Encoder()
       encoder.encode(segment)
-      this.persistStorage.put(segment.name.toString(), encoder.output)
+      this.persistStorage.set(segment.name.toString(), encoder.output)
     }
 
     if (push) {

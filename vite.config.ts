@@ -16,7 +16,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       devOptions: {
-        enabled: true
+        enabled: false  // SW and devtools adds > 1 sec to loading time. Enable only when nesessary.
       },
       includeAssets: ['ndn_app.png', 'ndn.svg'],
       manifest: {

@@ -5,7 +5,7 @@ import { SequenceNum } from "@ndn/naming-convention2"
 import { Decoder, Encoder } from "@ndn/tlv"
 import { SvStateVector } from "@ndn/sync"
 import { getNamespace } from "./namespace"
-import { Storage } from "./storages"
+import { Storage } from "../storage"
 
 export function encodeSyncState(state: SvStateVector): Uint8Array {
   const encoder = new Encoder()
@@ -74,6 +74,9 @@ export abstract class SyncDelivery {
     })
   }
 
+  /**
+   * True if the Sync has started, even in reset state.
+   */
   public get ready() {
     return this._ready
   }
@@ -154,7 +157,7 @@ export abstract class SyncDelivery {
 
   protected async storeSyncState(storage: Storage) {
     if (this.state !== undefined) {
-      storage.put(
+      storage.set(
         getNamespace().syncStateKey(this.baseName),
         encodeSyncState(this.state))
     }
@@ -202,7 +205,7 @@ export class AtLeastOnceDelivery extends SyncDelivery {
         })
 
         // Put into storage
-        await this.storage.put(name.toString(), data.content)
+        await this.storage.set(name.toString(), data.content)
 
         // Callback
         // AtLeastOnce is required to have the callback acknowledged
@@ -244,7 +247,7 @@ export class AtLeastOnceDelivery extends SyncDelivery {
 
     const encoder = new Encoder()
     encoder.encode(data)
-    this.storage.put(name.toString(), encoder.output)
+    this.storage.set(name.toString(), encoder.output)
 
     // Save my own state to prevent reuse the sync number
     if (this.state!.get(this.syncNode.id) < seqNum) {
@@ -302,7 +305,7 @@ export class LatestOnlyDelivery extends SyncDelivery {
       // Update the storage
       // Note that this will overwrite old data
       // TODO: How to serve?
-      this.pktStorage.put(getNamespace().latestOnlyKey(name), data.content)
+      this.pktStorage.set(getNamespace().latestOnlyKey(name), data.content)
 
       // Save Sync state
       await this.setSyncState(update.id, update.hiSeqNum, this.stateStorage)
@@ -333,7 +336,7 @@ export class LatestOnlyDelivery extends SyncDelivery {
 
     const encoder = new Encoder()
     encoder.encode(data)
-    this.pktStorage.put(getNamespace().latestOnlyKey(name), encoder.output)
+    this.pktStorage.set(getNamespace().latestOnlyKey(name), encoder.output)
 
     // Save my own state to prevent reuse the sync number
     if (this.state!.get(this.syncNode.id) < seqNum) {

@@ -3,7 +3,7 @@ import { Name, Data, Verifier, Signer } from "@ndn/packet"
 import {
   Certificate, createVerifier, NamedVerifier, createSigner, ECDSA
 } from "@ndn/keychain"
-import { Storage } from "../sync-agent"
+import { Storage } from "../storage"
 import { Endpoint } from "@ndn/endpoint"
 
 export class CertStorage {
@@ -30,7 +30,7 @@ export class CertStorage {
         keyPair).withKeyLocator(ownCertificate.name)
     })()
   }
- 
+
   get signer() {
     return this._signer
   }
@@ -42,7 +42,7 @@ export class CertStorage {
   async importCert(cert: Certificate) {
     const encoder = new Encoder
     cert.data.encodeTo(encoder)
-    await this.storage.put(cert.name.toString(), encoder.output)
+    await this.storage.set(cert.name.toString(), encoder.output)
   }
 
   async getCertificate(keyName: Name, localOnly: boolean): Promise<Certificate | undefined> {

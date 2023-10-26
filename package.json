@@ -51,6 +51,7 @@
     "@suid/vite-plugin": "^0.1.5",
     "@types/aframe": "^1.2.3",
     "@types/uuid": "^9.0.5",
+    "@types/wicg-file-system-access": "^2023.10.2",
     "@typescript-eslint/eslint-plugin": "^6.8.0",
     "@typescript-eslint/parser": "^6.8.0",
     "eslint": "^8.51.0",

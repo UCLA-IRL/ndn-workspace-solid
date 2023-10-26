@@ -11,7 +11,6 @@ import {
   Home as HomeIcon,
 } from "@suid/icons-material"
 
-// import './index.css'
 import Root from './components/root-wrapper'
 import App from './App'
 import ShareLatex from './components/share-latex'

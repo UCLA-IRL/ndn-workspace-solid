@@ -142,7 +142,6 @@ export function NdnWorkspaceProvider(props: ParentProps<unknown>) {
     bootstrapWorkspace: bootstrapWorkspace,
     stopWorkspace: stopWorkspace,
     trustAnchor: () => {
-      console.debug(main.trustAnchor)
       return main.trustAnchor
     },
     ownCertificate: () => main.ownCertificate,
