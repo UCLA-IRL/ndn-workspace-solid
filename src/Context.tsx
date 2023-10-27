@@ -12,8 +12,7 @@ export type ConnState = 'CONNECTED' | 'DISCONNECTED' | 'CONNECTING' | 'DISCONNEC
 
 export type ConnectionConfig = {
   nfdWs: {
-    host: string
-    port: number
+    uri: string
   },
   peerJs: {
     host: string,
@@ -59,8 +58,7 @@ export function NdnWorkspaceProvider(props: ParentProps<unknown>) {
 
   const [connections, setConnections] = createStore<ConnectionConfig>({
     nfdWs: {
-      host: 'localhost',
-      port: 9696,
+      uri: 'ws://localhost:9696/',
     },
     peerJs: {
       host: "localhost",
@@ -78,9 +76,14 @@ export function NdnWorkspaceProvider(props: ParentProps<unknown>) {
   // Execute the connection
   const connNfdWs = () => {
     setConnStatus('nfdWs', (): ConnState => 'CONNECTING')
+    let uri = connections.nfdWs.uri
+    if (!uri.endsWith('/')) {
+      uri += '/'
+    }
+    const hostname = new URL(uri).hostname
     main.connectNfdWs(
-      `ws://${connections.nfdWs.host}:${connections.nfdWs.port}/`,
-      ['localhost', '127.0.0.1'].some(v => v === connections.nfdWs.host)
+      uri,
+      ['localhost', '127.0.0.1'].some(v => v === hostname)
     ).then((nfdWsFace) => {
       nfdWsFace?.addEventListener('down', () => {
         disconnNfdWs()

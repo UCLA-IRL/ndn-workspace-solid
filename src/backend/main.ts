@@ -148,12 +148,13 @@ export async function bootstrapWorkspace(opts: {
   // Start Sync
   syncAgent.ready = true
 
-  // Register prefix if the connection is already there
   appPrefix = opts.trustAnchor.name.getPrefix(opts.trustAnchor.name.length - 4)
-  await checkPrefixRegistration(false)
 
   // Mark success
   bootstrapped = true
+
+  // Register prefix if the connection is already there
+  await checkPrefixRegistration(false)
 }
 
 export async function stopWorkspace() {
@@ -201,6 +202,7 @@ async function checkPrefixRegistration(cancel: boolean) {
     }, {
       endpoint: endpoint,
       commandPrefix: commandPrefix,
+      signer: certStorage!.signer,  // TODO: Use a different safebag. Route should be separated from app.
     })
     if (cr.statusCode !== 200) {
       console.error(`Unable to register route: ${cr.statusCode} ${cr.statusText}`);

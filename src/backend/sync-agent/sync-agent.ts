@@ -32,11 +32,11 @@ export class SyncAgent {
     // @ndn/repo/DataStore may be a better choice, but needs more time to write code
     endpoint.produce(appPrefix, interest => {
       return this.serve(interest)
-    }, { 
+    }, {
       describe: 'SyncAgent.serve',
       routeCapture: false,
       announcement: appPrefix,
-     })
+    })
   }
 
   public destroy() {
@@ -151,7 +151,11 @@ export class SyncAgent {
 
     const buffers: Uint8Array[] = []
     try {
-      const result = fetch(blobName, { verifier: this.verifier })
+      const result = fetch(blobName, {
+        verifier: this.verifier,
+        modifyInterest: { mustBeFresh: true },
+        lifetimeAfterRto: 2000,
+      })
       for await (const segment of result) {
         // Cache packets
         // TODO: Check with NDNts maintainer if there is a way to obtain the raw segment wire
@@ -262,7 +266,7 @@ export class SyncAgent {
     try {
       const parser = new Decoder(wire)
       const data = Data.decodeFrom(parser)
-      if(isLatestOnly && !data.name.equals(intName)) {
+      if (isLatestOnly && !data.name.equals(intName)) {
         console.log(`A status with not existing version is requested: ${intName.toString()}`)
         return undefined
       }

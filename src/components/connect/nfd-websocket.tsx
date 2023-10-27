@@ -4,7 +4,6 @@ import {
   CardContent,
   CardHeader,
   Divider,
-  InputAdornment,
   TextField,
   Grid,
 } from "@suid/material"
@@ -30,32 +29,21 @@ export default function NfdWebsocket() {
     <Divider />
     <CardContent>
       <Grid container spacing={1}>
-        <Grid item xs={8}>
+        <Grid item xs={12}>
           <TextField
             fullWidth
-            label="Host"
-            name="host"
+            label="URI"
+            name="uri"
             type="text"
             InputProps={{
-              startAdornment:
-                <InputAdornment position="start">
-                  ws://
-                </InputAdornment>,
+              // startAdornment:
+              //   <InputAdornment position="start">
+              //     wss://
+              //   </InputAdornment>,
             }}
             disabled={status.nfdWs !== 'DISCONNECTED'}
-            value={conns.nfdWs.host}
-            onChange={event => setConns('nfdWs', 'host', () => event.target.value)}
-          />
-        </Grid>
-        <Grid item xs={4}>
-          <TextField
-            fullWidth
-            label="Port"
-            name="port"
-            type="number"
-            disabled={status.nfdWs !== 'DISCONNECTED'}
-            value={conns.nfdWs.port}
-            onChange={event => setConns('nfdWs', 'port', () => parseInt(event.target.value))}
+            value={conns.nfdWs.uri}
+            onChange={event => setConns('nfdWs', 'uri', () => event.target.value)}
           />
         </Grid>
       </Grid>

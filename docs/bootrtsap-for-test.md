@@ -1,6 +1,8 @@
 # Bootstrapping for Testing
 
 This document describes the `ndnsec` commands to bootstrap a workspace for test using without NDN Cert.
+If you do not want to generate your own certificates for test, skip steps (1)-(3).
+You can directly use the result provided in the document to execute step (4).
 
 ## (1) Setup trust anchor
 
@@ -35,14 +37,7 @@ $ ndnsec key-gen /ndn-workspace/test/node-1
 
 $ ndnsec sign-req /ndn-workspace/test/node-1 | ndnsec cert-gen -s /ndn-workspace/test -i root
 
-Bv0BVwc8CA1uZG4td29ya3NwYWNlCAR0ZXN0CAZub2RlLTEIA0tFWQgIHmk8dlF2
-4jgIBHJvb3Q2CAAAAYtkmD+SFAkYAQIZBAA27oAVWzBZMBMGByqGSM49AgEGCCqG
-SM49AwEHA0IABKT2IPBrfjE/oBWH5OrWncM6b6+cquTU2FBWojTG7YN8wL6JV5p3
-AVUBEB3IrSpsvSOCW9p8Aq4icDvbhtqHiIEWZRsBAxw2BzQIDW5kbi13b3Jrc3Bh
-Y2UIBHRlc3QIA0tFWQgIUlLstnyB9QUIBHNlbGY2CAAAAYtkis3//QD9Jv0A/g8y
-MDIzMTAyNVQwMjA5NDL9AP8PMjAyNDEwMjRUMDIwOTQxF0gwRgIhAMQGRFY1pNj9
-lcxPGJqo4PFCB2qyvh66T76nkd7amh7VAiEAuwhDmUxp7OiF0rboXpcoRuxTjLiD
-OaMqd2paBUr5W1I=
+<SNIP>
 
 $ ndnsec cert-install -
 
@@ -76,14 +71,7 @@ $ ndnsec key-gen /ndn-workspace/test/node-2
 
 $ ndnsec sign-req /ndn-workspace/test/node-2 | ndnsec cert-gen -s /ndn-workspace/test -i root
 
-Bv0BVgc8CA1uZG4td29ya3NwYWNlCAR0ZXN0CAZub2RlLTIIA0tFWQgIbRPaa0lk
-MVYIBHJvb3Q2CAAAAYtkmjGBFAkYAQIZBAA27oAVWzBZMBMGByqGSM49AgEGCCqG
-SM49AwEHA0IABO/Iz5g739FaWUGQOSv8+79MJkyIQNjofuuTCgeFTbrst0f5czge
-Bq+9BxTv+RDHRIw/MWUqXVwFEeBqaLoL35cWZRsBAxw2BzQIDW5kbi13b3Jrc3Bh
-Y2UIBHRlc3QIA0tFWQgIUlLstnyB9QUIBHNlbGY2CAAAAYtkis3//QD9Jv0A/g8y
-MDIzMTAyNVQwMjExNDn9AP8PMjAyNDEwMjRUMDIxMTQ4F0cwRQIgLgC9fwVDX177
-Tx9S8vr5RwsyG1yxtGVxf9UDhv7S5HECIQCEQdjNgEEE04Ifst6VzAnXZ/5qa2AG
-9dpNICOZYDgJaw==
+<SNIP>
 
 $ ndnsec cert-install -
 

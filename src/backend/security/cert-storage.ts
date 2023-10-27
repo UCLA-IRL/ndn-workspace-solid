@@ -56,8 +56,15 @@ export class CertStorage {
             // Fetched key must be signed by a known key
             // TODO: Find a better way to handle security
             verifier: this.localVerifier,
-            // retx: 3
+            modifyInterest: { mustBeFresh: true, lifetime: 5000 },
+            retx: 5,
           })
+
+          // Cache result certificates
+          const encoder = new Encoder
+          result.encodeTo(encoder)
+          this.storage.set(result.name.toString(), encoder.output)
+
           return Certificate.fromData(result)
         } catch {
           return undefined

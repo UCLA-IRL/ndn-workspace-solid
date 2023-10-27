@@ -201,7 +201,8 @@ export class AtLeastOnceDelivery extends SyncDelivery {
       try {
         const data = await this.endpoint.consume(name, {
           verifier: this.verifier,
-          // retx: 3
+          modifyInterest: { mustBeFresh: true, lifetime: 5000 },
+          retx: 5,
         })
 
         // Put into storage
