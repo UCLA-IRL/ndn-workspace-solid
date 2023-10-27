@@ -1,14 +1,17 @@
 import { Encoder, Decoder } from "@ndn/tlv"
 import { Name, Data, Verifier, Signer } from "@ndn/packet"
 import {
-  Certificate, createVerifier, NamedVerifier, createSigner, ECDSA
+  Certificate, createVerifier, createSigner, ECDSA
 } from "@ndn/keychain"
 import { Storage } from "../storage"
 import { Endpoint } from "@ndn/endpoint"
 
+/**
+ * A Signer & Verifier that handles security authentication.
+ * CertStorage itself is not a storage, actually. Depend on an external storage.
+ */
 export class CertStorage {
   private _signer: Signer | undefined
-  private pubKey: NamedVerifier<true> | undefined
   readonly readyEvent: Promise<void>
 
   constructor(
@@ -31,20 +34,29 @@ export class CertStorage {
     })()
   }
 
+  /** Obtain the signer */
   get signer() {
     return this._signer
   }
 
+  /** Obtain this node's own certificate */
   get certificate() {
     return this.ownCertificate
   }
 
+  /** Import an external certificate into the storage */
   async importCert(cert: Certificate) {
     const encoder = new Encoder
     cert.data.encodeTo(encoder)
     await this.storage.set(cert.name.toString(), encoder.output)
   }
 
+  /**
+   * Fetch a certificate based on its name from local storage and then remote.
+   * @param keyName The certificate's name.
+   * @param localOnly If `true`, only look up the local storage without sending an Interest.
+   * @returns The fetched certificate. `undefined` if not found.
+   */
   async getCertificate(keyName: Name, localOnly: boolean): Promise<Certificate | undefined> {
     const certBytes = await this.storage.get(keyName.toString())
     if (certBytes === undefined) {
@@ -76,6 +88,11 @@ export class CertStorage {
     }
   }
 
+  /**
+   * Verify a packet. Throw an error if failed.
+   * @param pkt The packet to verify.
+   * @param localOnly If `true`, only look up the local storage for the certificate.
+   */
   async verify(pkt: Verifier.Verifiable, localOnly: boolean) {
     const keyName = pkt.sigInfo?.keyLocator?.name
     if (!keyName) {
@@ -93,15 +110,31 @@ export class CertStorage {
     }
   }
 
+  /** Obtain an verifier that fetches certificate */
   get verifier(): Verifier {
     return {
       verify: pkt => this.verify(pkt, false)
     }
   }
 
+  /** Obtain an verifier that does not fetch certificate remotely */
   get localVerifier(): Verifier {
     return {
       verify: pkt => this.verify(pkt, true)
     }
+  }
+
+  async create(
+    trustAnchor: Certificate,
+    ownCertificate: Certificate,
+    storage: Storage,
+    endpoint: Endpoint,
+    prvKeyBits: Uint8Array
+  ) {
+    const result = new CertStorage(
+      trustAnchor, ownCertificate, storage, endpoint, prvKeyBits
+    )
+    await result.readyEvent
+    return result
   }
 }

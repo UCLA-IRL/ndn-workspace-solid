@@ -1,3 +1,5 @@
+// The Context component connecting backend and the fronent part.
+// Wrap up NDN stuffs into Solid signals.
 import {
   createSignal, createContext, useContext,
   type ParentProps, type Accessor,

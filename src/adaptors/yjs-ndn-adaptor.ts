@@ -1,6 +1,16 @@
 import { SyncAgent } from "../backend/sync-agent"
 import * as Y from 'yjs'
 
+/**
+ * NDN SVS Provider for Yjs. Wraps update into `SyncAgent`'s `update` channel.
+ *
+ * @example
+ *   import * as Y from 'yjs'
+ *   import { WebsocketProvider } from 'yjs-ndn-adaptor'
+ *   const doc = new Y.Doc()
+ *   const syncAgent = await SyncAgent.create(...)
+ *   const provider = new WebsocketProvider(syncAgent, doc, 'doc-topic')
+ */
 export class NdnSvsAdaptor {
   private readonly callback = this.docUpdateHandler.bind(this)
 

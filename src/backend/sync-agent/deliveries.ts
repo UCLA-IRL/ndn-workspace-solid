@@ -26,8 +26,10 @@ export function parseSyncState(vector: Uint8Array): SvStateVector {
 
 export type UpdateEvent = (content: Uint8Array, id: Name, instance: SyncDelivery) => Promise<void>
 
-// SyncDelivery is a SVS Sync instance associated with a storage.
-// It handles update notification and production, but does not serve Data packets.
+/**
+ * SyncDelivery is a SVS Sync instance associated with a storage.
+ * It handles update notification and production, but does not serve Data packets.
+ */
 export abstract class SyncDelivery {
   readonly baseName: Name
   protected _syncInst?: SvSync
@@ -89,6 +91,10 @@ export abstract class SyncDelivery {
     return this._syncNode
   }
 
+  /**
+   * The callback on Sync updates. Note that AtLeastOnce requires all callbacks to be registered before Sync starts.
+   * Therefore, we fix the number of callbacks to one and leave demultiplexing to the SyncAgent.
+   */
   public get onUpdate() {
     return this._onUpdate
   }
@@ -103,6 +109,8 @@ export abstract class SyncDelivery {
   }
 
   destroy(storage?: Storage) {
+    // Note: the abstract class does not know where is the storage to store SVS vector.
+    // Derived classes will override this with `destroy()`
     if (this._syncInst !== undefined) {
       this._syncInst.close()
       if (storage !== undefined) {
@@ -140,6 +148,7 @@ export abstract class SyncDelivery {
     })
   }
 
+  /** Trigger the SVS to send a Sync Interest so that one can get latest updates. */
   public fire() {
     if (this._syncInst !== undefined && this._ready) {
       (this._syncInst as any).resetTimer(true)

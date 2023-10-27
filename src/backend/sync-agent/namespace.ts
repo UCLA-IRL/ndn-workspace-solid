@@ -6,19 +6,8 @@ let currentNamespace: SyncAgentNamespace | undefined = undefined
 
 // WARN: Please be aware that not every part of the application uses this interface
 // TODO: Globally use a namespace manager
+/** A global interface for SyncAgent to extract and convert NDN names in the application's namespace */
 export type SyncAgentNamespace = {
-  /**
-   * Extract the node ID from the key name of the signer
-   * @param signerName the signer's name used in KeyLocator. e.g. /ndn-app/alice/KEY/1
-   */
-  nodeIdFromSigner(signerName: Name): Name
-
-  /**
-   * Extract the application prefix from the key name of the signer
-   * @param signerName the signer's name used in KeyLocator. e.g. /ndn-app/alice/KEY/1
-   */
-  appPrefixFromSigner(signerName: Name): Name
-
   /**
    * Extract the application prefix from the node ID
    * @param nodeId the Node ID, e.g. /ndn-app/node/1
@@ -78,10 +67,18 @@ export function setNamespace(namespace: SyncAgentNamespace) {
 }
 
 function createDefaultNamespace(): SyncAgentNamespace {
-  return {
+  const ret = {
+    /**
+     * Extract the node ID from the key name of the signer
+     * @param signerName the signer's name used in KeyLocator. e.g. /ndn-app/alice/KEY/1/NA/XXX
+     */
     nodeIdFromSigner(signerName: Name): Name {
       return signerName.getPrefix(signerName.length - 4)
     },
+    /**
+     * Extract the application prefix from the key name of the signer
+     * @param signerName the signer's name used in KeyLocator. e.g. /ndn-app/alice/KEY/1/NA/XXX
+     */
     appPrefixFromSigner(signerName: Name): Name {
       return signerName.getPrefix(signerName.length - 5)
     },
@@ -106,4 +103,5 @@ function createDefaultNamespace(): SyncAgentNamespace {
     atLeastOnceKeyword: KeywordComponent.create('alo'),
     latestOnlyKeyword: KeywordComponent.create('late'),
   }
+  return ret
 }

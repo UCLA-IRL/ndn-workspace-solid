@@ -1,6 +1,24 @@
 import { observeDeep } from "@syncedstore/core"
 import { Accessor, createEffect, createSignal, from, onCleanup } from "solid-js"
 
+/**
+ * Solid hook to export a subobject of the store as a signal.
+ * Immitate the official `useSyncedStore`.
+ *
+ * @example
+ *
+ * // Store setup:
+ * const globalStore = SyncedStore({ people: [] })
+ * globalStore.people.push({ name: "Alice" })
+ * globalStore.people.push({ name: "Bob" })
+ *
+ * // In your component:
+ * const people = createSyncedStore(globalStore.people)
+ * <div>{people()![1].name}</div>
+ * 
+ * @param syncedObject The subobject to sync on
+ * @returns a signal tracking the subobject
+ */
 export function createSyncedStore<T>(syncedObject: T): Accessor<{ value: T } | undefined> {
   return from<{ value: T }>((set) => {
     if (syncedObject !== undefined) {
@@ -16,6 +34,26 @@ export function createSyncedStore<T>(syncedObject: T): Accessor<{ value: T } | u
   })
 }
 
+/**
+ * Solid hook to export a subobject of the store as a signal.
+ * Created from another signal.
+ *
+ * @example
+ *
+ * // Store setup:
+ * const globalStore = SyncedStore({ people: [] })
+ * const [storeSig, setStoreSig] = createSignal(globalStore)
+ * globalStore.people.push({ name: "Alice" })
+ * globalStore.people.push({ name: "Bob" })
+ *
+ * // In your component:
+ * const peopleSig = () => storeSig()?.people  // non-tracking
+ * const people = createSyncedStore(peopleSig) // tracking
+ * <div>{people()![1].name}</div>
+ *
+ * @param syncedObject The subobject to sync on
+ * @returns a signal tracking the subobject
+ */
 export function createSyncedStoreSig<T>(signal: Accessor<T | undefined>): Accessor<{ value: T } | undefined> {
   const [ret, setRet] = createSignal<{ value: T }>()
 
