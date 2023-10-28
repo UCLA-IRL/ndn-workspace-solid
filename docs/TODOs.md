@@ -269,3 +269,7 @@ As title stated.
 # #34 YaNFD does not work with this app
 
 See https://github.com/named-data/YaNFD/issues/55
+
+# #35 Size issue of CodeMirror
+
+It does not fit into the container when the document is large
