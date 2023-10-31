@@ -9,16 +9,6 @@ Come up with a more general namespace implementation that can convert names for 
 Note that there is no need to rewrite the existing `Namespace` interface.
 Application specific components may access specific implementation rather than depending on interface.
 
-# #2 Allow multiple profiles
-
-Currently only one workspace and one identity can be bootstrapped.
-This is not convenient to both users and developers.
-I plan to support multiple profiles, where a profile is a combination of a namespace and a boostrapped identity,
-and allow users to select a stored profile at the home page.
-At the first stage, we may still run one profile in the backend.
-
-*Note: also think about #7 when doing this*
-
 # #3 Better navigation bar
 
 The navigation bar on the left takes too much space so users cannot open two windows side-by-side.
@@ -71,16 +61,6 @@ I don't know what will happen if two users do so with current code.
 
 Note: after #4 is done, it should be OK to temporarily have files with the same name in the same folder.
   The only trouble would be not able to export as a ZIP.
-
-# #7 Support storage
-
-Currently everything is stored in memory.
-Need to add support for persistent storage -- such as OPFS, indexedDB, or File System API -- before Hackathon.
-
-To get this done, two things need to be handled:
-- Yjs document.
-  - Note: you can simply apply all stored updates. Like: https://github.com/yjs/y-indexeddb/blob/41a5e5964e698f11eb287ea029eb141fe6332039/src/y-indexeddb.js#L22
-- Boostrapping data
 
 # #8 Local snapshot
 
@@ -274,3 +254,23 @@ See https://github.com/named-data/YaNFD/issues/55
 # #35 Size issue of CodeMirror
 
 It does not fit into the container when the document is large
+
+# #7 Support storage (DONE)
+
+Currently everything is stored in memory.
+Need to add support for persistent storage -- such as OPFS, indexedDB, or File System API -- before Hackathon.
+
+To get this done, two things need to be handled:
+- Yjs document.
+  - Note: you can simply apply all stored updates. Like: https://github.com/yjs/y-indexeddb/blob/41a5e5964e698f11eb287ea029eb141fe6332039/src/y-indexeddb.js#L22
+- Boostrapping data
+
+# #2 Allow multiple profiles (DONE)
+
+Currently only one workspace and one identity can be bootstrapped.
+This is not convenient to both users and developers.
+I plan to support multiple profiles, where a profile is a combination of a namespace and a boostrapped identity,
+and allow users to select a stored profile at the home page.
+At the first stage, we may still run one profile in the backend.
+
+*Note: also think about #7 when doing this*
