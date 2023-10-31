@@ -5,6 +5,7 @@ import BootSafebag from "./boot-safebag"
 import { useNdnWorkspace } from "../../Context"
 import { Certificate, ECDSA, createVerifier } from "@ndn/keychain"
 import OwnCertificate from "./own-certificate"
+import { useNavigate } from "@solidjs/router"
 
 export default function Workspace() {
   const {
@@ -19,6 +20,7 @@ export default function Workspace() {
   const [prvKeyBytes, setPrvKeyBytes] = createSignal<Uint8Array>(new Uint8Array())
   const [readyToStart, setReadyToStart] = createSignal(false)
   const [inProgress, setInProgress] = createSignal(false)
+  const navigate = useNavigate()
 
   createEffect(() => {
     const prvKeyBits = prvKeyBytes()
@@ -76,7 +78,7 @@ export default function Workspace() {
   }
 
   const onStop = () => {
-    stopWorkspace()
+    stopWorkspace().then(() => { navigate('/profile', { replace: true }) })
   }
 
   return (

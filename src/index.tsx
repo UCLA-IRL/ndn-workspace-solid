@@ -17,7 +17,7 @@ import ShareLatex from './components/share-latex'
 import Scene from './components/networked-aframe/scene'
 import { NdnWorkspaceProvider } from './Context'
 import Connect from './components/connect'
-import Workspace from './components/workspace'
+import { Workspace, Profile } from './components/workspace'
 
 const root = document.getElementById('root')
 
@@ -28,7 +28,7 @@ render(
         <Routes>
           <Route path="/" element={<Root routes={[
             { icon: <HomeIcon />, href: '/', title: 'Home' },
-            { icon: <AppsIcon />, href: '/workspace', title: 'Workspace' },
+            { icon: <AppsIcon />, href: '/profile', title: 'Workspace' },
             { icon: <SettingsEthernetIcon />, href: '/connection', title: 'Connection' },
             { icon: <DescriptionIcon />, href: '/latex', title: 'LaTeX' },
             { icon: <ViewInArIcon />, href: '/aframe', title: 'A-Frame' },
@@ -38,6 +38,7 @@ render(
             <Route path="/aframe" component={Scene} />
             <Route path="/connection" component={Connect} />
             <Route path="/workspace" component={Workspace} />
+            <Route path="/profile" component={Profile} />
           </Route>
         </Routes>
       </Router>

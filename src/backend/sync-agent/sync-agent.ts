@@ -7,6 +7,7 @@ import { concatBuffers } from "@ndn/util"
 import { AtLeastOnceDelivery, LatestOnlyDelivery, UpdateEvent } from "./deliveries"
 import { getNamespace } from "./namespace"
 import { InMemoryStorage, Storage } from "../storage"
+import { SvStateVector } from "@ndn/sync"
 
 
 export type ChannelType = 'update' | 'blob' | 'status'
@@ -283,6 +284,31 @@ export class SyncAgent {
   public fire() {
     this.atLeastOnce.fire()
     this.latestOnly.fire()
+  }
+
+  /**
+   * Replay existing updates under specific topic
+   */
+  async replayUpdates(topic: string, startFrom?: SvStateVector) {
+    const listener = this.listeners[`update.${topic}`]
+    if (!listener) {
+      throw new Error('You cannot call replayUpdates without a listener')
+    }
+
+    const start = startFrom ?? new SvStateVector
+    await this.atLeastOnce.replay(start, async (wire, id) => {
+      const inner = this.parseInnerData(wire)
+      if (!inner) {
+        // Invalid inner data
+        return
+      }
+      const { channel, topic: updateTopic, content } = inner
+      if (channel !== 'update' || updateTopic !== topic) {
+        return
+      }
+      // Notify the listener
+      listener(content, id)
+    })
   }
 
   static async create(

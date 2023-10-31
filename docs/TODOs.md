@@ -249,7 +249,8 @@ NDNts is really a good library with potentials to develop real NDN applications.
 However, current documentation lacks necessary details:
 - Some functions/classes are not documented
 - Failure handling is not clear for documented functions (returning undefined vs raising exceptions).
-  For example, call `createSigner` with the *certificate* name will raise an exception.
+  For example, calling `createSigner` with the *certificate* name will raise an exception.
+  Calling `SvStateVector.get` with a non-existing node ID will obtain 0.
 - Tutorials are deeply in the forest of packages. Also, some are not well explained.
 - Some classes are not supposed to be created by ctors by users,
   but the doc does not give hints on which function should be used instead.

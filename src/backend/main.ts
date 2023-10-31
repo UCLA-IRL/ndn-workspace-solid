@@ -1,7 +1,7 @@
 // This file is the main file gluing all components and maintain a global context.
 // Should be changed to something better if refactor.
 import { Endpoint } from "@ndn/endpoint"
-import { Name } from '@ndn/packet'
+import { Data, Name } from '@ndn/packet'
 import { ControlCommand } from "@ndn/nfdmgmt"
 import { FwFace } from "@ndn/fw"
 import { WsTransport } from "@ndn/ws-transport"
@@ -11,9 +11,13 @@ import { NdnSvsAdaptor } from "../adaptors/yjs-ndn-adaptor"
 import { PeerJsListener } from '../adaptors/peerjs-transport'
 import { CertStorage } from './security/cert-storage'
 import { RootDocStore, initRootDoc } from './models'
+import { Profile, profileFromBootParams } from './profile'
 import { FsStorage, InMemoryStorage, type Storage } from "./storage"
 import { SyncAgent } from './sync-agent'
 import { Certificate } from "@ndn/keychain"
+import { base64ToBytes } from "../utils/base64"
+import { Decoder } from "@ndn/tlv"
+import { encodeKey as encodePath } from "./storage/file-system"
 
 export const endpoint: Endpoint = new Endpoint()
 
@@ -91,6 +95,7 @@ export async function bootstrapWorkspace(opts: {
   prvKey: Uint8Array,
   ownCertificate: Certificate,
   createNew: boolean,
+  inMemory?: boolean,
 }) {
   if (bootstrapping) {
     console.error('Bootstrapping in progress or done')
@@ -102,13 +107,26 @@ export async function bootstrapWorkspace(opts: {
   ownCertificate = opts.ownCertificate
 
   // Certificates
-  persistStore = new InMemoryStorage()
   // To switch to persistent storage:
   // TODO: Store YJS document in this storage
   // However, y-indexeddb seems to only replay all stored updates, until it reaches some point and
   // use `encodeStateAsUpdate` to reduce.
-  // const handle = await navigator.storage.getDirectory() 
-  // persistStore = new FsStorage(handle)
+  appPrefix = opts.trustAnchor.name.getPrefix(opts.trustAnchor.name.length - 4)
+  const nodeId = opts.ownCertificate.name.getPrefix(opts.ownCertificate.name.length - 4)
+
+  if (!opts.inMemory && opts.createNew && await isProfileExisting(nodeId.toString())) {
+    console.error('Cannot create an existing profile. Will try to join it instead.')
+    opts.createNew = false
+  }
+
+  if (opts.inMemory) {
+    persistStore = new InMemoryStorage()
+  } else {
+    const handle = await navigator.storage.getDirectory()
+    const subFolder = await handle.getDirectoryHandle(encodePath(nodeId.toString()), { create: true })
+    persistStore = new FsStorage(subFolder)
+  }
+
 
   // NOTE: CertStorage does not have a producer to serve certificates. This reuses the SyncAgent's responder.
   // certStore = new InMemoryStorage()
@@ -117,8 +135,7 @@ export async function bootstrapWorkspace(opts: {
 
   // Sync Agents
   syncAgent = await SyncAgent.create(
-    opts.ownCertificate.name.getPrefix(opts.ownCertificate.name.length - 4),
-    persistStore, endpoint, certStorage.signer!, certStorage.verifier,
+    nodeId, persistStore, endpoint, certStorage.signer!, certStorage.verifier,
   )
 
   // Root doc using CRDT and Sync
@@ -143,12 +160,17 @@ export async function bootstrapWorkspace(opts: {
       text: new Y.Text(),
     })
     rootDoc.aincraft.items = []
+  } else {
+    await syncAgent.replayUpdates('doc')
+  }
+
+  if (!opts.inMemory) {
+    // We need to save profile for both create and join
+    await saveProfile(profileFromBootParams(opts))
   }
 
   // Start Sync
   syncAgent.ready = true
-
-  appPrefix = opts.trustAnchor.name.getPrefix(opts.trustAnchor.name.length - 4)
 
   // Mark success
   bootstrapped = true
@@ -207,5 +229,57 @@ async function checkPrefixRegistration(cancel: boolean) {
     if (cr.statusCode !== 200) {
       console.error(`Unable to register route: ${cr.statusCode} ${cr.statusText}`);
     }
+  }
+}
+
+// ============= Profiles =============
+
+export async function loadProfiles() {
+  const rootHandle = await navigator.storage.getDirectory()
+
+  // Load profiles
+  const profiles = await rootHandle.getDirectoryHandle('profiles', { create: true })
+  const ret: Array<Profile> = []
+  for await (const [, handle] of profiles.entries()) {
+    if (handle instanceof FileSystemFileHandle) {
+      const jsonFile = await handle.getFile()
+      const jsonText = await jsonFile.text()
+      const profile = JSON.parse(jsonText) as Profile
+      ret.push(profile)
+    }
+  }
+
+  return ret
+}
+
+export async function saveProfile(profile: Profile) {
+  const rootHandle = await navigator.storage.getDirectory()
+
+  const profiles = await rootHandle.getDirectoryHandle('profiles', { create: true })
+  const fileHandle = await profiles.getFileHandle(encodePath(profile.nodeId), { create: true })
+  const textFile = await fileHandle.createWritable()
+  await textFile.write(JSON.stringify(profile))
+  await textFile.close()
+}
+
+export async function removeProfile(nodeId: string) {
+  const rootHandle = await navigator.storage.getDirectory()
+  const profiles = await rootHandle.getDirectoryHandle('profiles', { create: true })
+  try {
+    await profiles.removeEntry(encodePath(nodeId.toString()), { recursive: true })
+    await rootHandle.removeEntry(encodePath(nodeId.toString()), { recursive: true })
+  } catch {
+    return false
+  }
+}
+
+export async function isProfileExisting(nodeId: string) {
+  const rootHandle = await navigator.storage.getDirectory()
+  const profiles = await rootHandle.getDirectoryHandle('profiles', { create: true })
+  try {
+    await profiles.getFileHandle(encodePath(nodeId), { create: false })
+    return true
+  } catch {
+    return false
   }
 }

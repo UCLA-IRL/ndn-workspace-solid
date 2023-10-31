@@ -45,6 +45,7 @@ type ContextType = {
     prvKey: Uint8Array,
     ownCertificate: Certificate,
     createNew: boolean,
+    inMemory?: boolean,
   }) => Promise<void>,
   stopWorkspace: () => Promise<void>,
   trustAnchor: () => Certificate | undefined,

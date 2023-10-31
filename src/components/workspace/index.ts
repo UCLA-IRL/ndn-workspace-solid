@@ -1,2 +1,3 @@
 import Workspace from './workspace'
-export default Workspace
+import Profile from './profiles'
+export { Workspace, Profile }

@@ -1,11 +1,12 @@
 import { type Endpoint } from "@ndn/endpoint"
 import { SvSync, type SyncNode, type SyncUpdate } from "@ndn/sync"
-import { type Name, Data, digestSigning, type Verifier, Signer } from "@ndn/packet"
+import { Name, Data, digestSigning, type Verifier, Signer } from "@ndn/packet"
 import { SequenceNum } from "@ndn/naming-convention2"
 import { Decoder, Encoder } from "@ndn/tlv"
 import { SvStateVector } from "@ndn/sync"
 import { getNamespace } from "./namespace"
 import { Storage } from "../storage"
+import { fromHex } from "@ndn/util"
 
 export function encodeSyncState(state: SvStateVector): Uint8Array {
   const encoder = new Encoder()
@@ -89,6 +90,10 @@ export abstract class SyncDelivery {
 
   public get syncNode() {
     return this._syncNode
+  }
+
+  public get syncState() {
+    return new SvStateVector(this.state)
   }
 
   /**
@@ -286,6 +291,24 @@ export class AtLeastOnceDelivery extends SyncDelivery {
 
   override destroy() {
     return super.destroy(this.storage)
+  }
+
+  async replay(startFrom: SvStateVector, callback: UpdateEvent) {
+    for (const [key, last] of this.syncState) {
+      const first = startFrom.get(key)
+      const prefix = getNamespace().baseName(key, this.syncPrefix)
+      for(let i = first + 1; i <= last; i ++) {
+        const name = prefix.append(SequenceNum.create(i))
+        const wire = await this.storage.get(name.toString())
+        if(wire === undefined) {
+          console.error(`[AtLeastOnceDelivery] FATAL: data missing from local storage: ${name}`)
+        } else if (wire.length > 0) {
+          const decoder = new Decoder(wire)
+          const data = Data.decodeFrom(decoder)
+          await callback(data.content, key, this)
+        }
+      }
+    }
   }
 }
 
