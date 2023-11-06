@@ -41,6 +41,7 @@
     "eventemitter3": "^5.0.1",
     "jszip": "^3.10.1",
     "peerjs": "^1.5.1",
+    "qrcode": "^1.5.3",
     "solid-codemirror": "^2.3.0",
     "solid-js": "^1.8.1",
     "uuid": "^9.0.1",
