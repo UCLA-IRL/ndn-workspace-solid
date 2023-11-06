@@ -5,7 +5,8 @@ import { createSignal, For, Switch, type JSX, Match } from "solid-js"
 
 export default function AppTools(props: {
   rootPath: string,
-  pathNames: string[],
+  pathIds: string[],
+  resolveName: (id: string) => string | undefined,
   menuItems: Array<{ name: string, onClick?: () => void, icon?: JSX.Element }>,
   onCompile: () => void
 }) {
@@ -31,7 +32,7 @@ export default function AppTools(props: {
           <MenuIcon />
         </IconButton>
         <div style={{ 'flex-grow': 1 }}>
-          <PathBread rootPath={props.rootPath} pathNames={props.pathNames} />
+          <PathBread rootPath={props.rootPath} pathIds={props.pathIds} resolveName={props.resolveName} />
         </div>
         <Button onClick={props.onCompile}>
           Compile

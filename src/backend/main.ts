@@ -1,7 +1,7 @@
 // This file is the main file gluing all components and maintain a global context.
 // Should be changed to something better if refactor.
 import { Endpoint } from "@ndn/endpoint"
-import { Data, Name } from '@ndn/packet'
+import { Name } from '@ndn/packet'
 import { ControlCommand } from "@ndn/nfdmgmt"
 import { FwFace } from "@ndn/fw"
 import { WsTransport } from "@ndn/ws-transport"
@@ -10,14 +10,13 @@ import * as Y from 'yjs'
 import { NdnSvsAdaptor } from "../adaptors/yjs-ndn-adaptor"
 import { PeerJsListener } from '../adaptors/peerjs-transport'
 import { CertStorage } from './security/cert-storage'
-import { RootDocStore, initRootDoc } from './models'
+import { RootDocStore, initRootDoc, project } from './models'
 import { Profile, profileFromBootParams } from './profile'
 import { FsStorage, InMemoryStorage, type Storage } from "./storage"
 import { SyncAgent } from './sync-agent'
 import { Certificate } from "@ndn/keychain"
-import { base64ToBytes } from "../utils/base64"
-import { Decoder } from "@ndn/tlv"
 import { encodeKey as encodePath } from "./storage/file-system"
+import { v4 as uuidv4 } from "uuid"
 
 export const endpoint: Endpoint = new Endpoint()
 
@@ -27,6 +26,7 @@ export let persistStore: Storage | undefined
 export let certStorage: CertStorage | undefined
 export let syncAgent: SyncAgent | undefined
 export let appPrefix: Name | undefined
+export let nodeId: Name | undefined
 
 export let trustAnchor: Certificate | undefined
 export let ownCertificate: Certificate | undefined
@@ -112,7 +112,7 @@ export async function bootstrapWorkspace(opts: {
   // However, y-indexeddb seems to only replay all stored updates, until it reaches some point and
   // use `encodeStateAsUpdate` to reduce.
   appPrefix = opts.trustAnchor.name.getPrefix(opts.trustAnchor.name.length - 4)
-  const nodeId = opts.ownCertificate.name.getPrefix(opts.ownCertificate.name.length - 4)
+  nodeId = opts.ownCertificate.name.getPrefix(opts.ownCertificate.name.length - 4)
 
   if (!opts.inMemory && opts.createNew && await isProfileExisting(nodeId.toString())) {
     console.error('Cannot create an existing profile. Will try to join it instead.')
@@ -149,16 +149,24 @@ export async function bootstrapWorkspace(opts: {
   // Load or create
   if (opts.createNew) {
     console.log(`Created document`)
-    rootDoc.latex.root = {
+    const mainUuid = uuidv4()
+    rootDoc.latex[project.RootId] = {
+      id: project.RootId,
+      // fullPath: '/',
+      name: '',
+      parentId: undefined,
       kind: 'folder',
-      name: 'ROOT',
       items: []
     }
-    rootDoc.latex.root.items.push({
-      kind: 'doc',
+    rootDoc.latex[mainUuid] = {
+      id: mainUuid,
+      // fullPath: '/',
       name: 'main.tex',
+      parentId: project.RootId,
+      kind: 'text',
       text: new Y.Text(),
-    })
+    }
+    rootDoc.latex[project.RootId].items.push(mainUuid)
     rootDoc.aincraft.items = []
   } else {
     await syncAgent.replayUpdates('doc')
@@ -187,6 +195,7 @@ export async function stopWorkspace() {
   bootstrapped = false
 
   await checkPrefixRegistration(true)
+  nodeId = undefined
   appPrefix = undefined
 
   syncAgent!.ready = false
@@ -209,6 +218,13 @@ export async function stopWorkspace() {
 async function checkPrefixRegistration(cancel: boolean) {
   if (cancel && nfdWsFace !== undefined) {
     await ControlCommand.call("rib/unregister", {
+      name: nodeId!,
+      origin: 65,  // client
+    }, {
+      endpoint: endpoint,
+      commandPrefix: commandPrefix,
+    })
+    await ControlCommand.call("rib/unregister", {
       name: appPrefix!,
       origin: 65,  // client
     }, {
@@ -228,6 +244,19 @@ async function checkPrefixRegistration(cancel: boolean) {
     })
     if (cr.statusCode !== 200) {
       console.error(`Unable to register route: ${cr.statusCode} ${cr.statusText}`);
+    }
+    const cr2 = await ControlCommand.call("rib/register", {
+      name: nodeId!,
+      origin: 65,  // client
+      cost: 0,
+      flags: 0x02,  // CAPTURE
+    }, {
+      endpoint: endpoint,
+      commandPrefix: commandPrefix,
+      signer: certStorage!.signer,  // TODO: Use a different safebag. Route should be separated from app.
+    })
+    if (cr2.statusCode !== 200) {
+      console.error(`Unable to register route: ${cr2.statusCode} ${cr2.statusText}`);
     }
   }
 }

@@ -5,26 +5,34 @@ import LatexDoc from './latex-doc'
 import NewItemModal, { ModalState } from './new-item-modal'
 import { Button } from '@suid/material'
 import { useParams, useNavigate } from '@solidjs/router'
-import { ProjDoc, ProjFileDesc, ProjFolder, exportAsZip, latexFileAt } from '../../backend/models'
+import { project } from '../../backend/models'
 import { Match, Show, Switch, createEffect, createSignal, onCleanup } from 'solid-js'
 import { observeDeep } from '@syncedstore/core'
 import { Name } from '@ndn/packet'
-import { bytesToBase64 } from '../../utils/base64'
+import { v4 as uuidv4 } from "uuid"
 import { useNdnWorkspace } from '../../Context'
-
-// TODO: Switch to context instead of using exported variables
 
 export default function ShareLatex(props: {
   rootUri: string
 }) {
   const { rootDoc, syncAgent, booted } = useNdnWorkspace()!
   const navigate = useNavigate()
-  const params = useParams<{ path: string }>()
-  const path = () => params.path
-  const pathNames = () => path() ? path().split('/') : []
-  const pathUri = () => (path() ? `${props.rootUri}/${path()}` : props.rootUri)
-  const [item, setItem] = createSignal<ProjFileDesc>()
-  const [folderCopy, setFolderCopy] = createSignal<ProjFolder>()
+  const params = useParams<{ itemId: string }>()
+  const itemId = () => params.itemId
+  const [item, setItem] = createSignal<project.Item>()
+
+  const pathIds = (): string[] => {
+    const curItem = item()
+    const rootDocVal = rootDoc()
+    if (rootDocVal !== undefined) {
+      const withoutRoot = project.getPaths(rootDocVal.latex, curItem) ?? []
+      return [project.RootId, ...withoutRoot]
+    } else {
+      return []
+    }
+  }
+
+  const [folderChildren, setFolderChildren] = createSignal<string[]>()
   const [modalState, setModalState] = createSignal<ModalState>('')
 
   if (!booted()) {
@@ -38,89 +46,112 @@ export default function ShareLatex(props: {
   createEffect(() => {
     const rootDocVal = rootDoc()
     if (rootDocVal !== undefined) {
-      setItem(latexFileAt(rootDocVal.latex, pathNames()))
+      setItem(rootDocVal.latex[itemId()])
     }
   })
 
   createEffect(() => {
     const cur = item()
-    const curPathNames = pathNames()
     if (cur !== undefined && cur.kind === 'folder') {
-      setFolderCopy({ kind: 'folder', name: cur.name, items: cur.items })
-      // TODO: Use non-nested data structure to avoid dependencies issue
+      setFolderChildren([...cur.items])
       const cancel = observeDeep(cur, () => {
-        const obj = latexFileAt(rootDoc()!.latex, curPathNames)
-        if (obj?.kind === 'folder') {
-          // Create a shallow copy to force the page refresh
-          setFolderCopy({ kind: 'folder', name: cur.name, items: cur.items })
-        } else {
-          console.error('What happened?!')
-        }
+        // Shallow copy to force it to rerender
+        setFolderChildren([...cur.items])
       })
       onCleanup(cancel)
     } else {
-      setFolderCopy()
+      setFolderChildren()
     }
   })
 
+  const resolveItem = (id: string) => {
+    const rootDocVal = rootDoc()
+    return rootDocVal?.latex[id]
+  }
+
   const createItem = (name: string, state: ModalState, blob?: Uint8Array) => {
     const cur = item()  // Convenient for TS check
+    const rootDocVal = rootDoc()
     if (name !== '' && cur?.kind === 'folder') {
+      const existId = cur.items.find(obj => rootDocVal!.latex[obj]?.name === name)
+      const newId = existId ?? uuidv4()
+      const to = props.rootUri + '/' + newId
       if (state === 'folder') {
-        const to = pathUri() + '/' + name
-        if (cur.items.findIndex(obj => obj.name === name) == -1) {
-          cur.items.push({
+        if (existId === undefined) {
+          rootDocVal!.latex[newId] = {
+            id: newId,
             kind: 'folder',
+            // fullPath: cur.fullPath + '/' + name,
             name: name,
-            items: []
-          })
-          navigate(to, { replace: true })
+            parentId: cur.id,
+            items: [],
+          }
+          cur.items.push(newId)
         }
+        navigate(to, { replace: true })
       } else if (state === 'doc') {
-        // Cannot do this because there are .bib, .sty, etc.
+        // Cannot add the extension automatically because there are .bib, .sty, etc.
         // const newName = name.endsWith('.tex') ? name : name + '.tex'
-        const to = pathUri() + '/' + name
-        if (cur.items.findIndex(obj => obj.name === name) == -1) {
-          cur.items.push({
-            kind: 'doc',
+        if (existId === undefined) {
+          rootDocVal!.latex[newId] = {
+            id: newId,
+            kind: 'text',
+            // fullPath: cur.fullPath + '/' + name,
             name: name,
+            parentId: cur.id,
             text: new Y.Text(),
-          })
-          navigate(to, { replace: true })
+          }
+          cur.items.push(newId)
         }
+        navigate(to, { replace: true })
       } else if (state === 'upload' && blob !== undefined && blob.length > 0) {
-        if (cur.items.findIndex(obj => obj.name === name) == -1) {
-          syncAgent()!.publishBlob('latexBlob', blob).then(blobName => {
-            // TODO: support replace existing file
-            // TODO: how to handle two files with the same name? Use uuid instead of filenames?
-            cur.items.push({
+        syncAgent()!.publishBlob('latexBlob', blob).then(blobName => {
+          if (existId === undefined) {
+            rootDocVal!.latex[newId] = {
+              id: newId,
               kind: 'blob',
+              // fullPath: cur.fullPath + '/' + name,
               name: name,
-              blobName: blobName.toString()
-            })
-          })
-        }
+              parentId: cur.id,
+              blobName: blobName.toString(),
+            }
+            cur.items.push(newId)
+          } else {
+            const existItem = rootDocVal!.latex[existId]
+            if (existItem?.kind === 'blob') {
+              existItem.blobName = blobName.toString()
+            }
+          }
+        })
       }
     }
     setModalState('')
   }
 
   const onExportZip = () => {
-    exportAsZip(rootDoc()!.latex).then(zip => {
-      zip.generateAsync({ type: "base64" }).then(b64File => {
-        (window as Window).location = "data:application/zip;base64," + b64File
+    project.exportAsZip(
+      async name => await syncAgent()?.getBlob(name),
+      rootDoc()!.latex,
+    ).then(zip => {
+      zip.generateAsync({ type: "uint8array" }).then(content => {
+        const file = new Blob([content], { type: 'application/zip;base64' })
+        const fileUrl = URL.createObjectURL(file)
+        window.open(fileUrl)
       })
     })
   }
 
   const onCompile = () => {
     (async () => {
-      const zip = await exportAsZip(rootDoc()!.latex)
+      const zip = await project.exportAsZip(
+        async name => await syncAgent()?.getBlob(name),
+        rootDoc()!.latex)
       const blobFile = await zip.generateAsync({ type: "blob" })
       const formData = new FormData();
       formData.append("file", new File([blobFile], 'upload.zip', {
         type: 'application/octet-stream',
-      }));
+      }))
+      // TODO: Find a new way to handle compilation
       const response = await fetch('http://localhost:6175/zip', {
         method: 'POST',
         body: formData,
@@ -144,9 +175,9 @@ export default function ShareLatex(props: {
           const blobName = new Name(curItem.blobName)
           const blob = await syncAgent()!.getBlob(blobName)
           if (blob !== undefined) {
-            const b64 = bytesToBase64(blob)
-            const win = window as Window
-            win.location = "data:application/octet-stream;base64," + b64
+            const file = new Blob([blob], { type: 'application/octet-stream;base64' })
+            const fileUrl = URL.createObjectURL(file)
+            window.open(fileUrl)
           }
         } catch (e) {
           console.error(`Unable to fetch blob file: ${e}`)
@@ -166,7 +197,8 @@ export default function ShareLatex(props: {
       </Show>
       <AppTools
         rootPath={props.rootUri}
-        pathNames={pathNames()}
+        pathIds={pathIds()}
+        resolveName={id => resolveItem(id)?.name}
         onCompile={onCompile}
         menuItems={[
           { name: 'New folder', onClick: () => setModalState('folder') },
@@ -176,14 +208,15 @@ export default function ShareLatex(props: {
           { name: 'Download as zip', onClick: onExportZip },
         ]} />
       <Switch fallback={<></>}>
-        <Match when={folderCopy() !== undefined}>
+        <Match when={folderChildren() !== undefined}>
           <FileList
-            pathUri={pathUri()}
-            folder={folderCopy()!}
+            rootUri={props.rootUri}
+            subItems={folderChildren()!}
+            resolveItem={resolveItem}
           />
         </Match>
-        <Match when={item()?.kind === 'doc'}>
-          <LatexDoc doc={(item() as ProjDoc).text} />
+        <Match when={item()?.kind === 'text'}>
+          <LatexDoc doc={(item() as project.TextDoc).text} />
         </Match>
         <Match when={item()?.kind === 'blob'}>
           <Button onClick={onDownloadBlob}>
