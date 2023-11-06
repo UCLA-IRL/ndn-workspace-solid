@@ -22,39 +22,19 @@ If you want to use Google's [material web](https://github.com/material-component
 you can also do it.
 I would hesitate to import another UI library.
 
-# #4 Better doc model for files
-
-https://github.com/zjkmxy/ndn-workspace-solid/blob/dbb3c470b1fdc62c2a52a3cc78889a64686ebdd8/src/backend/models.ts#L9-L27
-
-Current data model of LaTeX project files is recursive.
-However, the SyncedStore (Yjs wrapper) only supports deep observation.
-This means that if someone is viewing the ROOT folder, he will receive a notification for all edits made at anywhere.
-I plan to change this to non-recursive data structures using UUID:
-
-```typescript
-type FileListEntry = {
-  name: string
-  uuid: string  // Unique for every created fil and immutable
-  version?: number  // Reserved for pinning a specific version in future, see #29 below
-}
-type FileList = FileListEntry[]
-// ...
-```
-
-Also, after this update, the URL of file view should depend on UUID instead of path:
-https://github.com/zjkmxy/ndn-workspace-solid/blob/dbb3c470b1fdc62c2a52a3cc78889a64686ebdd8/src/index.tsx#L38C26-L38C38
-
 # #5 Support version update of blob files
 
 Current implementation on blob files only supports uploading new files.
 No updating existing ones. No deletion.
 Need to add support for
-- Uploading a new version to replace existing files
+- Uploading a new version to replace existing files (DONE)
 - Deleting existing files. Including bolb files and docs.
 
 *Note: better get #4 done first*
 
 # #6 Conflict of names when creating files
+
+Should be good. Not tested, though.
 
 Handle simultaneous uploading files into the same folder with same name.
 I don't know what will happen if two users do so with current code.
@@ -88,6 +68,8 @@ Current implementation tries to push a ZIP file to localhost's 6175 port, which 
 We need a better design for this.
 
 Note: the LaTeX server's code is not published. Please let me know if you need to access it.
+
+Idea: maybe use RICE like discovery protocol (DISCOVERY -> REQUEST)
 
 # #10 Allow multiple LaTeX projects in one workspace
 
@@ -143,6 +125,8 @@ The routing registration command should be signed by a different certificate fro
 This requires some UI design to allow this.
 - Do we memorize WebSocket URI + certificate bundles and allow user to choose?
   If so, we need a completely different Connection page.
+
+Also, register both the workspace prefix and the user prefix.
 
 # #17 Use Toast notification instead of logs
 
@@ -247,10 +231,6 @@ Run a test and see what will happen and if there is anything we need to fix.
 
 As title stated.
 
-# #34 YaNFD does not work with this app
-
-See https://github.com/named-data/YaNFD/issues/55
-
 # #35 Size issue of CodeMirror
 
 It does not fit into the container when the document is large
@@ -274,3 +254,29 @@ and allow users to select a stored profile at the home page.
 At the first stage, we may still run one profile in the backend.
 
 *Note: also think about #7 when doing this*
+
+# #4 Better doc model for files (DONE)
+
+https://github.com/zjkmxy/ndn-workspace-solid/blob/dbb3c470b1fdc62c2a52a3cc78889a64686ebdd8/src/backend/models.ts#L9-L27
+
+Current data model of LaTeX project files is recursive.
+However, the SyncedStore (Yjs wrapper) only supports deep observation.
+This means that if someone is viewing the ROOT folder, he will receive a notification for all edits made at anywhere.
+I plan to change this to non-recursive data structures using UUID:
+
+```typescript
+type FileListEntry = {
+  name: string
+  uuid: string  // Unique for every created fil and immutable
+  version?: number  // Reserved for pinning a specific version in future, see #29 below
+}
+type FileList = FileListEntry[]
+// ...
+```
+
+Also, after this update, the URL of file view should depend on UUID instead of path:
+https://github.com/zjkmxy/ndn-workspace-solid/blob/dbb3c470b1fdc62c2a52a3cc78889a64686ebdd8/src/index.tsx#L38C26-L38C38
+
+# #34 YaNFD does not work with this app (DONE)
+
+See https://github.com/named-data/YaNFD/issues/55

@@ -13,7 +13,6 @@ export default function LatexDoc(props: {
   doc: Y.Text
 }) {
   // TODO: Need fix size
-  // TODO: useSyncedStore becomes createStore in SolidJS. But does this work?
 
   const { createExtension, ref } = createCodeMirror({
     value: props.doc.toString(),
