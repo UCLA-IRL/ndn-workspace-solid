@@ -1,7 +1,7 @@
 // This file is the main file gluing all components and maintain a global context.
 // Should be changed to something better if refactor.
 import { Endpoint } from "@ndn/endpoint"
-import { Name } from '@ndn/packet'
+import { Data, Name, Signer, digestSigning } from '@ndn/packet'
 import { ControlCommand } from "@ndn/nfdmgmt"
 import { FwFace } from "@ndn/fw"
 import { WsTransport } from "@ndn/ws-transport"
@@ -10,15 +10,16 @@ import * as Y from 'yjs'
 import { NdnSvsAdaptor } from "../adaptors/yjs-ndn-adaptor"
 import { PeerJsListener } from '../adaptors/peerjs-transport'
 import { CertStorage } from './security/cert-storage'
-import { RootDocStore, initRootDoc, project } from './models'
-import { Profile, profileFromBootParams } from './profile'
+import { RootDocStore, initRootDoc, project, profiles, connections } from './models'
 import { FsStorage, InMemoryStorage, type Storage } from "./storage"
 import { SyncAgent } from './sync-agent'
-import { Certificate } from "@ndn/keychain"
-import { encodeKey as encodePath } from "./storage/file-system"
+import { Certificate, ECDSA, createSigner } from "@ndn/keychain"
 import { v4 as uuidv4 } from "uuid"
+import { base64ToBytes, encodeKey as encodePath } from "../utils"
+import { Decoder } from "@ndn/tlv"
 
 export const endpoint: Endpoint = new Endpoint()
+export type ConnState = 'CONNECTED' | 'DISCONNECTED' | 'CONNECTING' | 'DISCONNECTING'
 
 export let bootstrapping = false  // To prevent double click
 export let bootstrapped = false
@@ -39,11 +40,13 @@ export let yjsAdaptor: NdnSvsAdaptor | undefined
 
 export let listener: PeerJsListener | undefined = undefined
 export let nfdWsFace: FwFace | undefined = undefined
+let connState: ConnState = 'DISCONNECTED'
+let nfdCmdSigner: Signer = digestSigning
 let commandPrefix = ControlCommand.localhopPrefix
 
 // ============= Connectivity =============
 
-export async function connectNfdWs(uri: string, isLocal: boolean) {
+async function connectNfdWs(uri: string, isLocal: boolean) {
   if (nfdWsFace !== undefined) {
     console.error('Try to connect to an already connected WebSocket face')
     return
@@ -63,7 +66,7 @@ export async function connectNfdWs(uri: string, isLocal: boolean) {
   return nfdWsFace
 }
 
-export async function disconnectNfdWs() {
+async function disconnectNfdWs() {
   if (nfdWsFace === undefined) {
     console.error('Try to disconnect from a non-existing WebSocket face')
     return
@@ -72,7 +75,7 @@ export async function disconnectNfdWs() {
   nfdWsFace = undefined
 }
 
-export async function connectPeerJs(opts: PeerJsListener.Options, discovery: boolean) {
+async function connectPeerJs(opts: PeerJsListener.Options, discovery: boolean) {
   if (listener === undefined) {
     listener = await PeerJsListener.listen(opts)
     if (discovery) {
@@ -83,9 +86,87 @@ export async function connectPeerJs(opts: PeerJsListener.Options, discovery: boo
   }
 }
 
-export async function disconnectPeerJs() {
+async function disconnectPeerJs() {
   listener?.closeAll()
   listener = undefined
+}
+
+export function connectionStatus() {
+  return connState
+}
+
+export async function disconnect() {
+  if (connState !== 'CONNECTED') {
+    return
+  }
+  connState = 'DISCONNECTING'
+  if (listener !== undefined) {
+    await disconnectPeerJs()
+  }
+  if (nfdWsFace !== undefined) {
+    await disconnectNfdWs()
+  }
+  connState = 'DISCONNECTED'
+}
+
+export async function connect(config: connections.Config) {
+  if (connState !== 'DISCONNECTED') {
+    console.error('Dual-homing is not supported. Please start local NFD.')
+    return
+  }
+  connState = 'CONNECTING'
+
+  if (config.kind === 'nfdWs') {
+
+    // Decode command signer
+    if (config.prvKeyB64 === '') {
+      nfdCmdSigner = digestSigning
+    } else {
+      try {
+        const prvKeyBits = base64ToBytes(config.prvKeyB64)
+        const certBytes = base64ToBytes(config.ownCertificateB64)
+        const certDecoder = new Decoder(certBytes)
+        const ownCertificate = Certificate.fromData(Data.decodeFrom(certDecoder))
+        const keyPair = await ECDSA.cryptoGenerate({
+          importPkcs8: [prvKeyBits, ownCertificate.publicKeySpki]
+        }, true)
+        nfdCmdSigner = createSigner(
+          ownCertificate.name.getPrefix(ownCertificate.name.length - 2),
+          ECDSA,
+          keyPair).withKeyLocator(ownCertificate.name)
+      } catch (e) {
+        console.error('Unable to parse credentials:', e)
+        connState = 'DISCONNECTED'
+        return
+      }
+    }
+
+    let face
+    try {
+      face = await connectNfdWs(config.uri, config.isLocal)
+      if (face === undefined) {
+        throw new Error('Face is nil')
+      }
+    } catch (err) {
+      console.error('Failed to connect:', err)
+      connState = 'DISCONNECTED'
+      return
+    }
+    face!.addEventListener('down', () => {
+      disconnectNfdWs()
+    })
+  } else if (config.kind === 'peerJs') {
+    try {
+      await connectPeerJs(config, true)
+    } catch (err) {
+      console.error('Failed to connect:', err)
+      connState = 'DISCONNECTED'
+      return
+    }
+  }
+
+  syncAgent?.fire()
+  connState = 'CONNECTED'
 }
 
 // ============= Bootstrapping =============
@@ -174,7 +255,7 @@ export async function bootstrapWorkspace(opts: {
 
   if (!opts.inMemory) {
     // We need to save profile for both create and join
-    await saveProfile(profileFromBootParams(opts))
+    await saveProfile(profiles.fromBootParams(opts))
   }
 
   // Start Sync
@@ -240,7 +321,7 @@ async function checkPrefixRegistration(cancel: boolean) {
     }, {
       endpoint: endpoint,
       commandPrefix: commandPrefix,
-      signer: certStorage!.signer,  // TODO: Use a different safebag. Route should be separated from app.
+      signer: nfdCmdSigner,
     })
     if (cr.statusCode !== 200) {
       console.error(`Unable to register route: ${cr.statusCode} ${cr.statusText}`);
@@ -253,7 +334,7 @@ async function checkPrefixRegistration(cancel: boolean) {
     }, {
       endpoint: endpoint,
       commandPrefix: commandPrefix,
-      signer: certStorage!.signer,  // TODO: Use a different safebag. Route should be separated from app.
+      signer: nfdCmdSigner,
     })
     if (cr2.statusCode !== 200) {
       console.error(`Unable to register route: ${cr2.statusCode} ${cr2.statusText}`);
@@ -263,52 +344,11 @@ async function checkPrefixRegistration(cancel: boolean) {
 
 // ============= Profiles =============
 
-export async function loadProfiles() {
-  const rootHandle = await navigator.storage.getDirectory()
+export const loadProfiles = profiles.profiles.loadAll.bind(profiles.profiles)
+export const saveProfile = profiles.profiles.save.bind(profiles.profiles)
+export const removeProfile = profiles.profiles.remove.bind(profiles.profiles)
+export const isProfileExisting = profiles.profiles.isExisting.bind(profiles.profiles)
 
-  // Load profiles
-  const profiles = await rootHandle.getDirectoryHandle('profiles', { create: true })
-  const ret: Array<Profile> = []
-  for await (const [, handle] of profiles.entries()) {
-    if (handle instanceof FileSystemFileHandle) {
-      const jsonFile = await handle.getFile()
-      const jsonText = await jsonFile.text()
-      const profile = JSON.parse(jsonText) as Profile
-      ret.push(profile)
-    }
-  }
+// ============= Connections (init) =============
 
-  return ret
-}
-
-export async function saveProfile(profile: Profile) {
-  const rootHandle = await navigator.storage.getDirectory()
-
-  const profiles = await rootHandle.getDirectoryHandle('profiles', { create: true })
-  const fileHandle = await profiles.getFileHandle(encodePath(profile.nodeId), { create: true })
-  const textFile = await fileHandle.createWritable()
-  await textFile.write(JSON.stringify(profile))
-  await textFile.close()
-}
-
-export async function removeProfile(nodeId: string) {
-  const rootHandle = await navigator.storage.getDirectory()
-  const profiles = await rootHandle.getDirectoryHandle('profiles', { create: true })
-  try {
-    await profiles.removeEntry(encodePath(nodeId.toString()), { recursive: true })
-    await rootHandle.removeEntry(encodePath(nodeId.toString()), { recursive: true })
-  } catch {
-    return false
-  }
-}
-
-export async function isProfileExisting(nodeId: string) {
-  const rootHandle = await navigator.storage.getDirectory()
-  const profiles = await rootHandle.getDirectoryHandle('profiles', { create: true })
-  try {
-    await profiles.getFileHandle(encodePath(nodeId), { create: false })
-    return true
-  } catch {
-    return false
-  }
-}
+connections.initDefault()

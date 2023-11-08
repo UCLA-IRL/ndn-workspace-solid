@@ -7,25 +7,23 @@ import {
   InputAdornment,
   TextField,
   Grid,
+  Button,
 } from "@suid/material"
-import { useNdnWorkspace } from "../../Context"
-import ConnStatus from "./conn-state"
-import ConnButton from "./conn-button"
+import { Config as Conn } from '../../backend/models/connections'
+import { createSignal } from "solid-js"
 
-export default function PeerJs() {
-  const {
-    connectionSetting: [conns, setConns],
-    connectionStatus: status,
-    connectFuncs: {
-      peerJs: [connPeerJs, disconnPeerJs]
-    }
-  } = useNdnWorkspace()!
+export default function PeerJs(props: {
+  onAdd: (config: Conn) => void
+}) {
+  const [host, setHost] = createSignal('localhost')
+  const [port, setPort] = createSignal(8000)
+  const [path, setPath] = createSignal('/aincraft')
+  const [key, setKey] = createSignal('peerjs')
 
   return <Card>
     <CardHeader
       sx={{ textAlign: 'left' }}
       title="PeerJS"
-      subheader={<ConnStatus state={status.peerJs} />}
     />
     <Divider />
     <CardContent>
@@ -42,9 +40,8 @@ export default function PeerJs() {
                   http://
                 </InputAdornment>,
             }}
-            disabled={status.peerJs !== 'DISCONNECTED'}
-            value={conns.peerJs.host}
-            onChange={event => setConns('peerJs', 'host', () => event.target.value)}
+            value={host()}
+            onChange={event => setHost(event.target.value)}
           />
         </Grid>
         <Grid item xs={4}>
@@ -53,9 +50,8 @@ export default function PeerJs() {
             label="Port"
             name="port"
             type="number"
-            disabled={status.peerJs !== 'DISCONNECTED'}
-            value={conns.peerJs.port}
-            onChange={event => setConns('peerJs', 'port', () => parseInt(event.target.value))}
+            value={port()}
+            onChange={event => setPort(parseInt(event.target.value))}
           />
         </Grid>
         <Grid item xs={6}>
@@ -64,9 +60,8 @@ export default function PeerJs() {
             label="Path"
             name="path"
             type="text"
-            disabled={status.peerJs !== 'DISCONNECTED'}
-            value={conns.peerJs.path}
-            onChange={event => setConns('peerJs', 'path', () => event.target.value)}
+            value={path()}
+            onChange={event => setPath(event.target.value)}
           />
         </Grid>
         <Grid item xs={6}>
@@ -75,20 +70,21 @@ export default function PeerJs() {
             label="Connection Key"
             name="key"
             type="text"
-            disabled={status.peerJs !== 'DISCONNECTED'}
-            value={conns.peerJs.key}
-            onChange={event => setConns('peerJs', 'key', () => event.target.value)}
+            value={key()}
+            onChange={event => setKey(event.target.value)}
           />
         </Grid>
       </Grid>
     </CardContent>
     <Divider />
     <CardActions sx={{ justifyContent: 'flex-end' }}>
-      <ConnButton
-        state={status.peerJs}
-        onConnect={() => connPeerJs()}
-        onDisonnect={() => disconnPeerJs()}
-      />
+      <Button
+        variant="text"
+        color="primary"
+        onClick={() => props.onAdd({ kind: 'peerJs', host: host(), port: port(), key: key(), path: path() })}
+      >
+        ADD
+      </Button>
     </CardActions>
   </Card>
 }

@@ -4,41 +4,20 @@ import {
   createSignal, createContext, useContext,
   type ParentProps, type Accessor,
 } from "solid-js"
-import { RootDocStore } from "./backend/models"
+import { RootDocStore, connections } from "./backend/models"
 import { SyncAgent } from "./backend/sync-agent"
 import * as main from "./backend/main"
-import { SetStoreFunction, createStore } from "solid-js/store"
 import { type Certificate } from "@ndn/keychain"
-
-export type ConnState = 'CONNECTED' | 'DISCONNECTED' | 'CONNECTING' | 'DISCONNECTING'
-
-export type ConnectionConfig = {
-  nfdWs: {
-    uri: string
-  },
-  peerJs: {
-    host: string,
-    port: number,
-    path: string,
-    key: string,
-    discovery: boolean,
-  }
-}
-
-export type ConnectionStatus = {
-  nfdWs: ConnState,
-  peerJs: ConnState
-}
 
 type ContextType = {
   rootDoc: Accessor<RootDocStore | undefined>
   syncAgent: Accessor<SyncAgent | undefined>
   booted: Accessor<boolean>
-  connectionSetting: [ConnectionConfig, SetStoreFunction<ConnectionConfig>]
-  connectionStatus: ConnectionStatus
+  connectionStatus: Accessor<main.ConnState>
+  currentConnConfig: Accessor<connections.Config | undefined>
   connectFuncs: {
-    nfdWs: [() => void, () => void],
-    peerJs: [() => void, () => void],
+    connect: (config: connections.Config) => void,
+    disconnect: () => void,
   },
   bootstrapWorkspace: (opts: {
     trustAnchor: Certificate,
@@ -59,66 +38,26 @@ export function NdnWorkspaceProvider(props: ParentProps<unknown>) {
   const [syncAgentSig, setSyncAgentSig] = createSignal<SyncAgent>()
   const [booted, setBooted] = createSignal(false)
 
-  const [connections, setConnections] = createStore<ConnectionConfig>({
-    nfdWs: {
-      uri: 'ws://localhost:9696/',
-    },
-    peerJs: {
-      host: "localhost",
-      port: 8000,
-      path: "/aincraft",
-      key: "peerjs",
-      discovery: true,
-    }
-  })
-  const [connStatus, setConnStatus] = createStore<ConnectionStatus>({
-    nfdWs: 'DISCONNECTED',
-    peerJs: 'DISCONNECTED',
-  })
+  const [connStatus, setConnStatus] = createSignal<main.ConnState>(main.connectionStatus())
+  const [connConfig, setConnConfig] = createSignal<connections.Config>()
 
   // Execute the connection
-  const connNfdWs = () => {
-    setConnStatus('nfdWs', (): ConnState => 'CONNECTING')
-    let uri = connections.nfdWs.uri
-    if (!uri.endsWith('/')) {
-      uri += '/'
-    }
-    const hostname = new URL(uri).hostname
-    main.connectNfdWs(
-      uri,
-      ['localhost', '127.0.0.1'].some(v => v === hostname)
-    ).then((nfdWsFace) => {
-      nfdWsFace?.addEventListener('down', () => {
-        disconnNfdWs()
-      })
-      main.syncAgent?.fire()
-      setConnStatus('nfdWs', (): ConnState => 'CONNECTED')
-    }).catch(() => {
-      disconnNfdWs()
+  const connect = (config: connections.Config) => {
+    setConnConfig(config)
+    setConnStatus('CONNECTING')
+    main.connect(config).then(() => {
+      const status = main.connectionStatus()
+      setConnStatus(status)
+      if (status !== 'CONNECTED') {
+        setConnConfig()
+      }
     })
   }
 
-  const disconnNfdWs = () => {
-    setConnStatus('nfdWs', (): ConnState => 'DISCONNECTING')
-    main.disconnectNfdWs().then(() => setConnStatus('nfdWs', (): ConnState => 'DISCONNECTED'))
-  }
-
-  const connPeerJs = () => {
-    setConnStatus('peerJs', (): ConnState => 'CONNECTING')
-    main.connectPeerJs(
-      connections.peerJs,
-      connections.peerJs.discovery,
-    ).then(() => {
-      main.syncAgent?.fire()
-      setConnStatus('peerJs', (): ConnState => 'CONNECTED')
-    }).catch(() => {
-      disconnPeerJs()
-    })
-  }
-
-  const disconnPeerJs = () => {
-    setConnStatus('peerJs', (): ConnState => 'DISCONNECTING')
-    main.disconnectPeerJs().then(() => setConnStatus('peerJs', (): ConnState => 'DISCONNECTED'))
+  const disconnect = () => {
+    setConnStatus('DISCONNECTING')
+    setConnConfig()
+    main.disconnect().then(() => setConnStatus(main.connectionStatus()))
   }
 
   const bootstrapWorkspace: ContextType['bootstrapWorkspace'] = async opts => {
@@ -139,12 +78,9 @@ export function NdnWorkspaceProvider(props: ParentProps<unknown>) {
     rootDoc: rootDocSig,
     syncAgent: syncAgentSig,
     booted: booted,
-    connectionSetting: [connections, setConnections],
     connectionStatus: connStatus,
-    connectFuncs: {
-      nfdWs: [connNfdWs, disconnNfdWs],
-      peerJs: [connPeerJs, disconnPeerJs],
-    },
+    currentConnConfig: connConfig,
+    connectFuncs: { connect, disconnect },
     bootstrapWorkspace: bootstrapWorkspace,
     stopWorkspace: stopWorkspace,
     trustAnchor: () => {

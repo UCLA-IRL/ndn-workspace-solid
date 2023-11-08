@@ -1,3 +1,5 @@
+Current schedule: #16, #18, #13, #9 done before hackathon
+
 # #1 Use namespace interface
 
 Currently SyncAgent uses the `Namespace` interface from `backend\sync-agent\namespace.ts`.

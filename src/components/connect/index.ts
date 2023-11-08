@@ -1,2 +1,3 @@
 import Connect from './connect'
-export default Connect
+import StoredConns from './stored-conns'
+export { StoredConns, Connect }

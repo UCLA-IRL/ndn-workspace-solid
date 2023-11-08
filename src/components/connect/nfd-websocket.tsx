@@ -6,25 +6,65 @@ import {
   Divider,
   TextField,
   Grid,
+  Button,
 } from "@suid/material"
-import { useNdnWorkspace } from "../../Context"
-import ConnStatus from "./conn-state"
-import ConnButton from "./conn-button"
+import { Config as Conn } from '../../backend/models/connections'
+import { createSignal } from "solid-js"
+import { base64ToBytes, bytesToBase64 } from "../../utils"
+import { Decoder, Encoder } from "@ndn/tlv"
+import { SafeBag } from "@ndn/ndnsec"
 
-export default function NfdWebsocket() {
-  const {
-    connectionSetting: [conns, setConns],
-    connectionStatus: status,
-    connectFuncs: {
-      nfdWs: [connNfdWs, disconnNfdWs]
+export default function NfdWebsocket(props: {
+  onAdd: (config: Conn) => void
+}) {
+  const [uriText, setUriText] = createSignal('ws://localhost:9696/')
+  const [safebagText, setSafebagText] = createSignal('')
+  const [passphrase, setPassphrase] = createSignal('')
+
+  const onClickAdd = async () => {
+    const safebagB64 = safebagText()
+    const pass = passphrase()
+    let uri = uriText()
+    if (!uri.endsWith('/')) {
+      uri += '/'
     }
-  } = useNdnWorkspace()!
+    const hostname = new URL(uri).hostname
+    const isLocal = ['localhost', '127.0.0.1'].some(v => v === hostname)
+    if (safebagB64 === '' && pass === '') {
+      // No signing
+      props.onAdd({ kind: 'nfdWs', uri: uri, isLocal: isLocal, ownCertificateB64: '', prvKeyB64: '' })
+      return
+    }
+    if (safebagB64 === '' || pass === '') {
+      console.error('Leave both passphrase and safebag as empty to use a digest signer.' +
+        'Otherwise, you need to provide both.')
+      return
+    }
+    try {
+      // Decode certificate and private keys
+      const safeBagWire = base64ToBytes(safebagB64)
+      const decoder = new Decoder(safeBagWire)
+      const safeBag = SafeBag.decodeFrom(decoder)
+      const cert = safeBag.certificate
+      const prvKeyBits = await safeBag.decryptKey(pass)
+      // Re encode certificate and private keys for storage
+      // TODO: Is cbor a better choice?
+      const encoder = new Encoder()
+      cert.data.encodeTo(encoder)
+      const certB64 = bytesToBase64(encoder.output)
+      const prvKeyB64 = bytesToBase64(prvKeyBits)
+      props.onAdd({ kind: 'nfdWs', uri, isLocal, ownCertificateB64: certB64, prvKeyB64 })
+      return
+    } catch (err) {
+      console.error('Unable to decode the provided credential.')
+      return
+    }
+  }
 
   return <Card>
     <CardHeader
       sx={{ textAlign: 'left' }}
       title="WebSocket to NFD"
-      subheader={<ConnStatus state={status.nfdWs} />}
     />
     <Divider />
     <CardContent>
@@ -35,26 +75,52 @@ export default function NfdWebsocket() {
             label="URI"
             name="uri"
             type="text"
-            InputProps={{
-              // startAdornment:
-              //   <InputAdornment position="start">
-              //     wss://
-              //   </InputAdornment>,
+            value={uriText()}
+            onChange={event => setUriText(event.target.value)}
+          />
+        </Grid>
+        {/* TODO: Reuse workspace's safebag component */}
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            required
+            label="Passphrase for private"
+            name="passphrase"
+            type="password"
+            value={passphrase()}
+            onChange={event => setPassphrase(event.target.value)}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            required
+            multiline
+            label="Safebag"
+            name="safebag"
+            type="text"
+            rows={15}
+            inputProps={{
+              style: {
+                "font-family": '"Roboto Mono", ui-monospace, monospace',
+                "white-space": "nowrap"
+              }
             }}
-            disabled={status.nfdWs !== 'DISCONNECTED'}
-            value={conns.nfdWs.uri}
-            onChange={event => setConns('nfdWs', 'uri', () => event.target.value)}
+            value={safebagText()}
+            onChange={event => setSafebagText(event.target.value)}
           />
         </Grid>
       </Grid>
     </CardContent>
     <Divider />
     <CardActions sx={{ justifyContent: 'flex-end' }}>
-      <ConnButton
-        state={status.nfdWs}
-        onConnect={() => connNfdWs()}
-        onDisonnect={() => disconnNfdWs()}
-      />
+      <Button
+        variant="text"
+        color="primary"
+        onClick={() => onClickAdd()}
+      >
+        ADD
+      </Button>
     </CardActions>
   </Card>
 }

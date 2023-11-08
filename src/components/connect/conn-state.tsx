@@ -1,5 +1,5 @@
 import { Match, Switch } from "solid-js"
-import { ConnState } from "../../Context"
+import { ConnState } from "../../backend/main"
 import { Typography } from "@suid/material"
 
 export default function ConnStatus(props: { state: ConnState }) {

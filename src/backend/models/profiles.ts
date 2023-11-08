@@ -1,7 +1,8 @@
 import { Certificate } from "@ndn/keychain"
-import { base64ToBytes, bytesToBase64 } from "../utils/base64"
+import { base64ToBytes, bytesToBase64 } from "../../utils"
 import { Decoder, Encoder } from "@ndn/tlv"
 import { Data } from "@ndn/packet"
+import { TypedModel } from "./typed-models"
 
 export type Profile = {
   workspaceName: string
@@ -11,7 +12,9 @@ export type Profile = {
   ownCertificateB64: string
 }
 
-export function profileToBootParams(profile: Profile) {
+export const profiles = new TypedModel<Profile>('profiles', profile => profile.nodeId)
+
+export function toBootParams(profile: Profile) {
   const prvKey = base64ToBytes(profile.prvKeyB64)
   const anchorBytes = base64ToBytes(profile.trustAnchorB64)
   const anchorDecoder = new Decoder(anchorBytes)
@@ -26,7 +29,7 @@ export function profileToBootParams(profile: Profile) {
   }
 }
 
-export function profileFromBootParams(params: {
+export function fromBootParams(params: {
   trustAnchor: Certificate,
   prvKey: Uint8Array,
   ownCertificate: Certificate,

@@ -12,7 +12,7 @@ import {
   ExpandMore as ExpandMoreIcon,
 } from '@suid/icons-material'
 import { Show, createEffect, createSignal } from "solid-js"
-import { bytesToBase64 } from "../../utils/base64"
+import { bytesToBase64 } from "../../utils"
 import { Encoder } from "@ndn/tlv"
 import { Certificate } from "@ndn/keychain"
 

@@ -13,7 +13,7 @@ import {
   ExpandMore as ExpandMoreIcon,
 } from '@suid/icons-material'
 import { Match, Show, Switch, createEffect, createSignal } from "solid-js"
-import { base64ToBytes } from "../../utils/base64"
+import { base64ToBytes } from "../../utils"
 import { Decoder } from "@ndn/tlv"
 import { SafeBag } from "@ndn/ndnsec"
 import { Certificate } from "@ndn/keychain"

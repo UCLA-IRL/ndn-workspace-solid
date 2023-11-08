@@ -1,34 +1,35 @@
 import { Match, Switch } from "solid-js"
-import { Button } from "@suid/material"
-import { ConnState } from "../../Context"
+import { IconButton } from "@suid/material"
+import {
+  PlayArrow as PlayArrowIcon,
+  MoreHoriz as MoreHorizIcon,
+  Stop as StopIcon,
+} from '@suid/icons-material'
+import { ConnState } from "../../backend/main"
 
 
 export default function ConnButton(props: {
   state: ConnState
+  isCur: boolean
   onConnect: () => void
-  onDisonnect: () => void,
+  onDisonnect: () => void
 }) {
   return (
     <Switch>
-      <Match when={props.state === 'CONNECTED'}>
-        <Button variant="text" color="error" onClick={props.onDisonnect}>
-          DISCONNECT
-        </Button>
+      <Match when={props.state === 'CONNECTED' && props.isCur}>
+        <IconButton color="error" onClick={props.onDisonnect}>
+          <StopIcon />
+        </IconButton>
       </Match>
       <Match when={props.state === 'DISCONNECTED'}>
-        <Button variant="text" color="primary" onClick={props.onConnect}>
-          CONNECT
-        </Button>
+        <IconButton color="success" onClick={props.onConnect}>
+          <PlayArrowIcon />
+        </IconButton>
       </Match>
-      <Match when={props.state === 'CONNECTING'}>
-        <Button variant="text" disabled>
-          CONNECTING ...
-        </Button>
-      </Match>
-      <Match when={props.state === 'DISCONNECTING'}>
-        <Button variant="text" disabled>
-          DISCONNECTING ...
-        </Button>
+      <Match when={true}>
+        <IconButton disabled>
+          <MoreHorizIcon />
+        </IconButton>
       </Match>
     </Switch>
   )

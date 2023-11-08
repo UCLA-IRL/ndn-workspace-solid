@@ -2,8 +2,10 @@ import { syncedStore } from "@syncedstore/core"
 import * as project from './project'
 import * as calendar from './calendar'
 import * as aincraft from './aincraft'
+import * as connections from './connections'
+import * as profiles from './profiles'
 
-export { project, calendar, aincraft }
+export { project, calendar, aincraft, connections, profiles }
 
 export type RootDocType = {
   latex: project.Items

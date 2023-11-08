@@ -16,9 +16,8 @@ import {
   PlayArrow as PlayArrowIcon,
   Delete as DeleteIcon,
 } from '@suid/icons-material'
-import { Profile, profileToBootParams } from "../../backend/profile"
+import { Profile, toBootParams as profileToBootParams, profiles as db } from "../../backend/models/profiles"
 import { For, createEffect, createSignal } from "solid-js"
-import { loadProfiles, removeProfile } from "../../backend/main"  // TODO: Should not depend on main
 import { useNdnWorkspace } from "../../Context"
 import { useNavigate } from "@solidjs/router"
 
@@ -31,7 +30,7 @@ export default function Profiles() {
   const navigate = useNavigate()
 
   createEffect(() => {
-    loadProfiles().then(items => setProfiles(items))
+    db.loadAll().then(items => setProfiles(items))
   })
 
   createEffect(() => {
@@ -53,8 +52,8 @@ export default function Profiles() {
   const onRemove = (id: number) => {
     const item = profiles()[id]
     if (item !== undefined) {
-      removeProfile(item.nodeId)
-        .then(() => loadProfiles())
+      db.remove(item.nodeId)
+        .then(() => db.loadAll())
         .then(items => setProfiles(items))
     }
   }

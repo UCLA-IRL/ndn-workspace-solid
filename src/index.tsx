@@ -16,7 +16,7 @@ import App from './App'
 import ShareLatex from './components/share-latex'
 import Scene from './components/networked-aframe/scene'
 import { NdnWorkspaceProvider } from './Context'
-import Connect from './components/connect'
+import { Connect, StoredConns } from './components/connect'
 import { Workspace, Profile } from './components/workspace'
 import Docs from './components/docs/docs'
 import { project } from './backend/models'
@@ -38,7 +38,8 @@ render(
             <Route path="/" component={App} />
             <Route path="/latex/:itemId" element={<ShareLatex rootUri='/latex' />} />
             <Route path="/aframe" component={Scene} />
-            <Route path="/connection" component={Connect} />
+            <Route path="/connection/add" component={Connect} />
+            <Route path="/connection" component={StoredConns} />
             <Route path="/workspace" component={Workspace} />
             <Route path="/profile" component={Profile} />
             <Route path="/docs" component={Docs} />
