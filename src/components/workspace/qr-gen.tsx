@@ -1,4 +1,4 @@
-import { createEffect, createSignal, onCleanup } from "solid-js";
+import { createEffect, createSignal } from "solid-js";
 import * as qrcode from "qrcode";
 
 export default function CertQrCode({ value }: { value: string }) {
@@ -6,26 +6,21 @@ export default function CertQrCode({ value }: { value: string }) {
 
   createEffect(() => {
     if (value) {
-      const canvas = document.createElement("canvas");
-      qrcode.toCanvas(
-        canvas,
+      qrcode.toDataURL(
         value,
         {
           errorCorrectionLevel: "L",
         },
-        function (error) {
+        function (error, dataUrl) {
           if (error) {
             console.error(`Unable to generate QRCode: ${error}`);
           } else {
-            setQRCodeData(canvas.toDataURL());
+            setQRCodeData(dataUrl);
           }
         }
       );
     }
   });
-
-  // Cleanup the QR code data when the component is unmounted
-  onCleanup(() => setQRCodeData(null));
 
   return (
     <div>

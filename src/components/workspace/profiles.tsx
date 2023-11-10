@@ -11,10 +11,6 @@ import {
   Typography,
   IconButton,
 } from "@suid/material"
-//QR code imports
-import CertQrCode from "./qr-gen"; // Adjust the import path as needed
-
-
 import {
   PersonAdd as PersonAddIcon,
   PlayArrow as PlayArrowIcon,
@@ -64,7 +60,6 @@ export default function Profiles() {
     }
   }
 
-  const [isPopupOpen, setPopupOpen] = createSignal(false);
 
   return (<Box sx={{ width: '100%' }}>
     <Paper sx={{ width: '100%', mb: 2 }}>
@@ -76,24 +71,10 @@ export default function Profiles() {
         >
           Profiles
         </Typography>
-        <IconButton onClick={() => setPopupOpen(!isPopupOpen())} sx={{visibility: booted() ? 'visible' : 'hidden'}}>
-          <QRIcon color="primary"/>
-        </IconButton>
         <IconButton onClick={() => navigate('/workspace', { replace: true })}>
           <PersonAddIcon color="primary" />
         </IconButton>
       </Toolbar>
-      {isPopupOpen() && (
-        <div class="popup">
-          <CertQrCode value="Bv0BPQc0CA1uZG4td29ya3NwYWNlCAR0ZXN0CANLRVkICFJS7LZ8gfUFCARzZWxm
-NggAAAGLZIrN/xQJGAECGQQANu6AFVswWTATBgcqhkjOPQIBBggqhkjOPQMBBwNC
-AATxuBAe/TYwLQ9e8Zt4cEXW1NPYAW3uooS+ZXTWeqLaXWF8Rlj4CzVzX8SPYiV8
-peenggFj5b3qEuMiBPlDQblvFlUbAQMcJgckCA1uZG4td29ya3NwYWNlCAR0ZXN0
-CANLRVkICFJS7LZ8gfUF/QD9Jv0A/g8yMDIzMTAyNVQwMTU1MDD9AP8PMjA0MzEw
-MjBUMDE1NTAwF0YwRAIgRWW2rafR0vHSsA7uAeb78nSFUPxO0gAwl9KKMzJwuJgC
-IEi9gc1gaM3/GYatfQUytQhvOnFxEEnWx+q4MxK7+Knh" />
-        </div>
-        )}
       <TableContainer>
         <Table sx={{ minWidth: 300 }}>
           <TableHead>

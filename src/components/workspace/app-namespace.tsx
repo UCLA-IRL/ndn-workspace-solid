@@ -7,15 +7,22 @@ import {
   IconButton,
   Typography,
 } from "@suid/material"
+//QR imports
+//import QrReader from "./qr-read"
+import QrScanner from 'qr-scanner';
+
 import {
   ExpandLess as ExpandLessIcon,
   ExpandMore as ExpandMoreIcon,
+  QrCodeScanner as QRIcon,
+  Scanner,
 } from '@suid/icons-material'
-import { Show, createEffect, createSignal, onMount } from "solid-js"
+import { Show, createEffect, createSignal, onCleanup, onMount } from "solid-js"
 import { base64ToBytes, bytesToBase64 } from "../../utils/base64"
 import { Decoder, Encoder } from "@ndn/tlv"
 import { Data } from "@ndn/packet"
 import { Certificate } from "@ndn/keychain"
+import { trustAnchor } from "../../backend/main";
 
 export default function AppNamespace(props: {
   trustAnchor: Certificate | undefined,
@@ -105,7 +112,30 @@ export default function AppNamespace(props: {
     }
   })
 
-  return <Card>
+  //open or close video stream
+  const [isPopupOpen, setPopupOpen] = createSignal(false);
+  let vid;
+  //running the QR code scanner
+  createEffect(() => {
+    if (isPopupOpen())
+    {
+      function handleQRread(result) {
+        console.log('Scanned QR code:', result);
+        setValue(result.data);
+        scanner.stop();
+        }
+      const scanner = new QrScanner(vid, handleQRread,
+        { returnDetailedScanResult: true});
+      scanner.start();
+      onCleanup(() => {
+          scanner.stop();
+      });
+    }      
+  });
+
+  
+
+  return(<Card>
     <CardHeader
       sx={{ textAlign: 'left' }}
       title="The Workspace"
@@ -114,6 +144,10 @@ export default function AppNamespace(props: {
           <Typography color="primary" fontFamily='"Roboto Mono", ui-monospace, monospace'>{nameStr()}</Typography>
         }>
           <Typography color="secondary">Please input the trust anchor exported by cert-dump</Typography>
+          <IconButton onClick={() => setPopupOpen(!isPopupOpen())}>
+            <QRIcon color="primary"/>
+          </IconButton>
+          {isPopupOpen() && (<video ref={vid}></video>)}
         </Show>
       }
       action={
@@ -123,10 +157,12 @@ export default function AppNamespace(props: {
           </Show>
         </IconButton>
       }
+      
     />
     <Show when={expanded()}>
       <Divider />
       <CardContent>
+        
         <TextField
           fullWidth
           required
@@ -148,6 +184,8 @@ export default function AppNamespace(props: {
           onChange={event => onChange(event.target.value)}
         />
       </CardContent>
+      
     </Show >
   </Card >
+  )
 }
