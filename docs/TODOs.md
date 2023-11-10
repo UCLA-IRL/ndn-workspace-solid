@@ -1,4 +1,4 @@
-Current schedule: #16, #18, #13, #9 done before hackathon
+Current schedule: #18, #13, #9, #5 done before hackathon
 
 # #1 Use namespace interface
 
@@ -72,6 +72,8 @@ We need a better design for this.
 Note: the LaTeX server's code is not published. Please let me know if you need to access it.
 
 Idea: maybe use RICE like discovery protocol (DISCOVERY -> REQUEST)
+Idea2: maybe sync to a system folder?
+  SA: https://motif.land/blog/syncing-text-files-using-yjs-and-the-file-system-access-api
 
 # #10 Allow multiple LaTeX projects in one workspace
 
@@ -120,15 +122,6 @@ We need to modify the following things:
 - No need to display document preview.
 - Use [ProseMirror](https://prosemirror.net/) or TipTap instead of Quill.
   - Quill is a little old, and ProseMirror is written by the same author as a current dependency CodeMirror.
-
-# #16 Separate routing and application
-
-The routing registration command should be signed by a different certificate from the one for the workspace.
-This requires some UI design to allow this.
-- Do we memorize WebSocket URI + certificate bundles and allow user to choose?
-  If so, we need a completely different Connection page.
-
-Also, register both the workspace prefix and the user prefix.
 
 # #17 Use Toast notification instead of logs
 
@@ -282,3 +275,12 @@ https://github.com/zjkmxy/ndn-workspace-solid/blob/dbb3c470b1fdc62c2a52a3cc78889
 # #34 YaNFD does not work with this app (DONE)
 
 See https://github.com/named-data/YaNFD/issues/55
+
+# #16 Separate routing and application (DONE)
+
+The routing registration command should be signed by a different certificate from the one for the workspace.
+This requires some UI design to allow this.
+- Do we memorize WebSocket URI + certificate bundles and allow user to choose?
+  If so, we need a completely different Connection page.
+
+Also, register both the workspace prefix and the user prefix.
