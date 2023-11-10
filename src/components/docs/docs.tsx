@@ -10,7 +10,7 @@ export default function Docs() {
   const store = new Y.Doc()
   const doc = store.getXmlFragment()
 
-  const editor = createTiptapEditor(() => ({
+  /* const editor = */ createTiptapEditor(() => ({
     element: container()!,
     extensions: [
       StarterKit,

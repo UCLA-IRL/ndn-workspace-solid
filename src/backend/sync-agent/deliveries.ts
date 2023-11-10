@@ -6,7 +6,6 @@ import { Decoder, Encoder } from "@ndn/tlv"
 import { SvStateVector } from "@ndn/sync"
 import { getNamespace } from "./namespace"
 import { Storage } from "../storage"
-import { fromHex } from "@ndn/util"
 
 export function encodeSyncState(state: SvStateVector): Uint8Array {
   const encoder = new Encoder()
@@ -26,6 +25,10 @@ export function parseSyncState(vector: Uint8Array): SvStateVector {
 }
 
 export type UpdateEvent = (content: Uint8Array, id: Name, instance: SyncDelivery) => Promise<void>
+
+const fireSvSync = (inst: SvSync) => {
+  (inst as unknown as { resetTimer: (immediate?: boolean) => void }).resetTimer(true)
+}
 
 /**
  * SyncDelivery is a SVS Sync instance associated with a storage.
@@ -73,7 +76,7 @@ export abstract class SyncDelivery {
     }).then(value => {
       // Force triggering the SvSync to fire
       // NOTE: NDNts does not expose a way to trigger the SVS manually
-      (value as any).resetTimer(true)
+      fireSvSync(value)
     })
   }
 
@@ -148,7 +151,7 @@ export abstract class SyncDelivery {
         }
       }).then(value => {
         // Force trigger the SvSync to fire
-        (value as any).resetTimer(true)
+        fireSvSync(value)
       })
     })
   }
@@ -156,7 +159,7 @@ export abstract class SyncDelivery {
   /** Trigger the SVS to send a Sync Interest so that one can get latest updates. */
   public fire() {
     if (this._syncInst !== undefined && this._ready) {
-      (this._syncInst as any).resetTimer(true)
+      fireSvSync(this._syncInst)
     }
   }
 
@@ -297,10 +300,10 @@ export class AtLeastOnceDelivery extends SyncDelivery {
     for (const [key, last] of this.syncState) {
       const first = startFrom.get(key)
       const prefix = getNamespace().baseName(key, this.syncPrefix)
-      for(let i = first + 1; i <= last; i ++) {
+      for (let i = first + 1; i <= last; i++) {
         const name = prefix.append(SequenceNum.create(i))
         const wire = await this.storage.get(name.toString())
-        if(wire === undefined) {
+        if (wire === undefined) {
           console.error(`[AtLeastOnceDelivery] FATAL: data missing from local storage: ${name}`)
         } else if (wire.length > 0) {
           const decoder = new Decoder(wire)

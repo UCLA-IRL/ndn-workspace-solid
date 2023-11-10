@@ -5,6 +5,10 @@ import { createSyncedStoreSig } from "../../adaptors/solid-synced-store"
 import { useNavigate } from "@solidjs/router"
 
 
+type Cloner<T> = {
+  clone: (value: T) => T
+}
+
 function getRandomColor() {
   const letters = '0123456789ABCDEF'
   let color = '#'
@@ -34,7 +38,8 @@ AFRAME.registerComponent('intersection-spawn', {
 
     el.addEventListener(data.event, evt => {
       // Snap intersection point to grid and offset from center.
-      const pos: { x: number, y: number, z: number } = (AFRAME.utils as any).clone(evt.detail.intersection.point)
+      const pos: { x: number, y: number, z: number } =
+        (AFRAME.utils as unknown as Cloner<{ x: number, y: number, z: number }>).clone(evt.detail.intersection.point)
       data.offset = AFRAME.utils.coordinates.parse(data.offset)
       data.snap = AFRAME.utils.coordinates.parse(data.snap)
       pos.x = Math.floor(pos.x / data.snap.x) * data.snap.x + data.offset.x

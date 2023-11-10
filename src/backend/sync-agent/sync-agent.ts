@@ -133,6 +133,7 @@ export class SyncAgent {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private async fetchBlob(nameWire: Uint8Array, id: Name) {
     let blobName: Name
 

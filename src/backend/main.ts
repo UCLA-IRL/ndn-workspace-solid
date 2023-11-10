@@ -2,7 +2,7 @@
 // Should be changed to something better if refactor.
 import { Endpoint } from "@ndn/endpoint"
 import { Data, Name, Signer, digestSigning } from '@ndn/packet'
-import { ControlCommand } from "@ndn/nfdmgmt"
+import { ControlCommand, enableNfdPrefixReg } from "@ndn/nfdmgmt"
 import { FwFace } from "@ndn/fw"
 import { WsTransport } from "@ndn/ws-transport"
 import { getYjsDoc } from '@syncedstore/core'
@@ -17,6 +17,8 @@ import { Certificate, ECDSA, createSigner } from "@ndn/keychain"
 import { v4 as uuidv4 } from "uuid"
 import { base64ToBytes, encodeKey as encodePath } from "../utils"
 import { Decoder } from "@ndn/tlv"
+
+export const UseAutoAnnouncement = false
 
 export const endpoint: Endpoint = new Endpoint()
 export type ConnState = 'CONNECTED' | 'DISCONNECTED' | 'CONNECTING' | 'DISCONNECTING'
@@ -51,17 +53,17 @@ async function connectNfdWs(uri: string, isLocal: boolean) {
     console.error('Try to connect to an already connected WebSocket face')
     return
   }
-  nfdWsFace = await WsTransport.createFace({}, uri)
-  commandPrefix = ControlCommand.localhopPrefix
-  if (isLocal) {
-    // Force ndnts to register the prefix correctly using localhost
-    // SA: https://redmine.named-data.net/projects/nfd/wiki/ScopeControl#local-face
-    nfdWsFace.attributes.local = true
-    commandPrefix = ControlCommand.localhostPrefix
+  // Force ndnts to register the prefix correctly using localhost
+  // SA: https://redmine.named-data.net/projects/nfd/wiki/ScopeControl#local-face
+  nfdWsFace = await WsTransport.createFace({ l3: { local: isLocal } }, uri)
+  // The automatic announcement is turned off by default to gain a finer control.
+  // See checkPrefixRegistration for details.
+  if (UseAutoAnnouncement) {
+    enableNfdPrefixReg(nfdWsFace, {
+      signer: nfdCmdSigner,
+    })
   }
-  // Note: the following code does not work. NDNts seems to only work when producers are created after the face.
-  // enableNfdPrefixReg(nfdWsFace)
-  // nfdWsFace.addAnnouncement(appPrefix)
+  commandPrefix = ControlCommand.getPrefix(isLocal)
   await checkPrefixRegistration(false)
   return nfdWsFace
 }
@@ -298,46 +300,68 @@ export async function stopWorkspace() {
 
 async function checkPrefixRegistration(cancel: boolean) {
   if (cancel && nfdWsFace !== undefined) {
-    await ControlCommand.call("rib/unregister", {
-      name: nodeId!,
-      origin: 65,  // client
-    }, {
-      endpoint: endpoint,
-      commandPrefix: commandPrefix,
-    })
-    await ControlCommand.call("rib/unregister", {
-      name: appPrefix!,
-      origin: 65,  // client
-    }, {
-      endpoint: endpoint,
-      commandPrefix: commandPrefix,
-    })
-  } else if (!cancel && nfdWsFace !== undefined && bootstrapped) {
-    const cr = await ControlCommand.call("rib/register", {
-      name: appPrefix!,
-      origin: 65,  // client
-      cost: 0,
-      flags: 0x02,  // CAPTURE
-    }, {
-      endpoint: endpoint,
-      commandPrefix: commandPrefix,
-      signer: nfdCmdSigner,
-    })
-    if (cr.statusCode !== 200) {
-      console.error(`Unable to register route: ${cr.statusCode} ${cr.statusText}`);
+    if (UseAutoAnnouncement) {
+      nfdWsFace.removeAnnouncement(appPrefix!)
+      nfdWsFace.removeAnnouncement(nodeId!)
+    } else {
+      await ControlCommand.call("rib/unregister", {
+        name: nodeId!,
+        origin: 65,  // client
+      }, {
+        endpoint: endpoint,
+        commandPrefix: commandPrefix,
+        signer: nfdCmdSigner,
+      })
+      await ControlCommand.call("rib/unregister", {
+        name: appPrefix!,
+        origin: 65,  // client
+      }, {
+        endpoint: endpoint,
+        commandPrefix: commandPrefix,
+        signer: nfdCmdSigner,
+      })
     }
-    const cr2 = await ControlCommand.call("rib/register", {
-      name: nodeId!,
-      origin: 65,  // client
-      cost: 0,
-      flags: 0x02,  // CAPTURE
-    }, {
-      endpoint: endpoint,
-      commandPrefix: commandPrefix,
-      signer: nfdCmdSigner,
-    })
-    if (cr2.statusCode !== 200) {
-      console.error(`Unable to register route: ${cr2.statusCode} ${cr2.statusText}`);
+  } else if (!cancel && nfdWsFace !== undefined && bootstrapped) {
+    // Note: the following code works, but I prefer a finer control over announcement
+    // More specifically:
+    // 1. Sync related prefixes does not need be announced, since it is covered by the appPrefix
+    // 2. NodeID should be announced to attract traffic.
+    //    NDNts will not automatically register this prefix because it cannot find a handler under this name.
+    //    Design decision: suppose node A, B and C connect to the same network.
+    //    When C is offline, A will fetch `/workspace/`C from B, using the route announced by `appPrefix`
+    //    When C is online, A will fetch `/workspace/C` from C, using the route announced by `nodeId`
+    //    Even B is closer to A, A will not fetch `/workspace/C` from B, because C announces a longer prefix.
+    // 3. removeAnnouncement(appPrefix!) sometimes does not work. I guess I'm not using it in a correct way.
+    if (UseAutoAnnouncement) {
+      nfdWsFace.addAnnouncement(appPrefix!)
+      nfdWsFace.addAnnouncement(nodeId!)
+    } else {
+      const cr = await ControlCommand.call("rib/register", {
+        name: appPrefix!,
+        origin: 65,  // client
+        cost: 0,
+        flags: 0x02,  // CAPTURE
+      }, {
+        endpoint: endpoint,
+        commandPrefix: commandPrefix,
+        signer: nfdCmdSigner,
+      })
+      if (cr.statusCode !== 200) {
+        console.error(`Unable to register route: ${cr.statusCode} ${cr.statusText}`);
+      }
+      const cr2 = await ControlCommand.call("rib/register", {
+        name: nodeId!,
+        origin: 65,  // client
+        cost: 0,
+        flags: 0x02,  // CAPTURE
+      }, {
+        endpoint: endpoint,
+        commandPrefix: commandPrefix,
+        signer: nfdCmdSigner,
+      })
+      if (cr2.statusCode !== 200) {
+        console.error(`Unable to register route: ${cr2.statusCode} ${cr2.statusText}`);
+      }
     }
   }
 }

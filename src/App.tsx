@@ -1,9 +1,6 @@
-import { createSignal } from 'solid-js'
 import { Typography } from "@suid/material"
 
 function App() {
-  const [count, setCount] = createSignal(0)
-
   return (
     <>
       <Typography variant='h3'>NDN Workspace Prototype</Typography>

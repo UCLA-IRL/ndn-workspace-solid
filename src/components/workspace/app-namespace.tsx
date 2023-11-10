@@ -11,7 +11,7 @@ import {
   ExpandLess as ExpandLessIcon,
   ExpandMore as ExpandMoreIcon,
 } from '@suid/icons-material'
-import { Show, createEffect, createSignal, onMount } from "solid-js"
+import { Show, createEffect, createSignal } from "solid-js"
 import { base64ToBytes, bytesToBase64 } from "../../utils"
 import { Decoder, Encoder } from "@ndn/tlv"
 import { Data } from "@ndn/packet"
