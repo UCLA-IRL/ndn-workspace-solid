@@ -41,8 +41,6 @@ export default function ShareLatex(props: {
   }
 
   // TODO: Make modal logic correct
-  // TODO: Use UndoManager to handle Undo
-  // const content = () => ()
 
   createEffect(() => {
     const rootDocVal = rootDoc()
@@ -68,6 +66,14 @@ export default function ShareLatex(props: {
   const resolveItem = (id: string) => {
     const rootDocVal = rootDoc()
     return rootDocVal?.latex[id]
+  }
+
+  const deleteItem = (index: number) => {
+    const cur = item()
+    if (cur?.kind === 'folder') {
+      cur.items.splice(index, 1)
+      // The root document is not modified, so the person editting this file will not be affected.
+    }
   }
 
   const createItem = (name: string, state: ModalState, blob?: Uint8Array) => {
@@ -229,6 +235,7 @@ export default function ShareLatex(props: {
             rootUri={props.rootUri}
             subItems={folderChildren()!}
             resolveItem={resolveItem}
+            deleteItem={deleteItem}
           />
         </Match>
         <Match when={item()?.kind === 'text'}>

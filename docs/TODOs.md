@@ -1,4 +1,7 @@
-Current schedule: #18, #13, #9, #5 done before hackathon
+Current schedule: #18, #13, #9, #6? done before hackathon
+Setup ndncert server
+Write a tutorial for trying
+Make slides for discussion
 
 # #1 Use namespace interface
 
@@ -24,15 +27,6 @@ If you want to use Google's [material web](https://github.com/material-component
 you can also do it.
 I would hesitate to import another UI library.
 
-# #5 Support version update of blob files
-
-Current implementation on blob files only supports uploading new files.
-No updating existing ones. No deletion.
-Need to add support for
-- Uploading a new version to replace existing files (DONE)
-- Deleting existing files. Including bolb files and docs.
-
-*Note: better get #4 done first*
 
 # #6 Conflict of names when creating files
 
@@ -218,6 +212,8 @@ Run a test and see what will happen and if there is anything we need to fix.
 
 As title stated.
 
+# ==================================================================
+
 # #7 Support storage (DONE)
 
 Currently everything is stored in memory.
@@ -286,3 +282,13 @@ We need to modify the following things:
 # #35 Size issue of CodeMirror (DONE)
 
 It does not fit into the container when the document is large
+
+# #5 Support version update of blob files (DONE)
+
+Current implementation on blob files only supports uploading new files.
+No updating existing ones. No deletion.
+Need to add support for
+- Uploading a new version to replace existing files
+- Deleting existing files. Including bolb files and docs.
+
+*Note: better get #4 done first*

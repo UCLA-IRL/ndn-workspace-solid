@@ -1,7 +1,20 @@
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Link } from '@suid/material'
-import FolderIcon from '@suid/icons-material/Folder';
-import DescriptionIcon from '@suid/icons-material/Description'
-import FilePresentIcon from '@suid/icons-material/FilePresent'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Link,
+  IconButton
+} from '@suid/material'
+import {
+  Folder as FolderIcon,
+  Description as DescriptionIcon,
+  FilePresent as FilePresentIcon,
+  Delete as DeleteIcon,
+} from '@suid/icons-material'
 import { project } from '../../backend/models'
 import { Link as RouterLink } from '@solidjs/router'
 import { For, Match, Switch } from 'solid-js';
@@ -10,6 +23,7 @@ export default function FileList(props: {
   rootUri: string,
   subItems: string[],
   resolveItem: (id: string) => project.Item | undefined,
+  deleteItem: (index: number) => void,
 }) {
   const getItemIcon = (item?: project.Item) => (
     <Switch fallback={(<></>)}>
@@ -51,7 +65,7 @@ export default function FileList(props: {
           </TableRow>
         </TableHead>
         <TableBody>
-          <For each={props.subItems}>{(itemId =>
+          <For each={props.subItems}>{((itemId, i) =>
             <TableRow
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
@@ -59,7 +73,9 @@ export default function FileList(props: {
                 {getItemLink(props.resolveItem(itemId))}
               </TableCell>
               <TableCell align="right">
-                N/A
+                <IconButton color='error' onClick={() => props.deleteItem(i())}>
+                  <DeleteIcon />
+                </IconButton>
               </TableCell>
             </TableRow>)}
           </For>
