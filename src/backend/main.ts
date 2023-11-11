@@ -138,6 +138,8 @@ export async function connect(config: connections.Config) {
           keyPair).withKeyLocator(ownCertificate.name)
       } catch (e) {
         console.error('Unable to parse credentials:', e)
+        listener?.closeAll()
+        listener = undefined
         connState = 'DISCONNECTED'
         return
       }
@@ -151,6 +153,8 @@ export async function connect(config: connections.Config) {
       }
     } catch (err) {
       console.error('Failed to connect:', err)
+      nfdWsFace?.close()
+      nfdWsFace = undefined
       connState = 'DISCONNECTED'
       return
     }
