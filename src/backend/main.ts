@@ -304,10 +304,7 @@ export async function stopWorkspace() {
 
 async function checkPrefixRegistration(cancel: boolean) {
   if (cancel && nfdWsFace !== undefined) {
-    if (UseAutoAnnouncement) {
-      nfdWsFace.removeAnnouncement(appPrefix!)
-      nfdWsFace.removeAnnouncement(nodeId!)
-    } else {
+    if (!UseAutoAnnouncement) {
       await ControlCommand.call("rib/unregister", {
         name: nodeId!,
         origin: 65,  // client
@@ -326,20 +323,12 @@ async function checkPrefixRegistration(cancel: boolean) {
       })
     }
   } else if (!cancel && nfdWsFace !== undefined && bootstrapped) {
-    // Note: the following code works, but I prefer a finer control over announcement
-    // More specifically:
-    // 1. Sync related prefixes does not need be announced, since it is covered by the appPrefix
-    // 2. NodeID should be announced to attract traffic.
-    //    NDNts will not automatically register this prefix because it cannot find a handler under this name.
-    //    Design decision: suppose node A, B and C connect to the same network.
-    //    When C is offline, A will fetch `/workspace/`C from B, using the route announced by `appPrefix`
-    //    When C is online, A will fetch `/workspace/C` from C, using the route announced by `nodeId`
-    //    Even B is closer to A, A will not fetch `/workspace/C` from B, because C announces a longer prefix.
-    // 3. removeAnnouncement(appPrefix!) sometimes does not work. I guess I'm not using it in a correct way.
-    if (UseAutoAnnouncement) {
-      nfdWsFace.addAnnouncement(appPrefix!)
-      nfdWsFace.addAnnouncement(nodeId!)
-    } else {
+    // Note: UseAutoAnnouncement works, the following code is kept for test.
+    // Differences:
+    // - UseAutoAnnouncement does not cut the connection and notify the user when he uses
+    //   an invalid certificate to connect to a testbed node.
+    // - UseAutoAnnouncement will announce sync prefixes
+    if (!UseAutoAnnouncement) {
       const cr = await ControlCommand.call("rib/register", {
         name: appPrefix!,
         origin: 65,  // client

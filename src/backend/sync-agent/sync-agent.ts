@@ -15,6 +15,8 @@ export type ChannelType = 'update' | 'blob' | 'status'
 export class SyncAgent {
   private _ready = false
   readonly listeners: { [key: string]: (content: Uint8Array, id: Name) => void } = {}
+  readonly producer
+  readonly trafficAttractor
 
   private constructor(
     readonly nodeId: Name,
@@ -31,18 +33,30 @@ export class SyncAgent {
     // TODO: Design a better namespace
     // TODO: Make sure this producer does not conflict with the certificate storage's
     // @ndn/repo/DataStore may be a better choice, but needs more time to write code
-    endpoint.produce(appPrefix, interest => {
+    this.producer = endpoint.produce(appPrefix, interest => {
       return this.serve(interest)
     }, {
       describe: 'SyncAgent.serve',
       routeCapture: false,
       announcement: appPrefix,
     })
+    // NodeID should be announced to attract traffic.
+    // Design decision: suppose node A, B and C connect to the same network.
+    // When C is offline, A will fetch `/workspace/`C from B, using the route announced by `appPrefix`
+    // When C is online, A will fetch `/workspace/C` from C, using the route announced by `nodeId`
+    // Even B is closer to A, A will not fetch `/workspace/C` from B, because C announces a longer prefix.
+    this.trafficAttractor = endpoint.produce(nodeId, async () => undefined, {
+      describe: 'SyncAgent.trafficAttractor',
+      routeCapture: false,
+      announcement: nodeId,
+    })
   }
 
   public destroy() {
     this.atLeastOnce.destroy()
     this.latestOnly.destroy()
+    this.trafficAttractor.close()
+    this.producer.close()
   }
 
   public reset() {
