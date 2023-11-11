@@ -24,6 +24,9 @@ jobs:
   # Single deploy job since we're just deploying
   deploy:
     runs-on: ubuntu-latest
+    environment: 
+      name: firebase
+      url: https://zjkmxy.web.app/
     steps:
       - name: Checkout
         uses: actions/checkout@v4
