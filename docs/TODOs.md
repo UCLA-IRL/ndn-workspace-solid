@@ -97,6 +97,8 @@ To correctly use PeerJS transport without having Interest loop, we need to do on
 - Drop in some quick fix to the NDNts's "forwarder" so that it can surpress unsatisfied Interests
 - Compile an in-browser forwarder using WASM.
 
+UPDATE: See Varun's work.
+
 # #13 (HARD) A better way to restart
 
 https://github.com/zjkmxy/ndn-workspace-solid/blob/dbb3c470b1fdc62c2a52a3cc78889a64686ebdd8/src/backend/sync-agent/deliveries.ts#L215-L219
@@ -112,16 +114,6 @@ Note:
 Current CertStorage uses a very naive trust schema: a certificate is signed by any known certificate in the storage,
 and any other data packet is signed by any fetchable certificate.
 Come up with a better way to handle this.
-
-# #15 Add Google Doc back
-
-The old NDN workspace has a [Google Doc replica](https://github.com/zjkmxy/ndn-workspace/tree/main/obsoleted/components/docs).
-I think it is good and we should add it back.
-We need to modify the following things:
-- Use standard MUI instead of CSS. They look too different.
-- No need to display document preview.
-- Use [ProseMirror](https://prosemirror.net/) or TipTap instead of Quill.
-  - Quill is a little old, and ProseMirror is written by the same author as a current dependency CodeMirror.
 
 # #17 Use Toast notification instead of logs
 
@@ -226,10 +218,6 @@ Run a test and see what will happen and if there is anything we need to fix.
 
 As title stated.
 
-# #35 Size issue of CodeMirror
-
-It does not fit into the container when the document is large
-
 # #7 Support storage (DONE)
 
 Currently everything is stored in memory.
@@ -284,3 +272,17 @@ This requires some UI design to allow this.
   If so, we need a completely different Connection page.
 
 Also, register both the workspace prefix and the user prefix.
+
+# #15 Add Google Doc back (DONE)
+
+The old NDN workspace has a [Google Doc replica](https://github.com/zjkmxy/ndn-workspace/tree/main/obsoleted/components/docs).
+I think it is good and we should add it back.
+We need to modify the following things:
+- Use standard MUI instead of CSS. They look too different.
+- No need to display document preview.
+- Use [ProseMirror](https://prosemirror.net/) or TipTap instead of Quill.
+  - Quill is a little old, and ProseMirror is written by the same author as a current dependency CodeMirror.
+
+# #35 Size issue of CodeMirror (DONE)
+
+It does not fit into the container when the document is large

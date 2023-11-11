@@ -66,8 +66,8 @@ dependencies:
     specifier: ^2.0.2
     version: 2.0.2(solid-js@1.8.5)
   '@solidjs/router':
-    specifier: ^0.9.0
-    version: 0.9.0(solid-js@1.8.5)
+    specifier: ^0.9.1
+    version: 0.9.1(solid-js@1.8.5)
   '@suid/icons-material':
     specifier: ^0.6.11
     version: 0.6.11(solid-js@1.8.5)
@@ -83,6 +83,9 @@ dependencies:
   '@tiptap/extension-collaboration':
     specifier: ^2.1.12
     version: 2.1.12(@tiptap/core@2.1.12)(@tiptap/pm@2.1.12)(y-prosemirror@1.0.20)
+  '@tiptap/extension-highlight':
+    specifier: ^2.1.12
+    version: 2.1.12(@tiptap/core@2.1.12)
   '@tiptap/pm':
     specifier: ^2.1.12
     version: 2.1.12
@@ -2365,10 +2368,10 @@ packages:
       solid-js: 1.8.5
     dev: true
 
-  /@solidjs/router@0.9.0(solid-js@1.8.5):
-    resolution: {integrity: sha512-q1RxUhLa8lKdbhqEPkG+8RwBQKIH5f5AIWiOxVoUTK4UllgsR0C0FNT++ufnIAb9LNkx3ahE4WxAHZqH4l1vEQ==}
+  /@solidjs/router@0.9.1(solid-js@1.8.5):
+    resolution: {integrity: sha512-kRY75piOQsyoH75E/RP6lr7uVGFCjeeCCCJx7Z2D1Vc6+I1yFQjLCvE+6agXGwqDoWi6vbETP1g7gmp/L1mNLg==}
     peerDependencies:
-      solid-js: ^1.5.3
+      solid-js: ^1.8.4
     dependencies:
       solid-js: 1.8.5
     dev: false
@@ -2598,6 +2601,14 @@ packages:
 
   /@tiptap/extension-heading@2.1.12(@tiptap/core@2.1.12):
     resolution: {integrity: sha512-MoANP3POAP68Ko9YXarfDKLM/kXtscgp6m+xRagPAghRNujVY88nK1qBMZ3JdvTVN6b/ATJhp8UdrZX96TLV2w==}
+    peerDependencies:
+      '@tiptap/core': ^2.0.0
+    dependencies:
+      '@tiptap/core': 2.1.12(@tiptap/pm@2.1.12)
+    dev: false
+
+  /@tiptap/extension-highlight@2.1.12(@tiptap/core@2.1.12):
+    resolution: {integrity: sha512-buen31cYPyiiHA2i0o2i/UcjRTg/42mNDCizGr1OJwvv3AELG3qOFc4Y58WJWIvWNv+1Dr4ZxHA3GNVn0ANWyg==}
     peerDependencies:
       '@tiptap/core': ^2.0.0
     dependencies:

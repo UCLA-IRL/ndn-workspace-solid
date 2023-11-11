@@ -18,7 +18,6 @@ import Scene from './components/networked-aframe/scene'
 import { NdnWorkspaceProvider } from './Context'
 import { Connect, StoredConns } from './components/connect'
 import { Workspace, Profile } from './components/workspace'
-import Docs from './components/docs/docs'
 import { project } from './backend/models'
 
 const root = document.getElementById('root')
@@ -42,7 +41,6 @@ render(
             <Route path="/connection" component={StoredConns} />
             <Route path="/workspace" component={Workspace} />
             <Route path="/profile" component={Profile} />
-            <Route path="/docs" component={Docs} />
           </Route>
         </Routes>
       </Router>

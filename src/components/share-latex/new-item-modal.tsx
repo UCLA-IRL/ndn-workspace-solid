@@ -16,7 +16,7 @@ import {
 } from '@suid/material'
 import { Show, createSignal } from 'solid-js'
 
-export type ModalState = '' | 'folder' | 'doc' | 'upload'
+export type ModalState = '' | 'folder' | 'doc' | 'upload' | 'richDoc'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -45,6 +45,8 @@ export default function NewItemModal(props: {
         return 'New folder'
       case 'doc':
         return 'New .tex file'
+      case 'richDoc':
+        return 'New .xml rich document'
       case 'upload':
         return 'Upload blob file'
       default:
@@ -117,7 +119,7 @@ export default function NewItemModal(props: {
         <Button
           type="submit"
           onClick={() => {
-            if(props.modalState === 'upload') {
+            if (props.modalState === 'upload') {
               props.onSubmit(name(), props.modalState, blob())
             } else {
               props.onSubmit(name(), props.modalState)

@@ -11,6 +11,7 @@ import { observeDeep } from '@syncedstore/core'
 import { Name } from '@ndn/packet'
 import { v4 as uuidv4 } from "uuid"
 import { useNdnWorkspace } from '../../Context'
+import RichDoc from './rich-doc'
 
 export default function ShareLatex(props: {
   rootUri: string
@@ -100,6 +101,20 @@ export default function ShareLatex(props: {
             name: name,
             parentId: cur.id,
             text: new Y.Text(),
+          }
+          cur.items.push(newId)
+        }
+        navigate(to, { replace: true })
+      } else if (state === 'richDoc') {
+        const newName = name.endsWith('.xml') ? name : name + '.xml'
+        if (existId === undefined) {
+          rootDocVal!.latex[newId] = {
+            id: newId,
+            kind: 'xmldoc',
+            // fullPath: cur.fullPath + '/' + name,
+            name: newName,
+            parentId: cur.id,
+            text: new Y.XmlFragment(),
           }
           cur.items.push(newId)
         }
@@ -203,6 +218,7 @@ export default function ShareLatex(props: {
         menuItems={[
           { name: 'New folder', onClick: () => setModalState('folder') },
           { name: 'New tex', onClick: () => setModalState('doc') },
+          { name: 'New rich doc', onClick: () => setModalState('richDoc') },
           { name: 'Upload blob', onClick: () => setModalState('upload') },
           { name: 'divider' },
           { name: 'Download as zip', onClick: onExportZip },
@@ -217,6 +233,9 @@ export default function ShareLatex(props: {
         </Match>
         <Match when={item()?.kind === 'text'}>
           <LatexDoc doc={(item() as project.TextDoc).text} />
+        </Match>
+        <Match when={item()?.kind === 'xmldoc'}>
+          <RichDoc doc={(item() as project.XmlDoc).text} />
         </Match>
         <Match when={item()?.kind === 'blob'}>
           <Button onClick={onDownloadBlob}>
