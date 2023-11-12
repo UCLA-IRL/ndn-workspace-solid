@@ -42,6 +42,7 @@
     "@tiptap/pm": "^2.1.12",
     "@tiptap/starter-kit": "^2.1.12",
     "codemirror": "^6.0.1",
+    "diff": "^5.1.0",
     "event-iterator": "^2.0.0",
     "eventemitter3": "^5.0.1",
     "jszip": "^3.10.1",
