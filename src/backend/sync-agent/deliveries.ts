@@ -223,7 +223,10 @@ export class AtLeastOnceDelivery extends SyncDelivery {
         })
 
         // Put into storage
-        await this.storage.set(name.toString(), data.content)
+        // Note: endpoint.consume does not give me the raw Data packet I need.
+        const reencoder = new Encoder()
+        reencoder.encode(data)
+        await this.storage.set(name.toString(), reencoder.output)
 
         // Callback
         // AtLeastOnce is required to have the callback acknowledged
