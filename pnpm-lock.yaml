@@ -136,6 +136,9 @@ devDependencies:
   '@types/aframe':
     specifier: ^1.2.5
     version: 1.2.5
+  '@types/diff':
+    specifier: ^5.0.8
+    version: 5.0.8
   '@types/uuid':
     specifier: ^9.0.7
     version: 9.0.7
@@ -2786,6 +2789,10 @@ packages:
     resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}
     dependencies:
       '@types/node': 20.9.0
+    dev: true
+
+  /@types/diff@5.0.8:
+    resolution: {integrity: sha512-kR0gRf0wMwpxQq6ME5s+tWk9zVCfJUl98eRkD05HWWRbhPB/eu4V1IbyZAsvzC1Gn4znBJ0HN01M4DGXdBEV8Q==}
     dev: true
 
   /@types/estree@0.0.39:

@@ -57,6 +57,7 @@
   "devDependencies": {
     "@suid/vite-plugin": "^0.1.5",
     "@types/aframe": "^1.2.5",
+    "@types/diff": "^5.0.8",
     "@types/uuid": "^9.0.7",
     "@types/wicg-file-system-access": "^2023.10.3",
     "@typescript-eslint/eslint-plugin": "^6.10.0",
