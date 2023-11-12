@@ -33,9 +33,7 @@ export default function OwnCertificate(props: {
         setNameStr('')
       }
       try {
-        const encoder = new Encoder()
-        cert.data.encodeTo(encoder)
-        const b64Text = bytesToBase64(encoder.output)
+        const b64Text = bytesToBase64(Encoder.encode(cert.data))
         const b64Breaks = b64Text.replace(/(.{64})/g, "$1\n")
         setCertText(b64Breaks)
       } catch (e) {

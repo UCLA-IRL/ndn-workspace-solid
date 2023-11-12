@@ -65,6 +65,8 @@ export default function Root(props: {
         '--md-sys-color-on-surface': theme.palette.text.primary,
         '--md-sys-color-shadow': theme.palette.primary.main,
         '--md-elevation-level': 0,
+        '--theme-color-success': theme.palette.success.main,
+        '--theme-color-grey-600': theme.palette.grey[600],
       }}>
         <Box sx={{ display: 'flex' }}>
           <Drawer

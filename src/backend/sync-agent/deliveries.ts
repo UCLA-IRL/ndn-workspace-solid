@@ -9,18 +9,15 @@ import { Storage } from "../storage"
 import { panic } from "../../utils"
 
 export function encodeSyncState(state: SvStateVector): Uint8Array {
-  const encoder = new Encoder()
-  state.encodeTo(encoder)
-  return encoder.output
+  return Encoder.encode(state)
 }
 
 export function parseSyncState(vector: Uint8Array): SvStateVector {
   try {
-    const decoder = new Decoder(vector)
-    const ret = SvStateVector.decodeFrom(decoder)
+    const ret = Decoder.decode(vector, SvStateVector)
     return ret
   } catch (e) {
-    console.error(`Unable to parse SvStateVector: ${e}`)
+    console.error(`Unable to parse SvStateVector: `, e)
     return new SvStateVector()
   }
 }
@@ -224,10 +221,9 @@ export class AtLeastOnceDelivery extends SyncDelivery {
         })
 
         // Put into storage
-        // Note: endpoint.consume does not give me the raw Data packet I need.
-        const reencoder = new Encoder()
-        reencoder.encode(data)
-        await this.storage.set(name.toString(), reencoder.output)
+        // Note: even endpoint.consume does not give me the raw Data packet,
+        //       the encode result will be the same.
+        await this.storage.set(name.toString(), Encoder.encode(data))
 
         // Callback
         // AtLeastOnce is required to have the callback acknowledged
@@ -238,9 +234,13 @@ export class AtLeastOnceDelivery extends SyncDelivery {
         lastHandled = i
       } catch (error) {
         // TODO: Find a better way to handle this
-        console.error(`Unable to fetch or verify ${name.toString()} due to: ${error}`)
+        console.error(`Unable to fetch or verify ${name.toString()} due to: `, error)
         console.warn('The current SVS protocol cannot recover from this error. A reset is scheduled in 10 min.')
         this.reset()
+
+        // TODO: Since it takes time to fix, let's core dump first
+        panic(`Unable to fetch or verify ${name.toString()} due to: ${error}`)
+
         return
       }
     }
@@ -267,9 +267,7 @@ export class AtLeastOnceDelivery extends SyncDelivery {
     )
     await this.signer.sign(data)
 
-    const encoder = new Encoder()
-    encoder.encode(data)
-    this.storage.set(name.toString(), encoder.output)
+    this.storage.set(name.toString(), Encoder.encode(data))
 
     // Save my own state to prevent reuse the sync number
     if (this.state!.get(this.syncNode.id) < seqNum) {
@@ -312,8 +310,7 @@ export class AtLeastOnceDelivery extends SyncDelivery {
           console.error(errMsg)
           panic(errMsg)
         } else if (wire.length > 0) {
-          const decoder = new Decoder(wire)
-          const data = Data.decodeFrom(decoder)
+          const data = Decoder.decode(wire, Data)
           await callback(data.content, key, this)
         }
       }
@@ -356,7 +353,7 @@ export class LatestOnlyDelivery extends SyncDelivery {
       // LatestOnlyDelivery does not need to wait for this callback
       this._onUpdate!(data.content, update.id, this)
     } catch (error) {
-      console.error(`Unable to fetch or verify ${name.toString()} due to: ${error}`)
+      console.error(`Unable to fetch or verify ${name.toString()} due to: `, error)
     }
   }
 

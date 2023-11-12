@@ -177,7 +177,7 @@ export async function exportAsZip(
           zip.file(curPath, blob)
         }
       } catch (e) {
-        console.error(`[project.exportAsZip] Unable to pack blob file ${curPath}: ${e}`)
+        console.error(`[project.exportAsZip] Unable to pack blob file ${curPath}: `, e)
       }
     }
   }

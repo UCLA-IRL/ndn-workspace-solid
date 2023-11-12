@@ -51,8 +51,7 @@ export default function BootSafebag(props: {
     }
     let userKey
     try {
-      const decoder = new Decoder(wire)
-      const safebag = SafeBag.decodeFrom(decoder)
+      const safebag = Decoder.decode(wire, SafeBag)
       const cert = safebag.certificate
       userKey = cert.name.getPrefix(cert.name.length - 2);
       setSafeBag(safebag)

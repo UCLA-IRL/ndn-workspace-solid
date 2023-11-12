@@ -53,8 +53,7 @@ export default function AppNamespace(props: {
       return
     }
     try {
-      const decoder = new Decoder(wire)
-      const data = Data.decodeFrom(decoder)
+      const data = Decoder.decode(wire, Data)
       const cert = Certificate.fromData(data)
       if (!props.readOnly) {
         props.setTrustAnchor(cert)
@@ -96,9 +95,7 @@ export default function AppNamespace(props: {
     if (!edited()) {
       const cert = props.trustAnchor
       if (cert !== undefined) {
-        const encoder = new Encoder
-        cert.data.encodeTo(encoder)
-        const b64Text = bytesToBase64(encoder.output)
+        const b64Text = bytesToBase64(Encoder.encode(cert.data))
         const b64Breaks = b64Text.replace(/(.{64})/g, "$1\n")
         setValue(b64Breaks)
       }

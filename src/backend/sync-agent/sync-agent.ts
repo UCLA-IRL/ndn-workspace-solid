@@ -101,7 +101,7 @@ export class SyncAgent {
         content: data.content
       }
     } catch (e) {
-      console.error(`Unable to decode encapsulated packet: ${e}`)
+      console.error(`Unable to decode encapsulated packet: `, e)
       return undefined
     }
   }
@@ -111,9 +111,7 @@ export class SyncAgent {
       new Name([channel, topic, uuidv4()]),
       content
     )
-    const encoder = new Encoder()
-    encoder.encode(data)
-    return encoder.output
+    return Encoder.encode(data)
   }
 
   private async onUpdate(wire: Uint8Array, id: Name) {
@@ -167,8 +165,7 @@ export class SyncAgent {
     let blobName: Name
 
     try {
-      const decoder = new Decoder(nameWire)
-      blobName = Name.decodeFrom(decoder)
+      blobName = Decoder.decode(nameWire, Name)
       // I don't think the following is a real concern. Need check
       // Current implementation does not pass the check
       // If anyone wants to fix, modify publishBlob()
@@ -176,7 +173,7 @@ export class SyncAgent {
       //   throw new Error(`Blob name does not start with node ID: ${blobName}`)
       // }
     } catch (e) {
-      console.error(`Invalid blob name ${nameWire}: ${e}`)
+      console.error(`Invalid blob name ${nameWire}: `, e)
       return
     }
 
@@ -189,16 +186,13 @@ export class SyncAgent {
       })
       for await (const segment of result) {
         // Cache packets
-        // TODO: Check with NDNts maintainer if there is a way to obtain the raw segment wire
-        const encoder = new Encoder()
-        encoder.encode(segment)
-        this.persistStorage.set(segment.name.toString(), encoder.output)
+        this.persistStorage.set(segment.name.toString(), Encoder.encode(segment))
 
         // Reassemble
         buffers.push(segment.content)
       }
     } catch (e) {
-      console.error(`Unable to fetch ${blobName}: ${e}`)
+      console.error(`Unable to fetch ${blobName}: `, e)
       return
     }
     const blob = concatBuffers(buffers)
@@ -239,18 +233,12 @@ export class SyncAgent {
     // Put segmented packets
     const producer = DataProducer.create(makeChunkSource(blobContent), name, { signer: this.signer })
     for await (const segment of producer.listData()) {
-      // TODO: Check with NDNts maintainer if there is a way to obtain the raw segment wire
-      // Or maybe the problem disappers after shifting to @ndn/repo/DataStore.
-      const encoder = new Encoder()
-      encoder.encode(segment)
-      this.persistStorage.set(segment.name.toString(), encoder.output)
+      this.persistStorage.set(segment.name.toString(), Encoder.encode(segment))
     }
 
     if (push) {
       // Publish encoded name
-      const encoder = new Encoder()
-      name.encodeTo(encoder)
-      await this.atLeastOnce.produce(this.makeInnerData('blob', topic, encoder.output))
+      await this.atLeastOnce.produce(this.makeInnerData('blob', topic, Encoder.encode(name)))
     }
 
     return name
@@ -304,15 +292,14 @@ export class SyncAgent {
       return undefined
     }
     try {
-      const parser = new Decoder(wire)
-      const data = Data.decodeFrom(parser)
+      const data = Decoder.decode(wire, Data)
       if (isLatestOnly && !data.name.equals(intName)) {
         console.log(`A status with not existing version is requested: ${intName.toString()}`)
         return undefined
       }
       return data
     } catch (e) {
-      console.error(`Data in storage is not decodable: ${intName.toString()}`)
+      console.error(`Data in storage is not decodable: ${intName.toString()}`, e)
       return undefined
     }
   }

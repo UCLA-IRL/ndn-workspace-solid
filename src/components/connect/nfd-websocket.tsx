@@ -43,15 +43,12 @@ export default function NfdWebsocket(props: {
     try {
       // Decode certificate and private keys
       const safeBagWire = base64ToBytes(safebagB64)
-      const decoder = new Decoder(safeBagWire)
-      const safeBag = SafeBag.decodeFrom(decoder)
+      const safeBag = Decoder.decode(safeBagWire, SafeBag)
       const cert = safeBag.certificate
       const prvKeyBits = await safeBag.decryptKey(pass)
       // Re encode certificate and private keys for storage
       // TODO: Is cbor a better choice?
-      const encoder = new Encoder()
-      cert.data.encodeTo(encoder)
-      const certB64 = bytesToBase64(encoder.output)
+      const certB64 = bytesToBase64(Encoder.encode(cert.data))
       const prvKeyB64 = bytesToBase64(prvKeyBits)
       props.onAdd({ kind: 'nfdWs', uri, isLocal, ownCertificateB64: certB64, prvKeyB64 })
       return

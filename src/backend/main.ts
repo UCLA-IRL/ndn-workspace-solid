@@ -127,8 +127,7 @@ export async function connect(config: connections.Config) {
       try {
         const prvKeyBits = base64ToBytes(config.prvKeyB64)
         const certBytes = base64ToBytes(config.ownCertificateB64)
-        const certDecoder = new Decoder(certBytes)
-        const ownCertificate = Certificate.fromData(Data.decodeFrom(certDecoder))
+        const ownCertificate = Certificate.fromData(Decoder.decode(certBytes, Data))
         const keyPair = await ECDSA.cryptoGenerate({
           importPkcs8: [prvKeyBits, ownCertificate.publicKeySpki]
         }, true)
@@ -340,7 +339,7 @@ async function checkPrefixRegistration(cancel: boolean) {
         signer: nfdCmdSigner,
       })
       if (cr.statusCode !== 200) {
-        console.error(`Unable to register route: ${cr.statusCode} ${cr.statusText}`)
+        window.alert(`Unable to register route: ${cr.statusCode} ${cr.statusText}`)
         // TODO: Cut connection
       }
       const cr2 = await ControlCommand.call("rib/register", {
@@ -354,7 +353,7 @@ async function checkPrefixRegistration(cancel: boolean) {
         signer: nfdCmdSigner,
       })
       if (cr2.statusCode !== 200) {
-        console.error(`Unable to register route: ${cr2.statusCode} ${cr2.statusText}`)
+        window.alert(`Unable to register route: ${cr2.statusCode} ${cr2.statusText}`)
         // TODO: Cut connection
       }
     }

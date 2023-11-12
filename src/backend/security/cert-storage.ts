@@ -46,9 +46,7 @@ export class CertStorage {
 
   /** Import an external certificate into the storage */
   async importCert(cert: Certificate) {
-    const encoder = new Encoder
-    cert.data.encodeTo(encoder)
-    await this.storage.set(cert.name.toString(), encoder.output)
+    await this.storage.set(cert.name.toString(), Encoder.encode(cert.data))
   }
 
   /**
@@ -73,9 +71,7 @@ export class CertStorage {
           })
 
           // Cache result certificates
-          const encoder = new Encoder
-          result.encodeTo(encoder)
-          this.storage.set(result.name.toString(), encoder.output)
+          this.storage.set(result.name.toString(), Encoder.encode(result))
 
           return Certificate.fromData(result)
         } catch {
@@ -83,8 +79,7 @@ export class CertStorage {
         }
       }
     } else {
-      const decoder = new Decoder(certBytes)
-      return Certificate.fromData(Data.decodeFrom(decoder))
+      return Certificate.fromData(Decoder.decode(certBytes, Data))
     }
   }
 

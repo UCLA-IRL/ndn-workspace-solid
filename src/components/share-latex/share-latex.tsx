@@ -201,7 +201,7 @@ export default function ShareLatex(props: {
             window.open(fileUrl)
           }
         } catch (e) {
-          console.error(`Unable to fetch blob file: ${e}`)
+          console.error(`Unable to fetch blob file: `, e)
         }
       }
     })()

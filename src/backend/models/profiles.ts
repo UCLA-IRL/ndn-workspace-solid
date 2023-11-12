@@ -17,11 +17,9 @@ export const profiles = new TypedModel<Profile>('profiles', profile => profile.n
 export function toBootParams(profile: Profile) {
   const prvKey = base64ToBytes(profile.prvKeyB64)
   const anchorBytes = base64ToBytes(profile.trustAnchorB64)
-  const anchorDecoder = new Decoder(anchorBytes)
-  const trustAnchor = Certificate.fromData(Data.decodeFrom(anchorDecoder))
+  const trustAnchor = Certificate.fromData(Decoder.decode(anchorBytes, Data))
   const certBytes = base64ToBytes(profile.ownCertificateB64)
-  const certDecoder = new Decoder(certBytes)
-  const ownCertificate = Certificate.fromData(Data.decodeFrom(certDecoder))
+  const ownCertificate = Certificate.fromData(Decoder.decode(certBytes, Data))
   return {
     trustAnchor,
     prvKey,
@@ -34,13 +32,11 @@ export function fromBootParams(params: {
   prvKey: Uint8Array,
   ownCertificate: Certificate,
 }): Profile {
-  const certEncoder = new Encoder()
-  params.ownCertificate.data.encodeTo(certEncoder)
-  const certB64 = bytesToBase64(certEncoder.output)
+  const certWire = Encoder.encode(params.ownCertificate.data)
+  const certB64 = bytesToBase64(certWire)
 
-  const anchorEncoder = new Encoder()
-  params.trustAnchor.data.encodeTo(anchorEncoder)
-  const anchorB64 = bytesToBase64(anchorEncoder.output)
+  const anchorWire = Encoder.encode(params.trustAnchor.data)
+  const anchorB64 = bytesToBase64(anchorWire)
 
   const prvKeyB64 = bytesToBase64(params.prvKey)
 
