@@ -8,9 +8,11 @@ import { AtLeastOnceDelivery, LatestOnlyDelivery, UpdateEvent } from "./deliveri
 import { getNamespace } from "./namespace"
 import { InMemoryStorage, Storage } from "../storage"
 import { SvStateVector } from "@ndn/sync"
+import { panic } from "../../utils"
 
 
-export type ChannelType = 'update' | 'blob' | 'status'
+export type ChannelType = 'update' | 'blob' | 'status' | 'blobUpdate'
+const AllChannelValues = ['update', 'blob', 'status', 'blobUpdate']
 
 export class SyncAgent {
   private _ready = false
@@ -79,8 +81,7 @@ export class SyncAgent {
 
   private parseInnerData(content: Uint8Array) {
     try {
-      const decoder = new Decoder(content)
-      const data = Data.decodeFrom(decoder)
+      const data = Decoder.decode(content, Data)
       // We use Data for convenient binary encoding. Currently it is not a fully functional Data packet
       // name = [channel, topic, uuid]
       if (data.name.length !== 3) {
@@ -88,7 +89,7 @@ export class SyncAgent {
         return undefined
       }
       const channelText = data.name.get(0)!.text
-      if (!['update', 'blob', 'status'].find(x => x === channelText)) {
+      if (!AllChannelValues.find(x => x === channelText)) {
         console.error(`Malformed encapsulated packet: ${data.name}`)
         return undefined
       }
@@ -118,6 +119,7 @@ export class SyncAgent {
   private async onUpdate(wire: Uint8Array, id: Name) {
     if (!this._ready) {
       console.error('[SyncAgent] FATAL: NOT READY YET')
+      panic('[SyncAgent] Not ready for update. Check program flow.')
     }
     if (wire.length <= 0) {
       // The dummy update to trigger SVS
@@ -133,22 +135,35 @@ export class SyncAgent {
     }
     const { channel, topic, content } = inner
 
-    if (channel === 'blob') {
-      // Handle segmentation for blob
+    if (channel !== 'blobUpdate') {
+      if (channel === 'blob') {
+        // Handle segmentation for blob
+        this.fetchBlob(content, id)
+      }
+      // Notify the listener
+      const listener = this.listeners[`${channel}.${topic}`]
+      if (listener) {
+        listener(content, id)
+      } else if (channel === 'update') {
+        console.error('Execution order violation at SyncAgent:',
+          'listeners for update channel must be registered before the first update arrives')
+      }
+    } else {
+      // Segmented update is both a blob and an update
       this.fetchBlob(content, id)
-    }
-    // Notify the listener
-    const listener = this.listeners[`${channel}.${topic}`]
-    if (listener) {
-      listener(content, id)
-    } else if (channel === 'update') {
-      console.error('Execution order violation at SyncAgent:',
-        'listeners for update channel must be registered before the first update arrives')
+      const name = Decoder.decode(content, Name)
+      const updateValue = await this.getBlob(name)
+      const listener = this.listeners[`update.${topic}`]
+      if (listener !== undefined && updateValue !== undefined) {
+        listener(updateValue, id)
+      } else {
+        panic('[SyncAgent] Unable to serve an update')
+      }
     }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private async fetchBlob(nameWire: Uint8Array, id: Name) {
+  private async fetchBlob(nameWire: Uint8Array, id?: Name) {
     let blobName: Name
 
     try {
@@ -201,10 +216,15 @@ export class SyncAgent {
   }
 
   // getBlob returns either a blob or a segment
-  public getBlob(name: Name) {
+  public async getBlob(name: Name) {
     // TODO: To avoid waste of space, we may want to do reassembly in this function
-    return this.persistStorage.get(name.toString())
-    // TODO: Fetch missing blob
+    const ret = await this.persistStorage.get(name.toString())
+    if (ret !== undefined) {
+      return ret
+    }
+    // Try to fetch missing blob
+    await this.fetchBlob(Encoder.encode(name))
+    return await this.persistStorage.get(name.toString())
   }
 
   // publishBlob segments and produce a blob object
@@ -236,11 +256,15 @@ export class SyncAgent {
     return name
   }
 
-  public publishUpdate(topic: string, content: Uint8Array) {
-    if (content.length > 6000) {
-      console.error(`Too large update for topic ${topic}: ${content.length}. Please use the blob channel.`)
+  public async publishUpdate(topic: string, content: Uint8Array) {
+    if (content.length <= 6000) {
+      await this.atLeastOnce.produce(this.makeInnerData('update', topic, content))
+    } else {
+      // Too large for one packet, do blob update
+      const name = await this.publishBlob('updateSeg', content, undefined, false)
+      const nameWire = Encoder.encode(name)
+      await this.atLeastOnce.produce(this.makeInnerData('blobUpdate', topic, nameWire))
     }
-    return this.atLeastOnce.produce(this.makeInnerData('update', topic, content))
   }
 
   public publishStatus(topic: string, content: Uint8Array) {
@@ -318,11 +342,22 @@ export class SyncAgent {
         return
       }
       const { channel, topic: updateTopic, content } = inner
-      if (channel !== 'update' || updateTopic !== topic) {
+      if ((channel !== 'update' && channel !== 'blobUpdate') || updateTopic !== topic) {
         return
       }
-      // Notify the listener
-      listener(content, id)
+      if (channel === 'blobUpdate') {
+        const name = Decoder.decode(content, Name)
+        const updateValue = await this.getBlob(name)
+        if (updateValue !== undefined) {
+          // Notify the listener
+          listener(updateValue, id)
+        } else {
+          panic('[SyncAgent] Unable to serve an update')
+        }
+      } else {
+        // Notify the listener
+        listener(content, id)
+      }
     })
   }
 

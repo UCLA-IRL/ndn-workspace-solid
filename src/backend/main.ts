@@ -340,7 +340,8 @@ async function checkPrefixRegistration(cancel: boolean) {
         signer: nfdCmdSigner,
       })
       if (cr.statusCode !== 200) {
-        console.error(`Unable to register route: ${cr.statusCode} ${cr.statusText}`);
+        console.error(`Unable to register route: ${cr.statusCode} ${cr.statusText}`)
+        // TODO: Cut connection
       }
       const cr2 = await ControlCommand.call("rib/register", {
         name: nodeId!,
@@ -353,7 +354,8 @@ async function checkPrefixRegistration(cancel: boolean) {
         signer: nfdCmdSigner,
       })
       if (cr2.statusCode !== 200) {
-        console.error(`Unable to register route: ${cr2.statusCode} ${cr2.statusText}`);
+        console.error(`Unable to register route: ${cr2.statusCode} ${cr2.statusText}`)
+        // TODO: Cut connection
       }
     }
   }

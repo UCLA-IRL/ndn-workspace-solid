@@ -6,6 +6,7 @@ import { Decoder, Encoder } from "@ndn/tlv"
 import { SvStateVector } from "@ndn/sync"
 import { getNamespace } from "./namespace"
 import { Storage } from "../storage"
+import { panic } from "../../utils"
 
 export function encodeSyncState(state: SvStateVector): Uint8Array {
   const encoder = new Encoder()
@@ -307,7 +308,9 @@ export class AtLeastOnceDelivery extends SyncDelivery {
         const name = prefix.append(SequenceNum.create(i))
         const wire = await this.storage.get(name.toString())
         if (wire === undefined) {
-          console.error(`[AtLeastOnceDelivery] FATAL: data missing from local storage: ${name}`)
+          const errMsg = `[AtLeastOnceDelivery] FATAL: data missing from local storage: ${name}`
+          console.error(errMsg)
+          panic(errMsg)
         } else if (wire.length > 0) {
           const decoder = new Decoder(wire)
           const data = Data.decodeFrom(decoder)
@@ -344,7 +347,7 @@ export class LatestOnlyDelivery extends SyncDelivery {
       // Update the storage
       // Note that this will overwrite old data
       // TODO: How to serve?
-      this.pktStorage.set(getNamespace().latestOnlyKey(name), data.content)
+      this.pktStorage.set(getNamespace().latestOnlyKey(name), Encoder.encode(data))
 
       // Save Sync state
       await this.setSyncState(update.id, update.hiSeqNum, this.stateStorage)
@@ -373,9 +376,7 @@ export class LatestOnlyDelivery extends SyncDelivery {
     )
     await this.signer.sign(data)
 
-    const encoder = new Encoder()
-    encoder.encode(data)
-    this.pktStorage.set(getNamespace().latestOnlyKey(name), encoder.output)
+    this.pktStorage.set(getNamespace().latestOnlyKey(name), Encoder.encode(data))
 
     // Save my own state to prevent reuse the sync number
     if (this.state!.get(this.syncNode.id) < seqNum) {
