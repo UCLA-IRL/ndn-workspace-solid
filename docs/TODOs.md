@@ -1,7 +1,8 @@
-Current schedule: #18, #13, #9, #6? done before hackathon
+Current schedule: #18, #6? done before hackathon
 Setup ndncert server
 Write a tutorial for trying
 Make slides for discussion
+Wrap these into GitHub issues
 
 # #1 Use namespace interface
 
@@ -66,7 +67,7 @@ We need a better design for this.
 Note: the LaTeX server's code is not published. Please let me know if you need to access it.
 
 Idea: maybe use RICE like discovery protocol (DISCOVERY -> REQUEST)
-Idea2: maybe sync to a system folder?
+Idea2: maybe sync to a system folder? (DONE)
   SA: https://motif.land/blog/syncing-text-files-using-yjs-and-the-file-system-access-api
 
 # #10 Allow multiple LaTeX projects in one workspace
@@ -211,6 +212,11 @@ Run a test and see what will happen and if there is anything we need to fix.
 # #33 Sign SVS Sync Interest
 
 As title stated.
+
+# #34 SVS Sync Interest with multicast forwarding hint
+
+(WIP) Since NDN testbed only has `/ndn/multicast` set to use the multicast strategy by default,
+maybe we should use forwarding hints to allow a different prefix?
 
 # ==================================================================
 
