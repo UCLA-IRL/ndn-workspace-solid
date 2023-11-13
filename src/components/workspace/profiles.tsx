@@ -32,7 +32,7 @@ export default function Profiles() {
   createEffect(() => {
     db.loadAll().then(items => setProfiles(items))
   })
-
+  
   createEffect(() => {
     if (booted()) {
       navigate('/workspace', { replace: true })
@@ -57,6 +57,7 @@ export default function Profiles() {
         .then(items => setProfiles(items))
     }
   }
+
 
   return (<Box sx={{ width: '100%' }}>
     <Paper sx={{ width: '100%', mb: 2 }}>

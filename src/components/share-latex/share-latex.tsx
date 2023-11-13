@@ -7,7 +7,7 @@ import { Button } from '@suid/material'
 import { useParams, useNavigate } from '@solidjs/router'
 import { project } from '../../backend/models'
 import { Match, Show, Switch, createEffect, createSignal, onCleanup } from 'solid-js'
-import { getYjsDoc, observeDeep } from '@syncedstore/core'
+import { observeDeep } from '@syncedstore/core'
 import { Name } from '@ndn/packet'
 import { v4 as uuidv4 } from "uuid"
 import { useNdnWorkspace } from '../../Context'
