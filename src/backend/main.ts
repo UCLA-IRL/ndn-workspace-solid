@@ -369,4 +369,4 @@ export const isProfileExisting = profiles.profiles.isExisting.bind(profiles.prof
 
 // ============= Connections (init) =============
 
-connections.initDefault()
+await connections.initDefault()

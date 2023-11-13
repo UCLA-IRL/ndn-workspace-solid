@@ -1,4 +1,4 @@
-Current schedule: #18, #6? done before hackathon
+Current schedule: #6? done before hackathon
 Setup ndncert server
 Write a tutorial for trying
 Make slides for discussion
@@ -116,13 +116,6 @@ Toast / [Snackbar](https://mui.com/material-ui/react-snackbar/) should be used t
 as normal users won't be able to check logs (`console.error`).
 However, SUID has no port for this component yet.
 May try https://www.solid-toast.com/ if you want.
-
-# #18 Add QRCode back
-
-Allow users to bootstrap with QRCode instead of manual input.
-See:
-- https://github.com/zjkmxy/ndn-workspace/blob/main/src/components/config/cert-qrcode.tsx
-- https://github.com/zjkmxy/ndn-workspace/blob/main/src/routes/config.tsx
 
 # #19 (HARD) Add Calendar back
 
@@ -298,3 +291,10 @@ Need to add support for
 - Deleting existing files. Including bolb files and docs.
 
 *Note: better get #4 done first*
+
+# #18 Add QRCode back (DONE)
+
+Allow users to bootstrap with QRCode instead of manual input.
+See:
+- https://github.com/zjkmxy/ndn-workspace/blob/main/src/components/config/cert-qrcode.tsx
+- https://github.com/zjkmxy/ndn-workspace/blob/main/src/routes/config.tsx

@@ -216,21 +216,16 @@ export default function ShareLatex(props: {
     if (mapper() === undefined) {
       return
     }
-    (async () => {
-      await mapper()?.SyncAll()
-    })()
+    mapper()?.SyncAll()
   }, () => 1500)
 
   createEffect(() => {
-    const cancel = observeDeep(rootDoc()!.latex, () => {
-      if (mapper() === undefined) {
-        return
-      }
-      (async () => {
-        await mapper()?.SyncAll()
-      })()
-    })
-    onCleanup(cancel)
+    const curRootDoc = rootDoc()
+    const curMapper = mapper()
+    if(curRootDoc !== undefined && curMapper !== undefined) {
+      const cancel = observeDeep(rootDoc()!.latex, () => curMapper.SyncAll())
+      onCleanup(cancel)
+    }
   })
 
 
