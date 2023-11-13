@@ -7,11 +7,13 @@ import { Button } from '@suid/material'
 import { useParams, useNavigate } from '@solidjs/router'
 import { project } from '../../backend/models'
 import { Match, Show, Switch, createEffect, createSignal, onCleanup } from 'solid-js'
-import { observeDeep } from '@syncedstore/core'
+import { getYjsDoc, observeDeep } from '@syncedstore/core'
 import { Name } from '@ndn/packet'
 import { v4 as uuidv4 } from "uuid"
 import { useNdnWorkspace } from '../../Context'
 import RichDoc from './rich-doc'
+import { FileMapper } from '../../backend/file-mapper'
+import { createInterval } from '../../utils'
 
 export default function ShareLatex(props: {
   rootUri: string
@@ -21,6 +23,8 @@ export default function ShareLatex(props: {
   const params = useParams<{ itemId: string }>()
   const itemId = () => params.itemId
   const [item, setItem] = createSignal<project.Item>()
+  const [mapper, setMapper] = createSignal<FileMapper>()
+  const { fileSystemSupported } = useNdnWorkspace()!
 
   const pathIds = (): string[] => {
     const curItem = item()
@@ -162,31 +166,73 @@ export default function ShareLatex(props: {
     })
   }
 
-  const onCompile = () => {
-    (async () => {
-      const zip = await project.exportAsZip(
-        async name => await syncAgent()?.getBlob(name),
-        rootDoc()!.latex)
-      const blobFile = await zip.generateAsync({ type: "blob" })
-      const formData = new FormData();
-      formData.append("file", new File([blobFile], 'upload.zip', {
-        type: 'application/octet-stream',
-      }))
-      // TODO: Find a new way to handle compilation
-      const response = await fetch('http://localhost:6175/zip', {
-        method: 'POST',
-        body: formData,
-      })
-      const val = await response.json()
-      const reqId: string = val.id
-      const status: string = val.status
-      if (status === 'success' && reqId) {
-        window.open(`http://localhost:6175/result/${reqId}`, "_blank", "noreferrer")
-      } else {
-        console.log(status)
-      }
-    })()
+  const onCompile = async () => {
+    const zip = await project.exportAsZip(
+      async name => await syncAgent()?.getBlob(name),
+      rootDoc()!.latex)
+    const blobFile = await zip.generateAsync({ type: "blob" })
+    const formData = new FormData();
+    formData.append("file", new File([blobFile], 'upload.zip', {
+      type: 'application/octet-stream',
+    }))
+    // TODO: Find a new way to handle compilation. Maybe RICE
+    const response = await fetch('http://localhost:6175/zip', {
+      method: 'POST',
+      body: formData,
+    })
+    const val = await response.json()
+    const reqId: string = val.id
+    const status: string = val.status
+    if (status === 'success' && reqId) {
+      window.open(`http://localhost:6175/result/${reqId}`, "_blank", "noreferrer")
+    } else {
+      console.log(val)
+    }
   }
+
+  const onMapFolder = async () => {
+    if (mapper() !== undefined) {
+      console.error('Already mapped')
+      return
+    }
+    if (!fileSystemSupported()) {
+      console.error('Browser does not support File System Access API. Please use Chrome or Edge 119+.')
+      return
+    }
+    let rootHandle
+    try {
+      rootHandle = await window.showDirectoryPicker({ mode: "readwrite" })
+    } catch (err) {
+      console.log('Failed to open target folder: ', err)
+      return
+    }
+    const newMapper = new FileMapper(syncAgent()!, rootDoc()!, rootHandle)
+    setMapper(newMapper)
+
+    await newMapper.SyncAll()
+  }
+
+  createInterval(() => {
+    if (mapper() === undefined) {
+      return
+    }
+    (async () => {
+      await mapper()?.SyncAll()
+    })()
+  }, () => 1500)
+
+  createEffect(() => {
+    const cancel = observeDeep(rootDoc()!.latex, () => {
+      if (mapper() === undefined) {
+        return
+      }
+      (async () => {
+        await mapper()?.SyncAll()
+      })()
+    })
+    onCleanup(cancel)
+  })
+
 
   const onDownloadBlob = () => {
     (async () => {
@@ -228,6 +274,7 @@ export default function ShareLatex(props: {
           { name: 'Upload blob', onClick: () => setModalState('upload') },
           { name: 'divider' },
           { name: 'Download as zip', onClick: onExportZip },
+          { name: 'Map to a folder', onClick: onMapFolder },
         ]} />
       <Switch fallback={<></>}>
         <Match when={folderChildren() !== undefined}>

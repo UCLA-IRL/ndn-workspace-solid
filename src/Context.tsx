@@ -29,6 +29,7 @@ type ContextType = {
   stopWorkspace: () => Promise<void>,
   trustAnchor: () => Certificate | undefined,
   ownCertificate: () => Certificate | undefined,
+  fileSystemSupported: Accessor<boolean>,
 }
 
 const NdnWorkspaceContext = createContext<ContextType>()
@@ -40,6 +41,7 @@ export function NdnWorkspaceProvider(props: ParentProps<unknown>) {
 
   const [connStatus, setConnStatus] = createSignal<main.ConnState>(main.connectionStatus())
   const [connConfig, setConnConfig] = createSignal<connections.Config>()
+  const [fileSystemSupported,] = createSignal(typeof window.showDirectoryPicker === 'function')
 
   // Execute the connection
   const connect = (config: connections.Config) => {
@@ -87,6 +89,7 @@ export function NdnWorkspaceProvider(props: ParentProps<unknown>) {
       return main.trustAnchor
     },
     ownCertificate: () => main.ownCertificate,
+    fileSystemSupported: fileSystemSupported,
   }
 
   return (
