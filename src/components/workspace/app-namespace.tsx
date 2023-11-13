@@ -10,12 +10,14 @@ import {
 import {
   ExpandLess as ExpandLessIcon,
   ExpandMore as ExpandMoreIcon,
+  QrCodeScanner as QRIcon,
 } from '@suid/icons-material'
 import { Show, createEffect, createSignal } from "solid-js"
-import { base64ToBytes, bytesToBase64 } from "../../utils"
+import { base64ToBytes, bytesToBase64 } from "../../utils/base64"
 import { Decoder, Encoder } from "@ndn/tlv"
 import { Data } from "@ndn/packet"
 import { Certificate } from "@ndn/keychain"
+import QrReader from "./qr-read"
 
 export default function AppNamespace(props: {
   trustAnchor: Certificate | undefined,
@@ -27,6 +29,8 @@ export default function AppNamespace(props: {
   const [nameStr, setNameStr] = createSignal('')
   const [errorText, setErrorText] = createSignal('')
   const [edited, setEdited] = createSignal(false)
+  //open or close video stream
+  const [isPopupOpen, setPopupOpen] = createSignal(false)
 
   // const readyToImport = () => !readOnly() && nameStr().length === 0
 
@@ -102,7 +106,7 @@ export default function AppNamespace(props: {
     }
   })
 
-  return <Card>
+  return (<Card>
     <CardHeader
       sx={{ textAlign: 'left' }}
       title="The Workspace"
@@ -110,7 +114,13 @@ export default function AppNamespace(props: {
         <Show when={nameStr().length === 0} fallback={
           <Typography color="primary" fontFamily='"Roboto Mono", ui-monospace, monospace'>{nameStr()}</Typography>
         }>
-          <Typography color="secondary">Please input the trust anchor exported by cert-dump</Typography>
+          <IconButton onClick={() => setPopupOpen(!isPopupOpen())}>
+            <QRIcon color="primary" />
+          </IconButton>
+          <Typography color="secondary" component={'span'}>
+            Please input the trust anchor exported by cert-dump
+          </Typography>
+          <QrReader popupOpen={isPopupOpen()} setValue={setValue} />
         </Show>
       }
       action={
@@ -120,10 +130,12 @@ export default function AppNamespace(props: {
           </Show>
         </IconButton>
       }
+
     />
     <Show when={expanded()}>
       <Divider />
       <CardContent>
+
         <TextField
           fullWidth
           required
@@ -145,6 +157,8 @@ export default function AppNamespace(props: {
           onChange={event => onChange(event.target.value)}
         />
       </CardContent>
+
     </Show >
   </Card >
+  )
 }

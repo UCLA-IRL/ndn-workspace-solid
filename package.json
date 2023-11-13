@@ -47,6 +47,8 @@
     "eventemitter3": "^5.0.1",
     "jszip": "^3.10.1",
     "peerjs": "^1.5.1",
+    "qr-scanner": "^1.4.2",
+    "qrcode": "^1.5.3",
     "solid-codemirror": "^2.3.0",
     "solid-js": "^1.8.5",
     "solid-tiptap": "^0.6.0",
@@ -57,6 +59,8 @@
   "devDependencies": {
     "@suid/vite-plugin": "^0.1.5",
     "@types/aframe": "^1.2.5",
+    "@types/diff": "^5.0.8",
+    "@types/qrcode": "^1.5.5",
     "@types/uuid": "^9.0.7",
     "@types/wicg-file-system-access": "^2023.10.3",
     "@typescript-eslint/eslint-plugin": "^6.10.0",
