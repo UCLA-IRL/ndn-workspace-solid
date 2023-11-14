@@ -6,6 +6,9 @@ import pluginRewriteAll from 'vite-plugin-rewrite-all'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  build: {
+    target: ['es2022', 'chrome111', 'edge111', 'firefox111'],
+  },
   plugins: [
     suidPlugin(),
     // devtools({

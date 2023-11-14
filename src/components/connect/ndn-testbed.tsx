@@ -13,7 +13,7 @@ import { Config as Conn } from '../../backend/models/connections'
 import { createSignal, onCleanup } from "solid-js"
 import { FwFace } from "@ndn/fw"
 import * as ndncert from '@ndn/ndncert'
-import * as keychain from "@ndn/keychain";
+import * as keychain from "@ndn/keychain"
 import { TestbedAnchorName } from "../../constants"
 import { bytesToBase64 } from "../../utils"
 import { Encoder } from "@ndn/tlv"

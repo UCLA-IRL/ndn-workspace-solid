@@ -1,5 +1,4 @@
-Current schedule: #6? done before hackathon
-Setup ndncert server
+Current schedule: before hackathon:
 Write a tutorial for trying
 Make slides for discussion
 Wrap these into GitHub issues
@@ -27,17 +26,6 @@ If you want to use other MUI components, make sure to check if SUID has ported t
 If you want to use Google's [material web](https://github.com/material-components/material-web/blob/main/docs/roadmap.md),
 you can also do it.
 I would hesitate to import another UI library.
-
-
-# #6 Conflict of names when creating files
-
-Should be good. Not tested, though.
-
-Handle simultaneous uploading files into the same folder with same name.
-I don't know what will happen if two users do so with current code.
-
-Note: after #4 is done, it should be OK to temporarily have files with the same name in the same folder.
-  The only trouble would be not able to export as a ZIP.
 
 # #8 Local snapshot
 
@@ -211,6 +199,16 @@ As title stated.
 (WIP) Since NDN testbed only has `/ndn/multicast` set to use the multicast strategy by default,
 maybe we should use forwarding hints to allow a different prefix?
 
+# #35 Allow multiple devices for one user
+
+Need namespace design.
+
+# #36 Use TPM instead of plain text private key in the storage
+
+# #37 Collaborate with NDN repo
+
+# #38 Check workbox and make sure it caches the correct things
+
 # ==================================================================
 
 # #7 Support storage (DONE)
@@ -298,3 +296,9 @@ Allow users to bootstrap with QRCode instead of manual input.
 See:
 - https://github.com/zjkmxy/ndn-workspace/blob/main/src/components/config/cert-qrcode.tsx
 - https://github.com/zjkmxy/ndn-workspace/blob/main/src/routes/config.tsx
+
+# #6 Conflict of names when creating files (DONE)
+
+Handle simultaneous uploading files into the same folder with same name.
+Both files will be kept.
+Exporting as ZIP works.

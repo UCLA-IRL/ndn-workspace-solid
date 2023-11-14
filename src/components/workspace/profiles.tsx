@@ -10,6 +10,7 @@ import {
   Toolbar,
   Typography,
   IconButton,
+  Button,
 } from "@suid/material"
 import {
   PersonAdd as PersonAddIcon,
@@ -32,7 +33,7 @@ export default function Profiles() {
   createEffect(() => {
     db.loadAll().then(items => setProfiles(items))
   })
-  
+
   createEffect(() => {
     if (booted()) {
       navigate('/workspace', { replace: true })
@@ -69,6 +70,9 @@ export default function Profiles() {
         >
           Profiles
         </Typography>
+        <Button onClick={() => navigate('/hackathon', { replace: true })} variant="outlined" color="secondary">
+          Hackathon
+        </Button>
         <IconButton onClick={() => navigate('/workspace', { replace: true })}>
           <PersonAddIcon color="primary" />
         </IconButton>

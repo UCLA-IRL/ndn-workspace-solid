@@ -43,7 +43,8 @@ export let yjsAdaptor: NdnSvsAdaptor | undefined
 export let listener: PeerJsListener | undefined = undefined
 export let nfdWsFace: FwFace | undefined = undefined
 let connState: ConnState = 'DISCONNECTED'
-let nfdCmdSigner: Signer = digestSigning
+export let nfdCmdSigner: Signer = digestSigning
+export let nfdCertificate: Certificate | undefined
 let commandPrefix = ControlCommand.localhopPrefix
 
 // ============= Connectivity =============
@@ -127,14 +128,14 @@ export async function connect(config: connections.Config) {
       try {
         const prvKeyBits = base64ToBytes(config.prvKeyB64)
         const certBytes = base64ToBytes(config.ownCertificateB64)
-        const ownCertificate = Certificate.fromData(Decoder.decode(certBytes, Data))
+        nfdCertificate = Certificate.fromData(Decoder.decode(certBytes, Data))
         const keyPair = await ECDSA.cryptoGenerate({
-          importPkcs8: [prvKeyBits, ownCertificate.publicKeySpki]
+          importPkcs8: [prvKeyBits, nfdCertificate.publicKeySpki]
         }, true)
         nfdCmdSigner = createSigner(
-          ownCertificate.name.getPrefix(ownCertificate.name.length - 2),
+          nfdCertificate.name.getPrefix(nfdCertificate.name.length - 2),
           ECDSA,
-          keyPair).withKeyLocator(ownCertificate.name)
+          keyPair).withKeyLocator(nfdCertificate.name)
       } catch (e) {
         console.error('Unable to parse credentials:', e)
         listener?.closeAll()
@@ -369,4 +370,4 @@ export const isProfileExisting = profiles.profiles.isExisting.bind(profiles.prof
 
 // ============= Connections (init) =============
 
-await connections.initDefault()
+connections.initDefault()

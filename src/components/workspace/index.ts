@@ -1,3 +1,4 @@
 import Workspace from './workspace'
 import Profile from './profiles'
-export { Workspace, Profile }
+import Hackathon from './hackathon'
+export { Workspace, Profile, Hackathon }
