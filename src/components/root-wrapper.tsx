@@ -89,7 +89,7 @@ export default function Root(props: {
           </Drawer>
           <Box
             component="main"
-            sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3, minHeight: '100vh', overflowX: 'hidden' }}
+            sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3, minHeight: '100vh', overflowX: 'hidden', display: 'flex', flexDirection: 'column' }}
           >
             <Outlet />
           </Box>

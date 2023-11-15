@@ -31,6 +31,7 @@
     "@ndn/tlv": "https://ndnts-nightly.ndn.today/tlv.tgz",
     "@ndn/util": "https://ndnts-nightly.ndn.today/util.tgz",
     "@ndn/ws-transport": "https://ndnts-nightly.ndn.today/ws-transport.tgz",
+    "@pdfslick/solid": "^1.2.4",
     "@reactivedata/reactive": "^0.2.2",
     "@solid-primitives/script-loader": "^2.0.2",
     "@solidjs/router": "^0.9.1",

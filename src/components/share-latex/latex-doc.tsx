@@ -1,16 +1,20 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-ignore
 import { createCodeMirror } from "solid-codemirror"
+import { createEffect, createSignal } from "solid-js";
+import { Dynamic } from "solid-js/web";
 // @ts-ignore
 import { yCollab } from 'y-codemirror.next'
 // There is an error in y-codemirror.next's package.json.
 import { EditorView, basicSetup } from "codemirror"
 import { StreamLanguage } from '@codemirror/language'
 import { stex } from '@codemirror/legacy-modes/mode/stex'
+import { usePDFSlick } from "@pdfslick/solid";
 import * as Y from 'yjs'
 
 export default function LatexDoc(props: {
-  doc: Y.Text
+  doc: Y.Text,
+  previewUrl: string | undefined,
 }) {
   const theme = EditorView.theme({
     '&': {
@@ -66,7 +70,22 @@ export default function LatexDoc(props: {
   // eslint-disable-next-line solid/reactivity
   createExtension(yCollab(props.doc, null))
 
+  const [pdf, setPDF] = createSignal(usePDFSlick(undefined));
+  createEffect(() => {
+    props.previewUrl;
+
+    // literally nothing else seems to work
+    setPDF(undefined!);
+    setTimeout(() => setPDF(usePDFSlick(props.previewUrl)), 0);
+  });
+
   return (
-    <div ref={ref} style={{ "text-align": "left" }} />
+    <div style={{ display: "flex", flex: 1 }}>
+      <div ref={ref} style={{ width: "50%" }} />
+
+      <div style={{ "flex": "1", "padding": "1px 20px", "position": "relative" }}>
+        { pdf() && <Dynamic component={pdf().PDFSlickViewer} store={pdf().pdfSlickStore} viewerRef={pdf().viewerRef} /> }
+      </div>
+    </div>
   )
 }

@@ -24,6 +24,7 @@ export default function ShareLatex(props: {
   const itemId = () => params.itemId
   const [item, setItem] = createSignal<project.Item>()
   const [mapper, setMapper] = createSignal<FileMapper>()
+  const [previewUrl, setPreviewUrl] = createSignal<string>()
   const { fileSystemSupported } = useNdnWorkspace()!
 
   const pathIds = (): string[] => {
@@ -153,20 +154,49 @@ export default function ShareLatex(props: {
     setModalState('')
   }
 
-  const onExportZip = () => {
-    project.exportAsZip(
+  const onExportZip = async () => {
+    const zip = await project.exportAsZip(
       async name => await syncAgent()?.getBlob(name),
       rootDoc()!.latex,
-    ).then(zip => {
-      zip.generateAsync({ type: "uint8array" }).then(content => {
-        const file = new Blob([content], { type: 'application/zip;base64' })
-        const fileUrl = URL.createObjectURL(file)
-        window.open(fileUrl)
-      })
-    })
+    )
+    const content = await zip.generateAsync({ type: "uint8array" })
+    const file = new Blob([content], { type: 'application/zip;base64' })
+    const fileUrl = URL.createObjectURL(file)
+    window.open(fileUrl)
   }
 
   const onCompile = async () => {
+    const engine = new (globalThis as any).PdfTeXEngine()
+    await engine.loadEngine()
+
+    // Store all files in the WASM filesystem
+    await project.walk(
+      async name => await syncAgent()?.getBlob(name),
+      rootDoc()!.latex,
+      (path) => engine.makeMemFSFolder(path),
+      (path, item) => engine.writeMemFSFile(path, item),
+    )
+
+    // Compile main.tex
+    engine.setEngineMainFile("main.tex")
+    const res = await engine.compileLaTeX()
+    console.log(res.log)
+
+    // Check if PDF is generated
+    if (!res.pdf) {
+      alert('Failed to compile PDF file')
+      console.error(res)
+      return
+    }
+
+    const data: Uint8Array = res.pdf
+    const blob = new Blob([data], { type: 'application/pdf' })
+
+    // Replace PDF preview
+    URL.revokeObjectURL(previewUrl()!);
+    setPreviewUrl(URL.createObjectURL(blob))
+
+    /*
     const zip = await project.exportAsZip(
       async name => await syncAgent()?.getBlob(name),
       rootDoc()!.latex)
@@ -188,6 +218,7 @@ export default function ShareLatex(props: {
     } else {
       console.log(val)
     }
+    */
   }
 
   const onMapFolder = async () => {
@@ -262,6 +293,7 @@ export default function ShareLatex(props: {
         pathIds={pathIds()}
         resolveName={id => resolveItem(id)?.name}
         onCompile={onCompile}
+        onExportZip={onExportZip}
         menuItems={[
           { name: 'New folder', onClick: () => setModalState('folder') },
           { name: 'New tex', onClick: () => setModalState('doc') },
@@ -281,7 +313,7 @@ export default function ShareLatex(props: {
           />
         </Match>
         <Match when={item()?.kind === 'text'}>
-          <LatexDoc doc={(item() as project.TextDoc).text} />
+          <LatexDoc doc={(item() as project.TextDoc).text} previewUrl={previewUrl()} />
         </Match>
         <Match when={item()?.kind === 'xmldoc'}>
           <RichDoc doc={(item() as project.XmlDoc).text} />
