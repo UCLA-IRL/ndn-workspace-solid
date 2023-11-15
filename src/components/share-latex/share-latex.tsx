@@ -165,9 +165,12 @@ export default function ShareLatex(props: {
     window.open(fileUrl)
   }
 
+  let engine: any;
   const onCompile = async () => {
-    const engine = new (globalThis as any).PdfTeXEngine()
-    await engine.loadEngine()
+    if (!engine) {
+      engine = new (globalThis as any).PdfTeXEngine()
+      await engine.loadEngine()
+    }
 
     // Store all files in the WASM filesystem
     await project.walk(
