@@ -1,5 +1,5 @@
 import { Typography } from "@suid/material"
-import "@pdfslick/solid/dist/pdf_viewer.css";
+import "@pdfslick/solid/dist/pdf_viewer.css"
 
 function App() {
   return (

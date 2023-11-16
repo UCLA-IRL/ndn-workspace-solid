@@ -70,13 +70,13 @@ export default function LatexDoc(props: {
   // eslint-disable-next-line solid/reactivity
   createExtension(yCollab(props.doc, null))
 
-  const [pdf, setPDF] = createSignal(usePDFSlick(undefined));
+  const [pdf, setPDF] = createSignal(usePDFSlick(undefined))
   createEffect(() => {
-    props.previewUrl;
+    const previewUrl = props.previewUrl
 
     // literally nothing else seems to work
     setPDF(undefined!);
-    setTimeout(() => setPDF(usePDFSlick(props.previewUrl)), 0);
+    setTimeout(() => setPDF(usePDFSlick(previewUrl)), 0)
   });
 
   return (

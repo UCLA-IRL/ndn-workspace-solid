@@ -14,6 +14,7 @@ import { useNdnWorkspace } from '../../Context'
 import RichDoc from './rich-doc'
 import { FileMapper } from '../../backend/file-mapper'
 import { createInterval } from '../../utils'
+import { PdfTeXEngine } from './pdf-tex-engine-types'
 
 export default function ShareLatex(props: {
   rootUri: string
@@ -165,10 +166,12 @@ export default function ShareLatex(props: {
     window.open(fileUrl)
   }
 
-  let engine: any;
+  const [texEngine, setTexEngine] = createSignal<PdfTeXEngine>()
   const onCompile = async () => {
+    let engine = texEngine()
     if (!engine) {
-      engine = new (globalThis as any).PdfTeXEngine()
+      engine = new (globalThis as unknown as { PdfTeXEngine: { new(): PdfTeXEngine } }).PdfTeXEngine()
+      setTexEngine(engine)
       await engine.loadEngine()
     }
 
@@ -176,8 +179,8 @@ export default function ShareLatex(props: {
     await project.walk(
       async name => await syncAgent()?.getBlob(name),
       rootDoc()!.latex,
-      (path) => engine.makeMemFSFolder(path),
-      (path, item) => engine.writeMemFSFile(path, item),
+      (path) => engine!.makeMemFSFolder(path),
+      (path, item) => engine!.writeMemFSFile(path, item),
     )
 
     // Compile main.tex
@@ -256,7 +259,7 @@ export default function ShareLatex(props: {
   createEffect(() => {
     const curRootDoc = rootDoc()
     const curMapper = mapper()
-    if(curRootDoc !== undefined && curMapper !== undefined) {
+    if (curRootDoc !== undefined && curMapper !== undefined) {
       const cancel = observeDeep(rootDoc()!.latex, () => curMapper.SyncAll())
       onCleanup(cancel)
     }
