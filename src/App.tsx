@@ -13,7 +13,7 @@ function App() {
           We do not guarantee Safari to work.
       </Typography>
       <Typography variant='body1'>
-        - See <a href='https://github.com/zjkmxy/ndn-workspace-solid/wiki'>Wiki</a> for help.
+        - See <a href='https://github.com/UCLA-IRL/ndn-workspace-solid/wiki'>Wiki</a> for help.
       </Typography>
     </>
   )
