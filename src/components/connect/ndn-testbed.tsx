@@ -18,6 +18,7 @@ import { TestbedAnchorName } from "../../constants"
 import { bytesToBase64 } from "../../utils"
 import { Encoder } from "@ndn/tlv"
 import { WsTransport } from "@ndn/ws-transport"
+import { Endpoint } from "@ndn/endpoint";
 
 type Resolver = { resolve: (pin: string | PromiseLike<string>) => void }
 
@@ -91,6 +92,12 @@ export default function NdnTestbed(props: {
 
       // New step
       const cert = await ndncert.requestCertificate({
+        endpoint: new Endpoint({
+          retx: {
+            limit: 4,
+            interval: 5000,
+          }
+        }),
         profile: caProfile,
         privateKey: prvKey,
         publicKey: pubKey,
