@@ -26,7 +26,7 @@ export type ItemBase = {
 export type Folder = ItemBase & {
   kind: 'folder'
 
-  /** 
+  /**
    * An unordered, non-duplicative list of containing subitems under this folder.
    * NO guarantee that the subitems have different names.
    */
@@ -50,7 +50,7 @@ export type XmlDoc = ItemBase & {
 export type BlobFile = ItemBase & {
   kind: 'blob'
 
-  /** 
+  /**
    * The canonical NDN name for this object with correct version component.
    * This name may be referring to a segmented object, instead of a single Data packet.
    */
@@ -156,25 +156,37 @@ export async function exportAsZip(
   baseId: string = RootId
 ) {
   const zip = new JSZip()
+  await walk(resolveBlob, items, null, zip.file.bind(zip), baseId)
+  return zip
+}
+
+export async function walk(
+  resolveBlob: (name: Name) => Promise<Uint8Array | undefined>,
+  items: PartItems,
+  callbackFolder: null | ((path: string) => void),
+  callbackFile: null | ((path: string, item: string | Uint8Array) => void),
+  baseId: string = RootId
+) {
   const examine = async (basePath: string, curId: string) => {
     const curItem = items[curId]
     const curPath = basePath ? `${basePath}/${curItem?.name}` : `${curItem?.name}`
     if (curItem === undefined) {
       return
     } else if (curItem.kind === 'folder') {
+      callbackFolder?.(curPath)
       for await (const subId of curItem.items) {
         await examine(curPath, subId)
       }
     } else if (curItem.kind === 'text') {
-      zip.file(curPath, curItem.text.toString())
+      callbackFile?.(curPath, curItem.text.toString())
     } else if (curItem.kind === 'xmldoc') {
-      zip.file(curPath, curItem.text.toString())
+      callbackFile?.(curPath, curItem.text.toString())
     } else if (curItem.kind === 'blob') {
       try {
         const blobName = new Name(curItem.blobName)
         const blob = await resolveBlob(blobName)
-        if (blob !== undefined) {
-          zip.file(curPath, blob)
+        if (blob) {
+          callbackFile?.(curPath, blob)
         }
       } catch (e) {
         console.error(`[project.exportAsZip] Unable to pack blob file ${curPath}: `, e)
@@ -182,5 +194,4 @@ export async function exportAsZip(
     }
   }
   await examine('', baseId)
-  return zip
 }
