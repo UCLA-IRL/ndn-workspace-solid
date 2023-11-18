@@ -35,19 +35,18 @@ export default function NdnTestbed(props: {
   const [pinResolver, setPinResolver] = createSignal<Resolver>()
 
   const onFch = async () => {
-    const position = await new Promise<GeolocationPosition | undefined>(
-      resolve => navigator.geolocation.getCurrentPosition(
-        pos => resolve(pos),
-        () => resolve(undefined)))
-    const fchRes = await fchQuery({
-      transport: 'wss',
-      position: [
-        position?.coords.longitude ?? 0,
-        position?.coords.latitude ?? 0,
-      ]
-    })
-    const url = new URL(fchRes.routers[0].connect)
-    setHost(url.host)
+    try {
+      const fchRes = await fchQuery({
+        transport: 'wss',
+        network: "ndn",
+      })
+      if (fchRes.routers.length > 0) {
+        const url = new URL(fchRes.routers[0].connect)
+        setHost(url.host)
+      }
+    } catch {
+      console.error('FCH server is down.')
+    }
   }
 
   const onInputPin = () => {
