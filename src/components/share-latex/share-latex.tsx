@@ -171,7 +171,7 @@ export default function ShareLatex(props: {
       async name => await syncAgent()?.getBlob(name),
       rootDoc()!.latex)
     const blobFile = await zip.generateAsync({ type: "blob" })
-    const formData = new FormData();
+    const formData = new FormData()
     formData.append("file", new File([blobFile], 'upload.zip', {
       type: 'application/octet-stream',
     }))

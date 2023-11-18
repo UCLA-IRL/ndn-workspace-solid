@@ -11,9 +11,9 @@ import {
 } from "@suid/material"
 import { createTheme, ThemeProvider } from "@suid/material/styles"
 import { Outlet, Link } from "@solidjs/router"
-import { For, JSX } from "solid-js";
+import { For, JSX } from "solid-js"
 
-const drawerWidth = 200;
+const drawerWidth = 200
 
 function RouteItem(props: { icon: JSX.Element, title: string, href: string }) {
   return (

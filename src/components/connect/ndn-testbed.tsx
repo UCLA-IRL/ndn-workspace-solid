@@ -18,7 +18,8 @@ import { TestbedAnchorName } from "../../constants"
 import { bytesToBase64 } from "../../utils"
 import { Encoder } from "@ndn/tlv"
 import { WsTransport } from "@ndn/ws-transport"
-import { Endpoint } from "@ndn/endpoint";
+import { Endpoint } from "@ndn/endpoint"
+import { fchQuery } from "@ndn/autoconfig"
 
 type Resolver = { resolve: (pin: string | PromiseLike<string>) => void }
 
@@ -38,16 +39,15 @@ export default function NdnTestbed(props: {
       resolve => navigator.geolocation.getCurrentPosition(
         pos => resolve(pos),
         () => resolve(undefined)))
-    const latitude = position?.coords.latitude
-    const longtitude = position?.coords.longitude
-    const baseUrl = 'https://ndn-fch.named-data.net/'
-    const fchUri = baseUrl + ((latitude && longtitude) ? `?lat=${latitude}&lon=${longtitude}` : '')
-    const result = await fetch(fchUri)
-    if (result.status === 200) {
-      setHost(await result.text())
-    } else {
-      console.error('Failed to connect to NDN-FCH', result.statusText)
-    }
+    const fchRes = await fchQuery({
+      transport: 'wss',
+      position: [
+        position?.coords.longitude ?? 0,
+        position?.coords.latitude ?? 0,
+      ]
+    })
+    const url = new URL(fchRes.routers[0].connect)
+    setHost(url.host)
   }
 
   const onInputPin = () => {
@@ -129,7 +129,7 @@ export default function NdnTestbed(props: {
   onCleanup(() => {
     const wsFace = tempFace()
     const curResolver = pinResolver()
-    if(curResolver !== undefined) {
+    if (curResolver !== undefined) {
       curResolver.resolve('')
     }
     if (wsFace !== undefined) {
@@ -162,6 +162,7 @@ export default function NdnTestbed(props: {
                 </InputAdornment>,
             }}
             value={host()}
+            onChange={event => setHost(event.target.value)}
           />
         </Grid>
         <Grid item xs={4}>

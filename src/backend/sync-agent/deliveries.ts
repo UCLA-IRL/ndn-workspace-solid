@@ -1,6 +1,6 @@
 import { type Endpoint } from "@ndn/endpoint"
 import { SvSync, type SyncNode, type SyncUpdate } from "@ndn/sync"
-import { Name, Data, digestSigning, type Verifier, Signer } from "@ndn/packet"
+import { Name, Data, digestSigning, type Verifier, Signer, Interest } from "@ndn/packet"
 import { SequenceNum } from "@ndn/naming-convention2"
 import { Decoder, Encoder } from "@ndn/tlv"
 import { SvStateVector } from "@ndn/sync"
@@ -214,14 +214,17 @@ export class AtLeastOnceDelivery extends SyncDelivery {
     for (let i = update.loSeqNum; i <= update.hiSeqNum; i++) {
       const name = prefix.append(SequenceNum.create(i))
       try {
-        const data = await this.endpoint.consume(name, {
+        const data = await this.endpoint.consume(new Interest(
+          name,
+          Interest.MustBeFresh,
+          Interest.Lifetime(5000),
+        ), {
           verifier: this.verifier,
-          modifyInterest: { mustBeFresh: true, lifetime: 5000 },
           retx: 5,
         })
 
         // Put into storage
-        // Note: even endpoint.consume does not give me the raw Data packet,
+        // Note: even though endpoint.consume does not give me the raw Data packet,
         //       the encode result will be the same.
         await this.storage.set(name.toString(), Encoder.encode(data))
 
