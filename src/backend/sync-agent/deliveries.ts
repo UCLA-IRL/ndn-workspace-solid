@@ -7,6 +7,7 @@ import { SvStateVector } from "@ndn/sync"
 import { getNamespace } from "./namespace"
 import { Storage } from "../storage"
 import { panic } from "../../utils"
+import { ConnState } from "../../backend/main"
 
 export function encodeSyncState(state: SvStateVector): Uint8Array {
   return Encoder.encode(state)
@@ -34,6 +35,7 @@ const fireSvSync = (inst: SvSync) => {
  */
 export abstract class SyncDelivery {
   readonly baseName: Name
+  connState: ConnState = "CONNECTED"
   protected _syncInst?: SvSync
   protected _syncNode?: SyncNode
   protected _ready: boolean = false
@@ -127,30 +129,25 @@ export abstract class SyncDelivery {
     }
   }
 
-  reset() {
+  public reset() {
     if (this._syncInst === undefined || !this._ready) {
       throw new Error('Please do not reset before start.')
     }
     console.warn('A Sync reset is scheduled.')
     this._syncInst.close()
     this._syncNode = undefined
-    return new Promise(r => setTimeout(r, 600000)).then(() => {
-      SvSync.create({
-        endpoint: this.endpoint,
-        syncPrefix: this.syncPrefix,
-        signer: digestSigning,
-        initialStateVector: new SvStateVector(this.state),
-        initialize: async (svSync) => {
-          this._syncInst = svSync
-          this._syncInst.addEventListener("update", update => this.handleSyncUpdate(update))
-          // const nodeId = getNamespace().nodeIdFromSigner(this.signer.name)
-          this._syncNode = this._syncInst.add(this.nodeId)
-          // this._ready should already be true
-        }
-      }).then(value => {
-        // Force trigger the SvSync to fire
-        fireSvSync(value)
-      })
+    SvSync.create({
+      endpoint: this.endpoint,
+      syncPrefix: this.syncPrefix,
+      signer: digestSigning,
+      initialStateVector: new SvStateVector(this.state),
+      initialize: async (svSync) => {
+        this._syncInst = svSync
+        this._syncInst.addEventListener("update", update => this.handleSyncUpdate(update))
+        // const nodeId = getNamespace().nodeIdFromSigner(this.signer.name)
+        this._syncNode = this._syncInst.add(this.nodeId)
+        // this._ready should already be true
+      }
     })
   }
 
@@ -238,11 +235,12 @@ export class AtLeastOnceDelivery extends SyncDelivery {
       } catch (error) {
         // TODO: Find a better way to handle this
         console.error(`Unable to fetch or verify ${name.toString()} due to: `, error)
-        console.warn('The current SVS protocol cannot recover from this error. A reset is scheduled in 10 min.')
-        this.reset()
+        console.warn('The current SVS protocol cannot recover from this error. A reset will be triggered')
+        // this.reset()
 
         // TODO: Since it takes time to fix, let's core dump first
-        panic(`Unable to fetch or verify ${name.toString()} due to: ${error}`)
+        this.connState = "DISCONNECTED"
+        // panic(`Unable to fetch or verify ${name.toString()} due to: ${error}`)
 
         return
       }

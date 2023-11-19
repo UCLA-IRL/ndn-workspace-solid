@@ -9,6 +9,7 @@ import { getNamespace } from "./namespace"
 import { InMemoryStorage, Storage } from "../storage"
 import { SvStateVector } from "@ndn/sync"
 import { panic } from "../../utils"
+import { ConnState } from "../main"
 
 
 export type ChannelType = 'update' | 'blob' | 'status' | 'blobUpdate'
@@ -29,7 +30,8 @@ export class SyncAgent {
     readonly signer: Signer,
     readonly verifier: Verifier,
     readonly atLeastOnce: AtLeastOnceDelivery,
-    readonly latestOnly: LatestOnlyDelivery
+    readonly latestOnly: LatestOnlyDelivery,
+    readonly connUpdateCallback: (connState: ConnState) => void
   ) {
     // Serve stored packets
     // TODO: Design a better namespace
@@ -115,6 +117,12 @@ export class SyncAgent {
   }
 
   private async onUpdate(wire: Uint8Array, id: Name) {
+    if (this.atLeastOnce.connState == "DISCONNECTED") {
+      console.log(this.atLeastOnce.connState)
+      this.connUpdateCallback(this.atLeastOnce.connState)
+      this.atLeastOnce.reset()
+      this.latestOnly.reset()
+    }
     if (!this._ready) {
       console.error('[SyncAgent] FATAL: NOT READY YET')
       panic('[SyncAgent] Not ready for update. Check program flow.')
@@ -354,6 +362,7 @@ export class SyncAgent {
     endpoint: Endpoint,
     signer: Signer,
     verifier: Verifier,
+    connUpdateCallback: (connState: ConnState) => void
   ) {
     const tempStorage = new InMemoryStorage()
     // Note: we need the signer name to be /[appPrefix]/<nodeId>/KEY/<keyID>
@@ -378,7 +387,8 @@ export class SyncAgent {
       signer,
       verifier,
       atLeastOnce,
-      latestOnly
+      latestOnly,
+      connUpdateCallback
     )
     resolver!((content, id) => ret.onUpdate(content, id))
     return ret

@@ -221,8 +221,14 @@ export async function bootstrapWorkspace(opts: {
   await certStorage.readyEvent
 
   // Sync Agents
+  let resolver = (newConnState: ConnState) => {
+    console.log("ConnState changed to: " + newConnState)
+    if (newConnState == "DISCONNECTED"){
+      disconnect()
+    }
+  }
   syncAgent = await SyncAgent.create(
-    nodeId, persistStore, endpoint, certStorage.signer!, certStorage.verifier,
+    nodeId, persistStore, endpoint, certStorage.signer!, certStorage.verifier, resolver
   )
 
   // Root doc using CRDT and Sync
