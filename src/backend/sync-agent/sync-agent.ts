@@ -9,7 +9,6 @@ import { getNamespace } from "./namespace"
 import { InMemoryStorage, Storage } from "../storage"
 import { SvStateVector } from "@ndn/sync"
 import { panic } from "../../utils"
-import { ConnState } from "../main"
 
 
 export type ChannelType = 'update' | 'blob' | 'status' | 'blobUpdate'
@@ -31,8 +30,11 @@ export class SyncAgent {
     readonly verifier: Verifier,
     readonly atLeastOnce: AtLeastOnceDelivery,
     readonly latestOnly: LatestOnlyDelivery,
-    readonly connUpdateCallback: (connState: ConnState) => void
+    readonly onReset?: () => void
   ) {
+    atLeastOnce.onReset = () => this.onResetTriggered()
+    latestOnly.onReset = () => this.onResetTriggered()
+
     // Serve stored packets
     // TODO: Design a better namespace
     // TODO: Make sure this producer does not conflict with the certificate storage's
@@ -116,13 +118,15 @@ export class SyncAgent {
     return Encoder.encode(data)
   }
 
-  private async onUpdate(wire: Uint8Array, id: Name) {
-    if (this.atLeastOnce.connState == "DISCONNECTED") {
-      console.log(this.atLeastOnce.connState)
-      this.connUpdateCallback(this.atLeastOnce.connState)
-      this.atLeastOnce.reset()
-      this.latestOnly.reset()
+  private onResetTriggered() {
+    if (this.onReset) {
+      this.onReset()
     }
+    this.atLeastOnce.reset()
+    this.latestOnly.reset()
+  }
+
+  private async onUpdate(wire: Uint8Array, id: Name) {
     if (!this._ready) {
       console.error('[SyncAgent] FATAL: NOT READY YET')
       panic('[SyncAgent] Not ready for update. Check program flow.')
@@ -362,7 +366,7 @@ export class SyncAgent {
     endpoint: Endpoint,
     signer: Signer,
     verifier: Verifier,
-    connUpdateCallback: (connState: ConnState) => void
+    onReset?: () => void
   ) {
     const tempStorage = new InMemoryStorage()
     // Note: we need the signer name to be /[appPrefix]/<nodeId>/KEY/<keyID>
@@ -388,7 +392,7 @@ export class SyncAgent {
       verifier,
       atLeastOnce,
       latestOnly,
-      connUpdateCallback
+      onReset
     )
     resolver!((content, id) => ret.onUpdate(content, id))
     return ret

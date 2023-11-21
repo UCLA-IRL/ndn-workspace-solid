@@ -7,7 +7,6 @@ import { SvStateVector } from "@ndn/sync"
 import { getNamespace } from "./namespace"
 import { Storage } from "../storage"
 import { panic } from "../../utils"
-import { ConnState } from "../../backend/main"
 
 export function encodeSyncState(state: SvStateVector): Uint8Array {
   return Encoder.encode(state)
@@ -35,13 +34,13 @@ const fireSvSync = (inst: SvSync) => {
  */
 export abstract class SyncDelivery {
   readonly baseName: Name
-  connState: ConnState = "CONNECTED"
   protected _syncInst?: SvSync
   protected _syncNode?: SyncNode
   protected _ready: boolean = false
   protected _startPromise: Promise<void>
   protected _onUpdate?: UpdateEvent
   private _startPromiseResolve?: () => void
+  protected _onReset?: () => void
 
   constructor(
     readonly nodeId: Name,
@@ -107,6 +106,15 @@ export abstract class SyncDelivery {
     return this._onUpdate
   }
 
+  public get onReset() {
+    return this._onReset
+  }
+
+  public set onReset(value: (() => void) | undefined) {
+    this._onReset = value
+  }
+
+
   start() {
     if (!this._ready) {
       this._ready = true
@@ -129,17 +137,18 @@ export abstract class SyncDelivery {
     }
   }
 
-  public reset() {
+  public async reset() {
     if (this._syncInst === undefined || !this._ready) {
       throw new Error('Please do not reset before start.')
     }
     console.warn('A Sync reset is scheduled.')
     this._syncInst.close()
     this._syncNode = undefined
-    SvSync.create({
+    const svSync = await SvSync.create({
       endpoint: this.endpoint,
       syncPrefix: this.syncPrefix,
       signer: digestSigning,
+      // We can do so because the state has not been set
       initialStateVector: new SvStateVector(this.state),
       initialize: async (svSync) => {
         this._syncInst = svSync
@@ -149,6 +158,8 @@ export abstract class SyncDelivery {
         // this._ready should already be true
       }
     })
+    // Force trigger the SvSync to fire
+    fireSvSync(svSync)
   }
 
   /** Trigger the SVS to send a Sync Interest so that one can get latest updates. */
@@ -238,8 +249,14 @@ export class AtLeastOnceDelivery extends SyncDelivery {
         console.warn('The current SVS protocol cannot recover from this error. A reset will be triggered')
         // this.reset()
 
-        // TODO: Since it takes time to fix, let's core dump first
-        this.connState = "DISCONNECTED"
+        this._syncInst?.close()
+        this._syncNode = undefined
+
+        if (this._onReset) {
+          this._onReset()
+        } else {
+          this.reset()
+        }
         // panic(`Unable to fetch or verify ${name.toString()} due to: ${error}`)
 
         return

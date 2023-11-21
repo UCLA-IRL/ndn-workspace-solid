@@ -15,7 +15,7 @@ import { FsStorage, InMemoryStorage, type Storage } from "./storage"
 import { SyncAgent } from './sync-agent'
 import { Certificate, ECDSA, createSigner } from "@ndn/keychain"
 import { v4 as uuidv4 } from "uuid"
-import { base64ToBytes, encodeKey as encodePath } from "../utils"
+import { base64ToBytes, encodeKey as encodePath, Signal as BackendSignal } from "../utils"
 import { Decoder } from "@ndn/tlv"
 
 export const UseAutoAnnouncement = false
@@ -42,7 +42,7 @@ export let yjsAdaptor: NdnSvsAdaptor | undefined
 
 export let listener: PeerJsListener | undefined = undefined
 export let nfdWsFace: FwFace | undefined = undefined
-let connState: ConnState = 'DISCONNECTED'
+const connState = new BackendSignal<ConnState>('DISCONNECTED')
 export let nfdCmdSigner: Signer = digestSigning
 export let nfdCertificate: Certificate | undefined
 let commandPrefix = ControlCommand.localhopPrefix
@@ -94,30 +94,29 @@ async function disconnectPeerJs() {
   listener = undefined
 }
 
-export function connectionStatus() {
-  return connState
-}
+export const connectionStatus = () => connState.value
+export const connectionStatusSig = () => connState
 
 export async function disconnect() {
-  if (connState !== 'CONNECTED') {
+  if (connState.value !== 'CONNECTED') {
     return
   }
-  connState = 'DISCONNECTING'
+  connState.value = 'DISCONNECTING'
   if (listener !== undefined) {
     await disconnectPeerJs()
   }
   if (nfdWsFace !== undefined) {
     await disconnectNfdWs()
   }
-  connState = 'DISCONNECTED'
+  connState.value = 'DISCONNECTED'
 }
 
 export async function connect(config: connections.Config) {
-  if (connState !== 'DISCONNECTED') {
+  if (connState.value !== 'DISCONNECTED') {
     console.error('Dual-homing is not supported. Please start local NFD.')
     return
   }
-  connState = 'CONNECTING'
+  connState.value = 'CONNECTING'
 
   if (config.kind === 'nfdWs') {
 
@@ -140,7 +139,7 @@ export async function connect(config: connections.Config) {
         console.error('Unable to parse credentials:', e)
         listener?.closeAll()
         listener = undefined
-        connState = 'DISCONNECTED'
+        connState.value = 'DISCONNECTED'
         return
       }
     }
@@ -155,7 +154,7 @@ export async function connect(config: connections.Config) {
       console.error('Failed to connect:', err)
       nfdWsFace?.close()
       nfdWsFace = undefined
-      connState = 'DISCONNECTED'
+      connState.value = 'DISCONNECTED'
       return
     }
     face!.addEventListener('down', () => {
@@ -166,13 +165,13 @@ export async function connect(config: connections.Config) {
       await connectPeerJs(config, true)
     } catch (err) {
       console.error('Failed to connect:', err)
-      connState = 'DISCONNECTED'
+      connState.value = 'DISCONNECTED'
       return
     }
   }
 
   syncAgent?.fire()
-  connState = 'CONNECTED'
+  connState.value = 'CONNECTED'
 }
 
 // ============= Bootstrapping =============
@@ -221,14 +220,11 @@ export async function bootstrapWorkspace(opts: {
   await certStorage.readyEvent
 
   // Sync Agents
-  let resolver = (newConnState: ConnState) => {
-    console.log("ConnState changed to: " + newConnState)
-    if (newConnState == "DISCONNECTED"){
+  syncAgent = await SyncAgent.create(
+    nodeId, persistStore, endpoint, certStorage.signer!, certStorage.verifier,
+    () => {
       disconnect()
     }
-  }
-  syncAgent = await SyncAgent.create(
-    nodeId, persistStore, endpoint, certStorage.signer!, certStorage.verifier, resolver
   )
 
   // Root doc using CRDT and Sync
