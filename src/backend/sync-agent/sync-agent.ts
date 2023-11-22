@@ -29,8 +29,12 @@ export class SyncAgent {
     readonly signer: Signer,
     readonly verifier: Verifier,
     readonly atLeastOnce: AtLeastOnceDelivery,
-    readonly latestOnly: LatestOnlyDelivery
+    readonly latestOnly: LatestOnlyDelivery,
+    readonly onReset?: () => void
   ) {
+    atLeastOnce.onReset = () => this.onResetTriggered()
+    latestOnly.onReset = () => this.onResetTriggered()
+
     // Serve stored packets
     // TODO: Design a better namespace
     // TODO: Make sure this producer does not conflict with the certificate storage's
@@ -112,6 +116,14 @@ export class SyncAgent {
       content
     )
     return Encoder.encode(data)
+  }
+
+  private onResetTriggered() {
+    if (this.onReset) {
+      this.onReset()
+    }
+    this.atLeastOnce.reset()
+    this.latestOnly.reset()
   }
 
   private async onUpdate(wire: Uint8Array, id: Name) {
@@ -354,6 +366,7 @@ export class SyncAgent {
     endpoint: Endpoint,
     signer: Signer,
     verifier: Verifier,
+    onReset?: () => void
   ) {
     const tempStorage = new InMemoryStorage()
     // Note: we need the signer name to be /[appPrefix]/<nodeId>/KEY/<keyID>
@@ -378,7 +391,8 @@ export class SyncAgent {
       signer,
       verifier,
       atLeastOnce,
-      latestOnly
+      latestOnly,
+      onReset
     )
     resolver!((content, id) => ret.onUpdate(content, id))
     return ret
