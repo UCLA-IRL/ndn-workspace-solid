@@ -7,7 +7,7 @@ import { concatBuffers } from "@ndn/util"
 import { AtLeastOnceDelivery, LatestOnlyDelivery, UpdateEvent } from "./deliveries"
 import { getNamespace } from "./namespace"
 import { InMemoryStorage, Storage } from "../storage"
-import { SvStateVector } from "@ndn/sync"
+import { SvStateVector, SyncUpdate } from "@ndn/sync"
 import { panic } from "../../utils"
 
 
@@ -264,6 +264,16 @@ export class SyncAgent {
       const name = await this.publishBlob('updateSeg', content, undefined, false)
       const nameWire = Encoder.encode(name)
       await this.atLeastOnce.produce(this.makeInnerData('blobUpdate', topic, nameWire))
+    }
+  }
+
+  public forceReset() {
+    if (this.atLeastOnce.syncNode) {
+      const seqNum = this.atLeastOnce.syncNode.seqNum + 1
+      this.atLeastOnce.syncNode.seqNum = seqNum
+      this.atLeastOnce.handleSyncUpdate(
+        new SyncUpdate(this.atLeastOnce.syncNode, seqNum, seqNum, 'forceReset')
+      )
     }
   }
 

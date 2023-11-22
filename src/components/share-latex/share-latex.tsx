@@ -14,6 +14,7 @@ import { useNdnWorkspace } from '../../Context'
 import RichDoc from './rich-doc'
 import { FileMapper } from '../../backend/file-mapper'
 import { createInterval } from '../../utils'
+import * as main from "../../backend/main"
 
 export default function ShareLatex(props: {
   rootUri: string
@@ -222,7 +223,7 @@ export default function ShareLatex(props: {
   createEffect(() => {
     const curRootDoc = rootDoc()
     const curMapper = mapper()
-    if(curRootDoc !== undefined && curMapper !== undefined) {
+    if (curRootDoc !== undefined && curMapper !== undefined) {
       const cancel = observeDeep(rootDoc()!.latex, () => curMapper.SyncAll())
       onCleanup(cancel)
     }
@@ -270,6 +271,12 @@ export default function ShareLatex(props: {
           { name: 'divider' },
           { name: 'Download as zip', onClick: onExportZip },
           { name: 'Map to a folder', onClick: onMapFolder },
+          { name: 'divider' },
+          {
+            name: 'Force reset', onClick: () => {
+              main.syncAgent?.forceReset()
+            }
+          },
         ]} />
       <Switch fallback={<></>}>
         <Match when={folderChildren() !== undefined}>
