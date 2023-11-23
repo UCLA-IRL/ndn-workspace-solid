@@ -9,8 +9,8 @@ function App() {
         - Every browser tab is a new node. Do not reuse credentials.
       </Typography>
       <Typography variant='body1'>
-        - Chrome 119 and Edge 119 are recommended. In Firefox 119, a small set of functions are supported.
-          We do not guarantee Safari to work.
+        - Chrome {">"}=111 and Edge {">"}=111 are recommended. In Firefox {">"}=111, a small set of functions are supported.
+          We do not test on Safari.
       </Typography>
       <Typography variant='body1'>
         - See <a href='https://github.com/UCLA-IRL/ndn-workspace-solid/wiki'>Wiki</a> for help.

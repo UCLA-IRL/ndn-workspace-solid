@@ -256,7 +256,6 @@ export async function bootstrapWorkspace(opts: {
       text: new Y.Text(),
     }
     rootDoc.latex[project.RootId].items.push(mainUuid)
-    rootDoc.aincraft.items = []
   } else {
     await syncAgent.replayUpdates('doc')
   }

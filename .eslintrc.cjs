@@ -6,7 +6,7 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:solid/recommended',
   ],
-  ignorePatterns: ['dist', '.eslintrc.cjs', 'aframe.d.ts'],
+  ignorePatterns: ['dist', '.eslintrc.cjs'],
   parser: '@typescript-eslint/parser',
   plugins: ['solid'],
   rules: {
