@@ -24,9 +24,10 @@ jobs:
   # Single deploy job since we're just deploying
   deploy:
     runs-on: ubuntu-latest
+    if: github.repository == 'UCLA-IRL/ndn-workspace-solid'
     environment: 
       name: firebase
-      url: https://zjkmxy.web.app/
+      url: https://ndn-workspace.web.app/
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -45,6 +46,6 @@ jobs:
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ZJKMXY }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_NDN_WORKSPACE }}'
           channelId: live
-          projectId: zjkmxy
+          projectId: ndn-workspace

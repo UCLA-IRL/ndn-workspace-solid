@@ -27,7 +27,7 @@ export default function OwnCertificate(props: {
     const cert = props.certificate
     if (cert !== undefined) {
       try {
-        const userKey = cert.name.getPrefix(cert.name.length - 2);
+        const userKey = cert.name.getPrefix(cert.name.length - 2)
         setNameStr(userKey.toString())
       } catch (e) {
         setNameStr('')

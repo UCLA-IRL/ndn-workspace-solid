@@ -5,7 +5,7 @@ import { Router, Route, Routes } from "@solidjs/router"
 
 import {
   Description as DescriptionIcon,
-  ViewInAr as ViewInArIcon,
+  // ViewInAr as ViewInArIcon,
   Apps as AppsIcon,
   SettingsEthernet as SettingsEthernetIcon,
   Home as HomeIcon,
@@ -14,7 +14,6 @@ import {
 import Root from './components/root-wrapper'
 import App from './App'
 import ShareLatex from './components/share-latex'
-import Scene from './components/networked-aframe/scene'
 import { NdnWorkspaceProvider } from './Context'
 import { Connect, StoredConns } from './components/connect'
 import { Workspace, Profile, Hackathon } from './components/workspace'
@@ -32,11 +31,9 @@ render(
             { icon: <AppsIcon />, href: '/profile', title: 'Workspace' },
             { icon: <SettingsEthernetIcon />, href: '/connection', title: 'Connection' },
             { icon: <DescriptionIcon />, href: `/latex/${project.RootId}`, title: 'LaTeX' },
-            { icon: <ViewInArIcon />, href: '/aframe', title: 'A-Frame' },
           ]} />} >
             <Route path="/" component={App} />
             <Route path="/latex/:itemId" element={<ShareLatex rootUri='/latex' />} />
-            <Route path="/aframe" component={Scene} />
             <Route path="/connection/add" component={Connect} />
             <Route path="/connection" component={StoredConns} />
             <Route path="/workspace" component={Workspace} />

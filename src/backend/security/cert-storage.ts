@@ -1,5 +1,5 @@
 import { Encoder, Decoder } from "@ndn/tlv"
-import { Name, Data, Verifier, Signer } from "@ndn/packet"
+import { Name, Data, Verifier, Signer, Interest } from "@ndn/packet"
 import {
   Certificate, createVerifier, createSigner, ECDSA
 } from "@ndn/keychain"
@@ -62,11 +62,14 @@ export class CertStorage {
         return undefined
       } else {
         try {
-          const result = await this.endpoint.consume(keyName, {
+          const result = await this.endpoint.consume(new Interest(
+            keyName,
+            Interest.MustBeFresh,
+            Interest.Lifetime(5000),
+          ), {
             // Fetched key must be signed by a known key
             // TODO: Find a better way to handle security
             verifier: this.localVerifier,
-            modifyInterest: { mustBeFresh: true, lifetime: 5000 },
             retx: 5,
           })
 

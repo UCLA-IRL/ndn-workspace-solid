@@ -17,7 +17,7 @@ import {
 } from '@suid/icons-material'
 import { project } from '../../backend/models'
 import { Link as RouterLink } from '@solidjs/router'
-import { For, Match, Switch } from 'solid-js';
+import { For, Match, Switch } from 'solid-js'
 
 export default function FileList(props: {
   rootUri: string,

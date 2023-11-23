@@ -16,19 +16,19 @@ export type PeerJs = ConfigBase & {
   kind: 'peerJs'
 
   /** Server host. */
-  host: string;
+  host: string
 
   /** Server port number. */
-  port: number;
+  port: number
 
   /** Connection key for server API calls. Defaults to `peerjs`. */
-  key?: string;
+  key?: string
 
   /** The path where your self-hosted PeerServer is running. Defaults to `'/'`. */
-  path?: string;
+  path?: string
 
   /** Optional ID of this peer provided by the user. */
-  peerId?: string;
+  peerId?: string
 }
 
 export type Config = NfdWs | PeerJs

@@ -2,7 +2,7 @@
 
 A local-first shared workspace demo application using NDNts and Yjs.
 
-Published at https://zjkmxy.web.app/
+Published at https://ndn-workspace.web.app/
 
 ## Usage
 

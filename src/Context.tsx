@@ -2,7 +2,7 @@
 // Wrap up NDN stuffs into Solid signals.
 import {
   createSignal, createContext, useContext,
-  type ParentProps, type Accessor,
+  type ParentProps, type Accessor, createEffect,
 } from "solid-js"
 import { RootDocStore, connections } from "./backend/models"
 import { SyncAgent } from "./backend/sync-agent"
@@ -42,6 +42,10 @@ export function NdnWorkspaceProvider(props: ParentProps<unknown>) {
   const [connStatus, setConnStatus] = createSignal<main.ConnState>(main.connectionStatus())
   const [connConfig, setConnConfig] = createSignal<connections.Config>()
   const [fileSystemSupported,] = createSignal(typeof window.showDirectoryPicker === 'function')
+
+  createEffect(() => {
+    main.connectionStatusSig().on("update", (newValue) => setConnStatus(newValue))
+  })
 
   // Execute the connection
   const connect = (config: connections.Config) => {

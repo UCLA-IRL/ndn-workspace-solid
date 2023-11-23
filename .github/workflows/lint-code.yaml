@@ -1,0 +1,40 @@
+# Simple workflow for deploying static content to GitHub Pages
+name: Lint
+
+on:
+  # Runs on pushes targeting the default branch
+  push:
+  pull_request:
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Down scope as necessary via https://docs.github.com/en/actions/security-guides/automatic-token-authentication#modifying-the-permissions-for-the-github_token
+permissions:
+  checks: write
+  contents: read
+
+jobs:
+  run-linters:
+    name: Run linters
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 21
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install
+      - name: Run linters
+        uses: wearerequired/lint-action@v2
+        with:
+          # Enable your linters here
+          eslint: true
+          eslint_args: "--ext ts,tsx --report-unused-disable-directives --max-warnings 10"

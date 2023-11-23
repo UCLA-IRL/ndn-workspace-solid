@@ -53,7 +53,7 @@ export default function BootSafebag(props: {
     try {
       const safebag = Decoder.decode(wire, SafeBag)
       const cert = safebag.certificate
-      userKey = cert.name.getPrefix(cert.name.length - 2);
+      userKey = cert.name.getPrefix(cert.name.length - 2)
       setSafeBag(safebag)
     } catch (e) {
       setErrorText(`Unable to parse certificate`)
