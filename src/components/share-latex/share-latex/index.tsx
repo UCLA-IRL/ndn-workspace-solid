@@ -4,17 +4,19 @@ import { useParams, useNavigate } from '@solidjs/router'
 import { project } from '../../../backend/models'
 import { createEffect, createSignal, onCleanup } from 'solid-js'
 import { observeDeep } from '@syncedstore/core'
-import { Name } from '@ndn/packet'
+import { Interest, Name, digestSigning } from '@ndn/packet'
 import { v4 as uuidv4 } from "uuid"
 import { useNdnWorkspace } from '../../../Context'
 import { FileMapper } from '../../../backend/file-mapper'
 import { createInterval } from '../../../utils'
 import ShareLatexComponent from './component'
+import { Encoder } from '@ndn/tlv'
+import * as segObj from '@ndn/segmented-object'
 
 export default function ShareLatex(props: {
   rootUri: string
 }) {
-  const { rootDoc, syncAgent, booted } = useNdnWorkspace()!
+  const { rootDoc, syncAgent, booted, endpoint } = useNdnWorkspace()!
   const navigate = useNavigate()
   const params = useParams<{ itemId: string }>()
   const itemId = () => params.itemId
@@ -163,26 +165,43 @@ export default function ShareLatex(props: {
   }
 
   const onCompile = async () => {
+    const agent = syncAgent()
+    if (!agent) {
+      return
+    }
     const zip = await project.exportAsZip(
-      async name => await syncAgent()?.getBlob(name),
+      async name => await agent.getBlob(name),
       rootDoc()!.latex)
-    const blobFile = await zip.generateAsync({ type: "blob" })
-    const formData = new FormData()
-    formData.append("file", new File([blobFile], 'upload.zip', {
-      type: 'application/octet-stream',
-    }))
-    // TODO: Find a new way to handle compilation. Maybe RICE
-    const response = await fetch('http://localhost:6175/zip', {
-      method: 'POST',
-      body: formData,
-    })
-    const val = await response.json()
-    const reqId: string = val.id
-    const status: string = val.status
-    if (status === 'success' && reqId) {
-      window.open(`http://localhost:6175/result/${reqId}`, "_blank", "noreferrer")
+    const blobFile = await zip.generateAsync({ type: "uint8array" })
+
+    // TODO: Disable the button when compiling is in progress
+    // TODO: Remove this temporary blob after finish (so is the object URL)
+    const reqName = await agent.publishBlob('zipToCompile', blobFile, undefined, false)
+    const reqNameEncoder = new Encoder()
+    reqName.encodeTo(reqNameEncoder)
+
+    const interest = new Interest(
+      '/ndn/workspace-compiler/request',
+      Interest.MustBeFresh,
+      Interest.Lifetime(60000),
+      reqNameEncoder.output,
+    )
+    await digestSigning.sign(interest)
+    const retWire = await endpoint.consume(interest)
+    const retText = new TextDecoder().decode(retWire.content)
+    const result = JSON.parse(retText)
+
+    if (result.status === 'error') {
+      console.error('Request failed')
+      console.log(result.stdout)
+      console.log(result.stderr)
     } else {
-      console.log(val)
+      console.info('Request finished')
+      const reqId = result.id
+      const pdfContent = await segObj.fetch(`/ndn/workspace-compiler/result/${reqId}`)
+      const file = new Blob([pdfContent], { type: 'application/pdf;base64' })
+      const fileUrl = URL.createObjectURL(file)
+      window.open(fileUrl)
     }
   }
 
