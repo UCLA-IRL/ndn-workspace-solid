@@ -9,6 +9,7 @@ import { SyncAgent } from "./backend/sync-agent"
 import * as main from "./backend/main"
 import { type Certificate } from "@ndn/keychain"
 import { type Theme, type Breakpoint } from "@suid/material/styles"
+import { Endpoint } from "@ndn/endpoint"
 
 type ContextType = {
   rootDoc: Accessor<RootDocStore | undefined>
@@ -33,6 +34,7 @@ type ContextType = {
   fileSystemSupported: Accessor<boolean>
   theme: Accessor<Theme<Breakpoint> | undefined>
   setTheme: Setter<Theme<Breakpoint> | undefined>
+  endpoint: Endpoint
 }
 
 const NdnWorkspaceContext = createContext<ContextType>()
@@ -99,6 +101,7 @@ export function NdnWorkspaceProvider(props: ParentProps<unknown>) {
     ownCertificate: () => main.ownCertificate,
     fileSystemSupported: fileSystemSupported,
     theme, setTheme,
+    endpoint: main.endpoint,
   }
 
   return (

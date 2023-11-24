@@ -34,7 +34,7 @@ export default function AppTools(props: {
         <div style={{ 'flex-grow': 1 }}>
           <PathBread rootPath={props.rootPath} pathIds={props.pathIds} resolveName={props.resolveName} />
         </div>
-        <Button onClick={props.onCompile} disabled>
+        <Button onClick={props.onCompile}>
           Compile
         </Button>
       </Toolbar>
