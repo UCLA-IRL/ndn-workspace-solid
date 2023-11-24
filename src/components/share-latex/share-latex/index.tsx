@@ -1,19 +1,15 @@
 import * as Y from 'yjs'
-import AppTools from './app-tools'
-import FileList from './file-list'
-import LatexDoc from './latex-doc'
-import NewItemModal, { ModalState } from './new-item-modal'
-import { Button } from '@suid/material'
+import { ModalState } from '../new-item-modal'
 import { useParams, useNavigate } from '@solidjs/router'
-import { project } from '../../backend/models'
-import { Match, Show, Switch, createEffect, createSignal, onCleanup } from 'solid-js'
+import { project } from '../../../backend/models'
+import { createEffect, createSignal, onCleanup } from 'solid-js'
 import { observeDeep } from '@syncedstore/core'
 import { Name } from '@ndn/packet'
 import { v4 as uuidv4 } from "uuid"
-import { useNdnWorkspace } from '../../Context'
-import RichDoc from './rich-doc'
-import { FileMapper } from '../../backend/file-mapper'
-import { createInterval } from '../../utils'
+import { useNdnWorkspace } from '../../../Context'
+import { FileMapper } from '../../../backend/file-mapper'
+import { createInterval } from '../../../utils'
+import ShareLatexComponent from './component'
 
 export default function ShareLatex(props: {
   rootUri: string
@@ -222,7 +218,7 @@ export default function ShareLatex(props: {
   createEffect(() => {
     const curRootDoc = rootDoc()
     const curMapper = mapper()
-    if(curRootDoc !== undefined && curMapper !== undefined) {
+    if (curRootDoc !== undefined && curMapper !== undefined) {
       const cancel = observeDeep(rootDoc()!.latex, () => curMapper.SyncAll())
       onCleanup(cancel)
     }
@@ -248,50 +244,19 @@ export default function ShareLatex(props: {
     })()
   }
 
-  return (
-    <>
-      <Show when={modalState() !== ''}>
-        <NewItemModal
-          modalState={modalState()}
-          onCancel={() => setModalState('')}
-          onSubmit={createItem}
-        />
-      </Show>
-      <AppTools
-        rootPath={props.rootUri}
-        pathIds={pathIds()}
-        resolveName={id => resolveItem(id)?.name}
-        onCompile={onCompile}
-        menuItems={[
-          { name: 'New folder', onClick: () => setModalState('folder') },
-          { name: 'New tex', onClick: () => setModalState('doc') },
-          { name: 'New rich doc', onClick: () => setModalState('richDoc') },
-          { name: 'Upload blob', onClick: () => setModalState('upload') },
-          { name: 'divider' },
-          { name: 'Download as zip', onClick: onExportZip },
-          { name: 'Map to a folder', onClick: onMapFolder },
-        ]} />
-      <Switch fallback={<></>}>
-        <Match when={folderChildren() !== undefined}>
-          <FileList
-            rootUri={props.rootUri}
-            subItems={folderChildren()!}
-            resolveItem={resolveItem}
-            deleteItem={deleteItem}
-          />
-        </Match>
-        <Match when={item()?.kind === 'text'}>
-          <LatexDoc doc={(item() as project.TextDoc).text} />
-        </Match>
-        <Match when={item()?.kind === 'xmldoc'}>
-          <RichDoc doc={(item() as project.XmlDoc).text} />
-        </Match>
-        <Match when={item()?.kind === 'blob'}>
-          <Button onClick={onDownloadBlob}>
-            DOWNLOAD
-          </Button>
-        </Match>
-      </Switch>
-    </>
-  )
+  return <ShareLatexComponent
+    rootUri={props.rootUri}
+    item={item()}
+    folderChildren={folderChildren()}
+    modalState={modalState}
+    setModalState={setModalState}
+    pathIds={pathIds}
+    resolveItem={resolveItem}
+    deleteItem={deleteItem}
+    createItem={createItem}
+    onExportZip={onExportZip}
+    onCompile={onCompile}
+    onMapFolder={onMapFolder}
+    onDownloadBlob={onDownloadBlob}
+  />
 }

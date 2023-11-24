@@ -12,6 +12,8 @@ import {
 import { createTheme, ThemeProvider } from "@suid/material/styles"
 import { Outlet, Link } from "@solidjs/router"
 import { For, JSX } from "solid-js"
+import { useNdnWorkspace } from "../Context"
+import { Portal } from "solid-js/web"
 
 const drawerWidth = 200
 
@@ -37,37 +39,45 @@ export default function Root(props: {
       mode: prefersDarkMode() ? "dark" : "light"
     },
   })
+  const { setTheme } = useNdnWorkspace()!
+  setTheme(theme)
 
   // TODO: MUI's Tab may be better?
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <div style={{
-        '--md-sys-color-primary': theme.palette.primary.main,
-        '--md-sys-color-on-primary': theme.palette.primary.contrastText,
-        '--md-sys-color-primary-container': theme.palette.primary.light,
-        '--md-sys-color-on-primary-container': theme.palette.primary.contrastText,
-        '--md-sys-color-secondary': theme.palette.secondary.main,
-        '--md-sys-color-on-secondary': theme.palette.secondary.contrastText,
-        '--md-sys-color-secondary-container': theme.palette.secondary.light,
-        '--md-sys-color-on-secondary-container': theme.palette.secondary.contrastText,
-        '--md-sys-color-tertiary': theme.palette.info.main,
-        '--md-sys-color-on-tertiary': theme.palette.info.contrastText,
-        '--md-sys-color-tertiary-container': theme.palette.info.light,
-        '--md-sys-color-on-tertiary-container': theme.palette.info.contrastText,
-        '--md-sys-color-error': theme.palette.error.main,
-        '--md-sys-color-on-error': theme.palette.error.contrastText,
-        '--md-sys-color-error-container': theme.palette.error.light,
-        '--md-sys-color-on-error-container': theme.palette.error.contrastText,
-        '--md-sys-color-background': theme.palette.background.default,
-        '--md-sys-color-on-background': theme.palette.text.primary,
-        '--md-sys-color-surface': theme.palette.background.paper,
-        '--md-sys-color-on-surface': theme.palette.text.primary,
-        '--md-sys-color-shadow': theme.palette.primary.main,
-        '--md-elevation-level': 0,
-        '--theme-color-success': theme.palette.success.main,
-        '--theme-color-grey-600': theme.palette.grey[600],
-      }}>
+      <Portal mount={document.getElementsByTagName("head")[0]}>
+        <style>{`
+        :root {
+          --md-sys-color-primary: ${theme.palette.primary.main};
+          --md-sys-color-on-primary: ${theme.palette.primary.contrastText};
+          --md-sys-color-primary-container: ${theme.palette.primary.light};
+          --md-sys-color-on-primary-container: ${theme.palette.primary.contrastText};
+          --md-sys-color-secondary: ${theme.palette.secondary.main};
+          --md-sys-color-on-secondary: ${theme.palette.secondary.contrastText};
+          --md-sys-color-secondary-container: ${theme.palette.secondary.light};
+          --md-sys-color-on-secondary-container: ${theme.palette.secondary.contrastText};
+          --md-sys-color-tertiary: ${theme.palette.info.main};
+          --md-sys-color-on-tertiary: ${theme.palette.info.contrastText};
+          --md-sys-color-tertiary-container: ${theme.palette.info.light};
+          --md-sys-color-on-tertiary-container: ${theme.palette.info.contrastText};
+          --md-sys-color-error: ${theme.palette.error.main};
+          --md-sys-color-on-error: ${theme.palette.error.contrastText};
+          --md-sys-color-error-container: ${theme.palette.error.light};
+          --md-sys-color-on-error-container: ${theme.palette.error.contrastText};
+          --md-sys-color-background: ${theme.palette.background.default};
+          --md-sys-color-on-background: ${theme.palette.text.primary};
+          --md-sys-color-surface: ${theme.palette.background.paper};
+          --md-sys-color-on-surface: ${theme.palette.text.primary};
+          --md-sys-color-shadow: ${theme.palette.primary.main};
+          --md-elevation-level: ${0};
+          --theme-color-success: ${theme.palette.success.main};
+          --theme-color-success-container: ${theme.palette.success.light};
+          --theme-color-grey-600: ${theme.palette.grey[600]};
+        }
+        `}</style>
+      </Portal>
+      <div>
         <Box sx={{ display: 'flex' }}>
           <Drawer
             sx={{
