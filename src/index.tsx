@@ -9,6 +9,7 @@ import {
   Apps as AppsIcon,
   SettingsEthernet as SettingsEthernetIcon,
   Home as HomeIcon,
+  Settings as SettingsIcon,
 } from "@suid/icons-material"
 
 import Root from './components/root-wrapper'
@@ -31,6 +32,7 @@ render(
             { icon: <AppsIcon />, href: '/profile', title: 'Workspace' },
             { icon: <SettingsEthernetIcon />, href: '/connection', title: 'Connection' },
             { icon: <DescriptionIcon />, href: `/latex/${project.RootId}`, title: 'LaTeX' },
+            { icon: <SettingsIcon />, href: '/', title: 'Settings' },
           ]} />} >
             <Route path="/" component={App} />
             <Route path="/latex/:itemId" element={<ShareLatex rootUri='/latex' />} />
