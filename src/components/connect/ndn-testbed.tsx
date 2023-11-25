@@ -89,7 +89,7 @@ export default function NdnTestbed(props: {
       const pubKey = keychain.createVerifier(keyName, algo, gen)
       const prvKeyBits = await crypto.subtle.exportKey('pkcs8', gen.privateKey)
       // Minus one to avoid the failure when the clock is not synced.
-      const maximalValidityDays = Math.floor(caProfile.maxValidityPeriod / 86400) - 1
+      const maximalValidityDays = Math.floor(caProfile.maxValidityPeriod / 86400000) - 1
 
       // New step
       const cert = await ndncert.requestCertificate({
