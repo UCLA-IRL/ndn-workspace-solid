@@ -46,12 +46,15 @@ export default function Hackathon() {
     const prvKey = keychain.createSigner(keyName, algo, gen)
     const pubKey = keychain.createVerifier(keyName, algo, gen)
     const prvKeyBits = await crypto.subtle.exportKey('pkcs8', gen.privateKey)
+      // Minus one to avoid the failure when the clock is not synced.
+    const maximalValidityDays = Math.floor(caProfile.maxValidityPeriod / 86400) - 1
 
     // New step
     const cert = await ndncert.requestCertificate({
       profile: caProfile,
       privateKey: prvKey,
       publicKey: pubKey,
+      validity: keychain.ValidityPeriod.daysFromNow(maximalValidityDays),
       challenges: [
         new ndncert.ClientPossessionChallenge(pofp, signer)
       ],
