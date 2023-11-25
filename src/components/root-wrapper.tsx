@@ -20,6 +20,7 @@ import { useNdnWorkspace } from "../Context"
 import { Portal } from "solid-js/web"
 
 const drawerWidth = 200
+const navBarHeight = 56
 
 function RouteItem(props: { icon: JSX.Element, title: string, href: string }) {
   return (
@@ -115,7 +116,14 @@ export default function Root(props: {
           {/* The body */}
           <Box
             component="main"
-            sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3, minHeight: '100vh', overflowX: 'hidden' }}
+            sx={{
+              flexGrow: 1,
+              bgcolor: 'background.default',
+              p: 3,
+              minHeight: { sm: '100vh', xs: `calc(100% - ${navBarHeight}px)` },
+              marginBottom: { sm: '0', xs: `${navBarHeight}px` },
+              overflowX: 'hidden'
+            }}
           >
             <Outlet />
           </Box>
@@ -123,7 +131,7 @@ export default function Root(props: {
           {/* The bottom navigation bar */}
           <Paper
             elevation={3}
-            sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }}
+            sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, height: `${navBarHeight}px` }}
           >
             <BottomNavigation
               showLabels
