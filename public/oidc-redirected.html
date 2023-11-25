@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Redirected Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+    <script>
+      // https://developers.google.com/oauthplayground/?code=CODE&scope=openid&authuser=0&prompt=consent
+      const urlParams = new URLSearchParams(document.location.search);
+      const code = urlParams.get("code");
+      const state = urlParams.get("state");
+      const channel = new BroadcastChannel("oauth-test");
+      channel.postMessage({ code, state });
+      setTimeout(() => {
+        channel.close();
+        window.close();
+      }, 10);
+    </script>
+  </head>
+  <body>
+    Authentication completed. This page will automatically close.
+  </body>
+</html>
