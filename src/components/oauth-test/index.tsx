@@ -5,6 +5,7 @@ import { GoogleOAuthClientId, GitHubOAuthClientId } from "../../constants"
 export default function OauthTest() {
   const [requestId, setRequestId] = createSignal('')
   const [accessCode, setAccessCode] = createSignal('')
+  // Official way should be useLocation, but I don't think we need it if we only uses the origin
   const basePath = location.origin  // === `${location.protocol}//${location.host}`
   const redirectTarget = `${basePath}/oidc-redirected.html`
   const channel = new BroadcastChannel('oauth-test')

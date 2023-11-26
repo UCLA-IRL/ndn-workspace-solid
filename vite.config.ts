@@ -15,11 +15,14 @@ export default defineConfig({
     // }),
     solid(),
     VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'src/workers',
+      filename: 'sw.ts',
       registerType: 'autoUpdate',
       devOptions: {
-        enabled: false  // SW and devtools adds > 1 sec to loading time. Enable only when nesessary.
+        enabled: true  // SW and devtools adds > 1 sec to loading time. Enable only when nesessary.
       },
-      includeAssets: ['ndn_app.png', 'ndn.svg'],
+      includeAssets: ['ndn_app.png', 'ndn.svg', 'font', 'font/*.woff2'],
       manifest: {
         "name": "NDN Workspace",
         "short_name": "NDN Workspace",
