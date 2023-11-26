@@ -12,7 +12,7 @@ import { createInterval } from '../../../utils'
 import ShareLatexComponent from './component'
 import { Encoder } from '@ndn/tlv'
 import * as segObj from '@ndn/segmented-object'
-import { PdfTeXEngine } from '../pdf-tex-engine-types'
+import { PdfTeXEngine } from '../../../vendor/swiftlatex/PdfTeXEngine'
 
 export default function ShareLatex(props: {
   rootUri: string
@@ -168,7 +168,7 @@ export default function ShareLatex(props: {
   const onCompile = async () => {
     let engine = texEngine()
     if (!engine) {
-      engine = new (globalThis as unknown as { PdfTeXEngine: { new(): PdfTeXEngine } }).PdfTeXEngine()
+      engine = new PdfTeXEngine()
       setTexEngine(engine)
       await engine.loadEngine()
     }
