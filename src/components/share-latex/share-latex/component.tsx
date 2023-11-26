@@ -19,7 +19,8 @@ export default function ShareLatexComponent(
     deleteItem: (index: number) => void
     createItem: (name: string, state: ModalState, blob?: Uint8Array) => void
     onExportZip: () => void
-    onCompile: () => Promise<void>
+    onCompileLocal: () => Promise<void>
+    onCompileRemote: () => Promise<void>
     onMapFolder: () => Promise<void>
     onDownloadBlob: () => void
   }
@@ -36,7 +37,8 @@ export default function ShareLatexComponent(
       rootPath={props.rootUri}
       pathIds={props.pathIds()}
       resolveName={id => props.resolveItem(id)?.name}
-      onCompile={props.onCompile}
+      onCompileLocal={props.onCompileLocal}
+      onCompileRemote={props.onCompileRemote}
       menuItems={[
         { name: 'New folder', onClick: () => props.setModalState('folder') },
         { name: 'New tex', onClick: () => props.setModalState('doc') },

@@ -166,7 +166,7 @@ export default function ShareLatex(props: {
   }
 
   const [texEngine, setTexEngine] = createSignal<PdfTeXEngine>()
-  const onCompile = async () => {
+  const onCompileLocal = async () => {
     let engine = texEngine()
     if (!engine) {
       engine = new PdfTeXEngine()
@@ -205,9 +205,7 @@ export default function ShareLatex(props: {
     window.open(fileUrl)
   }
 
-  // TODO:
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const onCompileServer = async () => {
+  const onCompileRemote = async () => {
     const agent = syncAgent()
     if (!agent) {
       return
@@ -317,7 +315,8 @@ export default function ShareLatex(props: {
     deleteItem={deleteItem}
     createItem={createItem}
     onExportZip={onExportZip}
-    onCompile={onCompile}
+    onCompileLocal={onCompileLocal}
+    onCompileRemote={onCompileRemote}
     onMapFolder={onMapFolder}
     onDownloadBlob={onDownloadBlob}
   />
