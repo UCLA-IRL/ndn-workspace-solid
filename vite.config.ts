@@ -2,7 +2,6 @@ import { defineConfig } from 'vite'
 import solid from 'vite-plugin-solid'
 import suidPlugin from "@suid/vite-plugin"
 // import devtools from 'solid-devtools/vite'
-import pluginRewriteAll from 'vite-plugin-rewrite-all'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
@@ -15,7 +14,6 @@ export default defineConfig({
     //   autoname: true,
     // }),
     solid(),
-    pluginRewriteAll(),
     VitePWA({
       registerType: 'autoUpdate',
       devOptions: {
