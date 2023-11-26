@@ -15,3 +15,5 @@ export const GoogleOAuthClientId = '960085847794-jgd05gg3b6l3ijm8khdiu8du8hb44h2
 export const GitHubOAuthClientId = 'Iv1.67da66ee76551396'
 
 export const DefaultTexliveEndpoint = 'https://texlive2.swiftlatex.com/'
+
+export const LatexEnginePath = '/swiftlatex/swiftlatexpdftex.js'

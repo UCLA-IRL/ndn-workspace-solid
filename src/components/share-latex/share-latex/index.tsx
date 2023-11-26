@@ -13,6 +13,7 @@ import ShareLatexComponent from './component'
 import { Encoder } from '@ndn/tlv'
 import * as segObj from '@ndn/segmented-object'
 import { PdfTeXEngine } from '../../../vendor/swiftlatex/PdfTeXEngine'
+import { LatexEnginePath } from '../../../constants'
 
 export default function ShareLatex(props: {
   rootUri: string
@@ -170,7 +171,8 @@ export default function ShareLatex(props: {
     if (!engine) {
       engine = new PdfTeXEngine()
       setTexEngine(engine)
-      await engine.loadEngine()
+      await engine.loadEngine(LatexEnginePath)
+      engine.setTexliveEndpoint(`${location.origin}/stored/`)
     }
 
     // Store all files in the WASM filesystem

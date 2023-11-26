@@ -15,8 +15,6 @@
  ********************************************************************************/
 // This is a modified version.
 
-const ENGINE_PATH = '/swiftlatex/swiftlatexpdftex.js';
-
 export enum EngineStatus {
   Init = 1,
   Ready,
@@ -46,13 +44,13 @@ export class PdfTeXEngine {
   public latexWorkerStatus: EngineStatus = EngineStatus.Init;
   constructor() { }
 
-  public async loadEngine() {
+  public async loadEngine(enginePath: string) {
     if (this.latexWorker !== undefined) {
       throw new Error('Other instance is running, abort()');
     }
     this.latexWorkerStatus = EngineStatus.Init;
     await new Promise<void>((resolve, reject) => {
-      this.latexWorker = new Worker(ENGINE_PATH);
+      this.latexWorker = new Worker(enginePath);
       this.latexWorker.onmessage = (ev: MessageEvent<MsgType>) => {
         if (ev.data.result === 'ok') {
           this.latexWorkerStatus = EngineStatus.Ready;
