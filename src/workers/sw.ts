@@ -24,4 +24,8 @@ precacheAndRoute(self.__WB_MANIFEST, {
 //   // denylist: [],
 // });
 
-registerRoute(new NavigationRoute(createHandlerBoundToURL("index.html")))
+registerRoute(new NavigationRoute(
+  createHandlerBoundToURL("index.html"),
+  {
+    denylist: [/\/stored\/.*/],
+  }))
