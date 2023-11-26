@@ -13,3 +13,5 @@ export const WorkspaceAnchorName = AltUri3.parseName(
 export const GoogleOAuthClientId = '960085847794-jgd05gg3b6l3ijm8khdiu8du8hb44h2i.apps.googleusercontent.com'
 
 export const GitHubOAuthClientId = 'Iv1.67da66ee76551396'
+
+export const DefaultTexliveEndpoint = 'https://texlive2.swiftlatex.com/'

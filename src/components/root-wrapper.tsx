@@ -133,7 +133,14 @@ export default function Root(props: {
           {/* The bottom navigation bar */}
           <Paper
             elevation={3}
-            sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, height: `${navBarHeight}px` }}
+            sx={{
+              position: 'fixed',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: `${navBarHeight}px`,
+              display: { sm: 'none', xs: 'flex' },
+            }}
           >
             <BottomNavigation
               showLabels
