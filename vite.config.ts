@@ -2,7 +2,6 @@ import { defineConfig } from 'vite'
 import solid from 'vite-plugin-solid'
 import suidPlugin from "@suid/vite-plugin"
 // import devtools from 'solid-devtools/vite'
-import pluginRewriteAll from 'vite-plugin-rewrite-all'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
@@ -15,13 +14,15 @@ export default defineConfig({
     //   autoname: true,
     // }),
     solid(),
-    pluginRewriteAll(),
     VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'src/workers',
+      filename: 'sw.ts',
       registerType: 'autoUpdate',
       devOptions: {
-        enabled: false  // SW and devtools adds > 1 sec to loading time. Enable only when nesessary.
+        enabled: true  // SW and devtools adds > 1 sec to loading time. Enable only when nesessary.
       },
-      includeAssets: ['ndn_app.png', 'ndn.svg'],
+      includeAssets: ['ndn_app.png', 'ndn.svg', 'font', 'font/*.woff2'],
       manifest: {
         "name": "NDN Workspace",
         "short_name": "NDN Workspace",

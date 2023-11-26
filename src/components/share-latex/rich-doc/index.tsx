@@ -1,10 +1,11 @@
-import { createEditorTransaction, createTiptapEditor } from 'solid-tiptap'
+import { createTiptapEditor } from 'solid-tiptap'
 import StarterKit from '@tiptap/starter-kit'
 import Collaboration from "@tiptap/extension-collaboration"
 import Highlight from '@tiptap/extension-highlight'
-import { type ChainedCommands, type Editor } from '@tiptap/core'
+import { Color } from '@tiptap/extension-color'
+import TextStyle from '@tiptap/extension-text-style'
 import * as Y from 'yjs'
-import { ParentProps, createSignal } from 'solid-js'
+import { createSignal } from 'solid-js'
 import { Card, CardContent, Divider, IconButton, Stack } from '@suid/material'
 import {
   FormatBold as FormatBoldIcon,
@@ -26,42 +27,8 @@ import {
   Redo as RedoIcon,
 } from '@suid/icons-material'
 import { H1Icon, H2Icon, H3Icon, H4Icon } from './icons'
-
-const CmdIcon = (props: ParentProps<{
-  editor: Editor | undefined,
-  toggle: (cmd?: ChainedCommands) => ChainedCommands | undefined,
-  activeName?: string,
-  activeAttr?: object,
-  noChecking?: boolean,
-}>) => {
-  const onClick = () => props.toggle(props.editor?.chain().focus())?.run()
-  const disabled = createEditorTransaction(
-    () => props.editor,
-    (editor) => {
-      if (props.noChecking) {
-        return props.editor === undefined
-      } else {
-        return !props.toggle(editor?.can().chain().focus())?.run()
-      }
-    })
-  const isActive = createEditorTransaction(
-    () => props.editor,
-    (editor) => {
-      if (props.activeName !== undefined) {
-        return editor?.isActive(props.activeName, props.activeAttr) ?? false
-      } else {
-        return false
-      }
-    })
-
-  return (<IconButton
-    onClick={onClick}
-    disabled={disabled()}
-    color={isActive() ? 'primary' : undefined}
-  >
-    {props.children}
-  </IconButton>)
-}
+import CmdIcon from './cmd-icon'
+import ColorList from './color-list'
 
 export default function RichDoc(props: {
   doc: Y.XmlFragment
@@ -79,6 +46,8 @@ export default function RichDoc(props: {
         fragment: props.doc,
       }),
       Highlight,
+      TextStyle,
+      Color,
     ],
   }))
 
@@ -172,6 +141,7 @@ export default function RichDoc(props: {
         >
           <NotesIcon />
         </CmdIcon>
+        <Divider orientation="vertical" flexItem />
         <CmdIcon
           editor={editor()}
           toggle={cmd => cmd?.toggleBulletList()}
@@ -193,6 +163,7 @@ export default function RichDoc(props: {
         >
           <DataObjectIcon />
         </CmdIcon>
+        <ColorList editor={editor()} />
         <Divider orientation="vertical" flexItem />
         <CmdIcon
           editor={editor()}

@@ -9,3 +9,7 @@ export const WorkspaceAnchorName = AltUri3.parseName(
   '/ndn/multicast/workspace-test/KEY/-%BE%A9%A9%01d%B67/self/v=1699662749518' +
   '/sha256digest=0880e74e252781f58f715a2c906b2e0cf12f10b8cc8277527ee2b3fbf30f6bd1'
 )
+
+export const GoogleOAuthClientId = '960085847794-jgd05gg3b6l3ijm8khdiu8du8hb44h2i.apps.googleusercontent.com'
+
+export const GitHubOAuthClientId = 'Iv1.67da66ee76551396'

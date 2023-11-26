@@ -9,7 +9,6 @@ export default function AppTools(props: {
   resolveName: (id: string) => string | undefined,
   menuItems: Array<{ name: string, onClick?: () => void, icon?: JSX.Element }>,
   onCompile: () => void,
-  onExportZip: () => void,
 }) {
   const [menuAnchor, setMenuAnchor] = createSignal<HTMLElement>()
   const menuOpen = () => menuAnchor() !== undefined
@@ -37,9 +36,6 @@ export default function AppTools(props: {
         </div>
         <Button onClick={props.onCompile}>
           Compile
-        </Button>
-        <Button onClick={props.onExportZip}>
-          Export Zip
         </Button>
       </Toolbar>
 

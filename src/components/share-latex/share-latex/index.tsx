@@ -1,31 +1,29 @@
 import * as Y from 'yjs'
-import AppTools from './app-tools'
-import FileList from './file-list'
-import LatexDoc from './latex-doc'
-import NewItemModal, { ModalState } from './new-item-modal'
-import { Button } from '@suid/material'
+import { ModalState } from '../new-item-modal'
 import { useParams, useNavigate } from '@solidjs/router'
-import { project } from '../../backend/models'
-import { Match, Show, Switch, createEffect, createSignal, onCleanup } from 'solid-js'
+import { project } from '../../../backend/models'
+import { createEffect, createSignal, onCleanup } from 'solid-js'
 import { observeDeep } from '@syncedstore/core'
-import { Name } from '@ndn/packet'
+import { Interest, Name, digestSigning } from '@ndn/packet'
 import { v4 as uuidv4 } from "uuid"
-import { useNdnWorkspace } from '../../Context'
-import RichDoc from './rich-doc'
-import { FileMapper } from '../../backend/file-mapper'
-import { createInterval } from '../../utils'
-import { PdfTeXEngine } from './pdf-tex-engine-types'
+import { useNdnWorkspace } from '../../../Context'
+import { FileMapper } from '../../../backend/file-mapper'
+import { createInterval } from '../../../utils'
+import ShareLatexComponent from './component'
+import { Encoder } from '@ndn/tlv'
+import * as segObj from '@ndn/segmented-object'
+import { PdfTeXEngine } from '../pdf-tex-engine-types'
 
 export default function ShareLatex(props: {
   rootUri: string
 }) {
-  const { rootDoc, syncAgent, booted } = useNdnWorkspace()!
+  const { rootDoc, syncAgent, booted, endpoint } = useNdnWorkspace()!
   const navigate = useNavigate()
   const params = useParams<{ itemId: string }>()
   const itemId = () => params.itemId
   const [item, setItem] = createSignal<project.Item>()
   const [mapper, setMapper] = createSignal<FileMapper>()
-  const [previewUrl, setPreviewUrl] = createSignal<string>()
+  // const [previewUrl, setPreviewUrl] = createSignal<string>()
   const { fileSystemSupported } = useNdnWorkspace()!
 
   const pathIds = (): string[] => {
@@ -198,33 +196,54 @@ export default function ShareLatex(props: {
     const data: Uint8Array = res.pdf
     const blob = new Blob([data], { type: 'application/pdf' })
 
-    // Replace PDF preview
-    URL.revokeObjectURL(previewUrl()!);
-    setPreviewUrl(URL.createObjectURL(blob))
+    // Replace PDF preview  -> Open a new window for now.
+    // URL.revokeObjectURL(previewUrl()!);
+    // setPreviewUrl(URL.createObjectURL(blob))
+    const fileUrl = URL.createObjectURL(blob)
+    window.open(fileUrl)
+  }
 
-    /*
-    const zip = await project.exportAsZip(
-      async name => await syncAgent()?.getBlob(name),
-      rootDoc()!.latex)
-    const blobFile = await zip.generateAsync({ type: "blob" })
-    const formData = new FormData()
-    formData.append("file", new File([blobFile], 'upload.zip', {
-      type: 'application/octet-stream',
-    }))
-    // TODO: Find a new way to handle compilation. Maybe RICE
-    const response = await fetch('http://localhost:6175/zip', {
-      method: 'POST',
-      body: formData,
-    })
-    const val = await response.json()
-    const reqId: string = val.id
-    const status: string = val.status
-    if (status === 'success' && reqId) {
-      window.open(`http://localhost:6175/result/${reqId}`, "_blank", "noreferrer")
-    } else {
-      console.log(val)
+  // TODO:
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const onCompileServer = async () => {
+    const agent = syncAgent()
+    if (!agent) {
+      return
     }
-    */
+    const zip = await project.exportAsZip(
+      async name => await agent.getBlob(name),
+      rootDoc()!.latex)
+    const blobFile = await zip.generateAsync({ type: "uint8array" })
+
+    // TODO: Disable the button when compiling is in progress
+    // TODO: Remove this temporary blob after finish (so is the object URL)
+    const reqName = await agent.publishBlob('zipToCompile', blobFile, undefined, false)
+    const reqNameEncoder = new Encoder()
+    reqName.encodeTo(reqNameEncoder)
+
+    const interest = new Interest(
+      '/ndn/workspace-compiler/request',
+      Interest.MustBeFresh,
+      Interest.Lifetime(60000),
+      reqNameEncoder.output,
+    )
+    await digestSigning.sign(interest)
+    const retWire = await endpoint.consume(interest)
+    const retText = new TextDecoder().decode(retWire.content)
+    const result = JSON.parse(retText)
+
+    if (result.status === 'error') {
+      console.error('Request failed')
+      console.log(result.stdout)
+      console.log(result.stderr)
+    } else {
+      console.info('Request finished')
+      const reqId = result.id
+      const pdfContent = await segObj.fetch(`/ndn/workspace-compiler/result/${reqId}`)
+      const file = new Blob([pdfContent], { type: 'application/pdf;base64' })
+      const fileUrl = URL.createObjectURL(file)
+      window.open(fileUrl)
+    }
   }
 
   const onMapFolder = async () => {
@@ -285,51 +304,19 @@ export default function ShareLatex(props: {
     })()
   }
 
-  return (
-    <>
-      <Show when={modalState() !== ''}>
-        <NewItemModal
-          modalState={modalState()}
-          onCancel={() => setModalState('')}
-          onSubmit={createItem}
-        />
-      </Show>
-      <AppTools
-        rootPath={props.rootUri}
-        pathIds={pathIds()}
-        resolveName={id => resolveItem(id)?.name}
-        onCompile={onCompile}
-        onExportZip={onExportZip}
-        menuItems={[
-          { name: 'New folder', onClick: () => setModalState('folder') },
-          { name: 'New tex', onClick: () => setModalState('doc') },
-          { name: 'New rich doc', onClick: () => setModalState('richDoc') },
-          { name: 'Upload blob', onClick: () => setModalState('upload') },
-          { name: 'divider' },
-          { name: 'Download as zip', onClick: onExportZip },
-          { name: 'Map to a folder', onClick: onMapFolder },
-        ]} />
-      <Switch fallback={<></>}>
-        <Match when={folderChildren() !== undefined}>
-          <FileList
-            rootUri={props.rootUri}
-            subItems={folderChildren()!}
-            resolveItem={resolveItem}
-            deleteItem={deleteItem}
-          />
-        </Match>
-        <Match when={item()?.kind === 'text'}>
-          <LatexDoc doc={(item() as project.TextDoc).text} previewUrl={previewUrl()} />
-        </Match>
-        <Match when={item()?.kind === 'xmldoc'}>
-          <RichDoc doc={(item() as project.XmlDoc).text} />
-        </Match>
-        <Match when={item()?.kind === 'blob'}>
-          <Button onClick={onDownloadBlob}>
-            DOWNLOAD
-          </Button>
-        </Match>
-      </Switch>
-    </>
-  )
+  return <ShareLatexComponent
+    rootUri={props.rootUri}
+    item={item()}
+    folderChildren={folderChildren()}
+    modalState={modalState}
+    setModalState={setModalState}
+    pathIds={pathIds}
+    resolveItem={resolveItem}
+    deleteItem={deleteItem}
+    createItem={createItem}
+    onExportZip={onExportZip}
+    onCompile={onCompile}
+    onMapFolder={onMapFolder}
+    onDownloadBlob={onDownloadBlob}
+  />
 }

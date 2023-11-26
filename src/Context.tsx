@@ -2,12 +2,14 @@
 // Wrap up NDN stuffs into Solid signals.
 import {
   createSignal, createContext, useContext,
-  type ParentProps, type Accessor, createEffect,
+  type ParentProps, type Accessor, createEffect, Setter,
 } from "solid-js"
 import { RootDocStore, connections } from "./backend/models"
 import { SyncAgent } from "./backend/sync-agent"
 import * as main from "./backend/main"
 import { type Certificate } from "@ndn/keychain"
+import { type Theme, type Breakpoint } from "@suid/material/styles"
+import { Endpoint } from "@ndn/endpoint"
 
 type ContextType = {
   rootDoc: Accessor<RootDocStore | undefined>
@@ -16,20 +18,23 @@ type ContextType = {
   connectionStatus: Accessor<main.ConnState>
   currentConnConfig: Accessor<connections.Config | undefined>
   connectFuncs: {
-    connect: (config: connections.Config) => void,
-    disconnect: () => void,
-  },
+    connect: (config: connections.Config) => void
+    disconnect: () => void
+  }
   bootstrapWorkspace: (opts: {
-    trustAnchor: Certificate,
-    prvKey: Uint8Array,
-    ownCertificate: Certificate,
-    createNew: boolean,
-    inMemory?: boolean,
-  }) => Promise<void>,
-  stopWorkspace: () => Promise<void>,
-  trustAnchor: () => Certificate | undefined,
-  ownCertificate: () => Certificate | undefined,
-  fileSystemSupported: Accessor<boolean>,
+    trustAnchor: Certificate
+    prvKey: Uint8Array
+    ownCertificate: Certificate
+    createNew: boolean
+    inMemory?: boolean
+  }) => Promise<void>
+  stopWorkspace: () => Promise<void>
+  trustAnchor: () => Certificate | undefined
+  ownCertificate: () => Certificate | undefined
+  fileSystemSupported: Accessor<boolean>
+  theme: Accessor<Theme<Breakpoint> | undefined>
+  setTheme: Setter<Theme<Breakpoint> | undefined>
+  endpoint: Endpoint
 }
 
 const NdnWorkspaceContext = createContext<ContextType>()
@@ -38,6 +43,7 @@ export function NdnWorkspaceProvider(props: ParentProps<unknown>) {
   const [rootDocSig, setRootDocSig] = createSignal<RootDocStore>()
   const [syncAgentSig, setSyncAgentSig] = createSignal<SyncAgent>()
   const [booted, setBooted] = createSignal(false)
+  const [theme, setTheme] = createSignal<Theme<Breakpoint>>()
 
   const [connStatus, setConnStatus] = createSignal<main.ConnState>(main.connectionStatus())
   const [connConfig, setConnConfig] = createSignal<connections.Config>()
@@ -94,6 +100,8 @@ export function NdnWorkspaceProvider(props: ParentProps<unknown>) {
     },
     ownCertificate: () => main.ownCertificate,
     fileSystemSupported: fileSystemSupported,
+    theme, setTheme,
+    endpoint: main.endpoint,
   }
 
   return (
