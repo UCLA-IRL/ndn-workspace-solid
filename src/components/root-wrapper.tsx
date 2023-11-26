@@ -122,7 +122,9 @@ export default function Root(props: {
               p: 3,
               minHeight: { sm: '100vh', xs: `calc(100% - ${navBarHeight}px)` },
               marginBottom: { sm: '0', xs: `${navBarHeight}px` },
-              overflowX: 'hidden'
+              overflowX: 'hidden',
+              display: 'flex',
+              flexDirection: 'column'
             }}
           >
             <Outlet />
@@ -131,7 +133,14 @@ export default function Root(props: {
           {/* The bottom navigation bar */}
           <Paper
             elevation={3}
-            sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, height: `${navBarHeight}px` }}
+            sx={{
+              position: 'fixed',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: `${navBarHeight}px`,
+              display: { sm: 'none', xs: 'flex' },
+            }}
           >
             <BottomNavigation
               showLabels

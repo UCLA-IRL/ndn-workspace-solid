@@ -8,7 +8,8 @@ export default function AppTools(props: {
   pathIds: string[],
   resolveName: (id: string) => string | undefined,
   menuItems: Array<{ name: string, onClick?: () => void, icon?: JSX.Element }>,
-  onCompile: () => void
+  onCompileLocal: () => Promise<void>,
+  onCompileRemote: () => Promise<void>,
 }) {
   const [menuAnchor, setMenuAnchor] = createSignal<HTMLElement>()
   const menuOpen = () => menuAnchor() !== undefined
@@ -34,8 +35,11 @@ export default function AppTools(props: {
         <div style={{ 'flex-grow': 1 }}>
           <PathBread rootPath={props.rootPath} pathIds={props.pathIds} resolveName={props.resolveName} />
         </div>
-        <Button onClick={props.onCompile}>
-          Compile
+        <Button onClick={props.onCompileLocal}>
+          Compile (local)
+        </Button>
+        <Button onClick={props.onCompileRemote}>
+          Compile (remote)
         </Button>
       </Toolbar>
 

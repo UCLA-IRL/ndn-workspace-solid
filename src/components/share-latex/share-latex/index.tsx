@@ -12,6 +12,8 @@ import { createInterval } from '../../../utils'
 import ShareLatexComponent from './component'
 import { Encoder } from '@ndn/tlv'
 import * as segObj from '@ndn/segmented-object'
+import { PdfTeXEngine } from '../../../vendor/swiftlatex/PdfTeXEngine'
+import { LatexEnginePath } from '../../../constants'
 
 export default function ShareLatex(props: {
   rootUri: string
@@ -22,6 +24,7 @@ export default function ShareLatex(props: {
   const itemId = () => params.itemId
   const [item, setItem] = createSignal<project.Item>()
   const [mapper, setMapper] = createSignal<FileMapper>()
+  // const [previewUrl, setPreviewUrl] = createSignal<string>()
   const { fileSystemSupported } = useNdnWorkspace()!
 
   const pathIds = (): string[] => {
@@ -151,20 +154,58 @@ export default function ShareLatex(props: {
     setModalState('')
   }
 
-  const onExportZip = () => {
-    project.exportAsZip(
+  const onExportZip = async () => {
+    const zip = await project.exportAsZip(
       async name => await syncAgent()?.getBlob(name),
       rootDoc()!.latex,
-    ).then(zip => {
-      zip.generateAsync({ type: "uint8array" }).then(content => {
-        const file = new Blob([content], { type: 'application/zip;base64' })
-        const fileUrl = URL.createObjectURL(file)
-        window.open(fileUrl)
-      })
-    })
+    )
+    const content = await zip.generateAsync({ type: "uint8array" })
+    const file = new Blob([content], { type: 'application/zip;base64' })
+    const fileUrl = URL.createObjectURL(file)
+    window.open(fileUrl)
   }
 
-  const onCompile = async () => {
+  const [texEngine, setTexEngine] = createSignal<PdfTeXEngine>()
+  const onCompileLocal = async () => {
+    let engine = texEngine()
+    if (!engine) {
+      engine = new PdfTeXEngine()
+      setTexEngine(engine)
+      await engine.loadEngine(LatexEnginePath)
+      engine.setTexliveEndpoint(`${location.origin}/stored/`)
+    }
+
+    // Store all files in the WASM filesystem
+    await project.walk(
+      async name => await syncAgent()?.getBlob(name),
+      rootDoc()!.latex,
+      (path) => engine!.makeMemFSFolder(path),
+      (path, item) => engine!.writeMemFSFile(path, item),
+    )
+
+    // Compile main.tex
+    engine.setEngineMainFile("main.tex")
+    const res = await engine.compileLaTeX()
+    console.log(res.log)
+
+    // Check if PDF is generated
+    if (!res.pdf) {
+      alert('Failed to compile PDF file')
+      console.error(res)
+      return
+    }
+
+    const data: Uint8Array = res.pdf
+    const blob = new Blob([data], { type: 'application/pdf' })
+
+    // Replace PDF preview  -> Open a new window for now.
+    // URL.revokeObjectURL(previewUrl()!);
+    // setPreviewUrl(URL.createObjectURL(blob))
+    const fileUrl = URL.createObjectURL(blob)
+    window.open(fileUrl)
+  }
+
+  const onCompileRemote = async () => {
     const agent = syncAgent()
     if (!agent) {
       return
@@ -274,7 +315,8 @@ export default function ShareLatex(props: {
     deleteItem={deleteItem}
     createItem={createItem}
     onExportZip={onExportZip}
-    onCompile={onCompile}
+    onCompileLocal={onCompileLocal}
+    onCompileRemote={onCompileRemote}
     onMapFolder={onMapFolder}
     onDownloadBlob={onDownloadBlob}
   />
