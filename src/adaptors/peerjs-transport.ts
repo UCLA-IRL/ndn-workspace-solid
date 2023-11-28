@@ -101,13 +101,12 @@ export namespace PeerJsTransport {
     return new Promise<PeerJsTransport>((resolve, reject) => {
       const sock = peer.connect(peerId, { serialization: "binary", reliable: false }) as BufferedConnection;
 
-      let timeout: NodeJS.Timeout | undefined; // eslint-disable-line prefer-const
       const fail = (err?: Error) => {
         clearTimeout(timeout);
         sock.close();
         reject(err);
       };
-      timeout = setTimeout(() => fail(new Error("connectTimeout")), connectTimeout);
+      const timeout = setTimeout(() => fail(new Error("connectTimeout")), connectTimeout);
 
       const onabort = () => fail(new Error("abort"));
       signal?.addEventListener("abort", onabort);
@@ -236,13 +235,12 @@ export namespace PeerJsListener {
     return new Promise<PeerJsListener>((resolve, reject) => {
       const peer: Peer = peerId ? new Peer(peerId, peerJsOpts) : new Peer(peerJsOpts);
 
-      let timeout: NodeJS.Timeout | undefined; // eslint-disable-line prefer-const
       const fail = (err?: Error) => {
         clearTimeout(timeout);
         peer.disconnect();
         reject(err);
       };
-      timeout = setTimeout(() => fail(new Error("connectTimeout")), connectTimeout);
+      const timeout = setTimeout(() => fail(new Error("connectTimeout")), connectTimeout);
 
       const onabort = () => fail(new Error("abort"));
       signal?.addEventListener("abort", onabort);

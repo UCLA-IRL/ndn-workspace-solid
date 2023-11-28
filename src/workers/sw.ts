@@ -3,7 +3,7 @@ import { clientsClaim } from 'workbox-core'
 import * as navigationPreload from 'workbox-navigation-preload'
 import { registerRoute, NavigationRoute } from 'workbox-routing'
 import { DefaultTexliveEndpoint } from '../constants'
-import { encodeKey } from '../utils'
+import { encodeKey, writeFile } from '../utils'
 
 declare let self: ServiceWorkerGlobalScope;
 
@@ -76,9 +76,7 @@ registerRoute(/\/stored\/.*/, async (options) => {
   if (result.status === 200) {
     // Write content
     const fileHandle = await stored.getFileHandle(hashStr, { create: true });
-    const writable = await fileHandle.createWritable({ keepExistingData: false });
-    await writable.write(await result.clone().arrayBuffer());
-    await writable.close();
+    await writeFile(fileHandle, await result.clone().arrayBuffer());
   } else if (result.status === 301 || result.status === 404) {
     // treat 301 as 404
     // do nothing

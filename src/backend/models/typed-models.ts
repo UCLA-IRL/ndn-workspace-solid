@@ -1,4 +1,4 @@
-import { encodeKey as encodePath } from "../../utils"
+import { encodeKey as encodePath, writeFile } from "../../utils"
 
 export class TypedModel<T> {
   constructor(
@@ -10,9 +10,7 @@ export class TypedModel<T> {
     const rootHandle = await navigator.storage.getDirectory()
     const connections = await rootHandle.getDirectoryHandle(this.storageFolder, { create: true })
     const fileHandle = await connections.getFileHandle(encodePath(this.getName(object)), { create: true })
-    const textFile = await fileHandle.createWritable()
-    await textFile.write(JSON.stringify(object))
-    await textFile.close()
+    await writeFile(fileHandle, JSON.stringify(object))
   }
 
   async remove(connName: string) {

@@ -1,5 +1,5 @@
 import { Storage } from "./types"
-import { encodeKey } from "../../utils"
+import { encodeKey, writeFile } from "../../utils"
 
 /**
  * A storage based on [File System API](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API).
@@ -32,9 +32,7 @@ export class FsStorage implements Storage {
     const fileName = encodeKey(key)
     if (value !== undefined) {
       const handle = await this.root.getFileHandle(fileName, { create: true })
-      const writable = await handle.createWritable({ keepExistingData: false })
-      await writable.write(value)
-      await writable.close()
+      await writeFile(handle, value)
     } else {
       try {
         await this.root.removeEntry(fileName)
