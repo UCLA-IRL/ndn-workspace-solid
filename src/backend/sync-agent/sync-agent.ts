@@ -360,6 +360,23 @@ export class SyncAgent {
     })
   }
 
+  /** 
+   * Save the current status into a local snapshot.
+   * This snapshot includes everyone's update and is not supposed to be published.
+   * Public snapshots use a different mechanism.
+   */
+  async saveLocalSnapshot() {
+    
+  }
+
+  /**
+   * Load from a local snapshot.
+   * @returns a SVS vector that can be used as a start point for `replayUpdates`.
+   */
+  async loadLocalSnapshot() {
+    
+  }
+
   static async create(
     nodeId: Name,
     persistStorage: Storage,
