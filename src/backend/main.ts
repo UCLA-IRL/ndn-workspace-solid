@@ -15,7 +15,7 @@ import { FsStorage, InMemoryStorage, type Storage } from "./storage"
 import { SyncAgent } from './sync-agent'
 import { Certificate, ECDSA, createSigner } from "@ndn/keychain"
 import { v4 as uuidv4 } from "uuid"
-import { base64ToBytes, encodeKey as encodePath, Signal as BackendSignal } from "../utils"
+import { base64ToBytes, encodeKey as encodePath, Signal as BackendSignal, openRoot } from "../utils"
 import { Decoder } from "@ndn/tlv"
 
 export const UseAutoAnnouncement = false
@@ -208,7 +208,7 @@ export async function bootstrapWorkspace(opts: {
   if (opts.inMemory) {
     persistStore = new InMemoryStorage()
   } else {
-    const handle = await navigator.storage.getDirectory()
+    const handle = await openRoot()
     const subFolder = await handle.getDirectoryHandle(encodePath(nodeId.toString()), { create: true })
     persistStore = new FsStorage(subFolder)
   }

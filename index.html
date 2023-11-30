@@ -1,21 +1,23 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/ndn.svg" />
+    <link rel="apple-touch-icon" href="/ndn_app.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#ce93d8" />
+    <link href="/font/roboto-v30.css" rel="stylesheet" />
+    <link href="/font/roboto-mono-v23.css" rel="stylesheet" />
+    <title>NDN Workspace</title>
+    <meta
+      name="description"
+      content="NDN Workspace for collaborative paper writing and documents"
+    />
+    <script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/ndn.svg" />
-  <link rel="apple-touch-icon" href="/ndn_app.png">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#ce93d8" />
-  <link href="/font/roboto-v30.css" rel="stylesheet" />
-  <link href="/font/roboto-mono-v23.css" rel="stylesheet" />
-  <title>NDN Workspace</title>
-  <meta name="description" content="NDN Workspace for collaborative paper writing and documents">
-</head>
-
-<body>
-  <div id="root" style="padding: 0; margin: 0;"></div>
-  <script type="module" src="/src/index.tsx"></script>
-</body>
-
+  <body>
+    <div id="root" style="padding: 0; margin: 0"></div>
+    <script type="module" src="/src/index.tsx"></script>
+  </body>
 </html>

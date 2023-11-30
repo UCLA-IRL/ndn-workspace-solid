@@ -162,7 +162,7 @@ export default function ShareLatex(props: {
     const content = await zip.generateAsync({ type: "uint8array" })
     const file = new Blob([content], { type: 'application/zip;base64' })
     const fileUrl = URL.createObjectURL(file)
-    window.open(fileUrl)
+    window.open(fileUrl)  // TODO: not working on Safari
   }
 
   const [texEngine, setTexEngine] = createSignal<PdfTeXEngine>()
@@ -202,7 +202,7 @@ export default function ShareLatex(props: {
     // URL.revokeObjectURL(previewUrl()!);
     // setPreviewUrl(URL.createObjectURL(blob))
     const fileUrl = URL.createObjectURL(blob)
-    window.open(fileUrl)
+    window.open(fileUrl)  // TODO: not working on Safari
   }
 
   const onCompileRemote = async () => {
@@ -242,7 +242,7 @@ export default function ShareLatex(props: {
       const pdfContent = await segObj.fetch(`/ndn/workspace-compiler/result/${reqId}`)
       const file = new Blob([pdfContent], { type: 'application/pdf;base64' })
       const fileUrl = URL.createObjectURL(file)
-      window.open(fileUrl)
+      window.open(fileUrl)  // TODO: not working on Safari
     }
   }
 
@@ -295,7 +295,7 @@ export default function ShareLatex(props: {
           if (blob !== undefined) {
             const file = new Blob([blob], { type: 'application/octet-stream;base64' })
             const fileUrl = URL.createObjectURL(file)
-            window.open(fileUrl)
+            window.open(fileUrl)  // TODO: not working on Safari
           }
         } catch (e) {
           console.error(`Unable to fetch blob file: `, e)

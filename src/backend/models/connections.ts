@@ -1,3 +1,4 @@
+import { openRoot } from "../../utils"
 import { TypedModel } from "./typed-models"
 
 export type ConfigBase = {
@@ -50,7 +51,7 @@ export const storageFolder = 'connections'
 export const connections = new TypedModel<Config>('connections', getName)
 
 export async function initDefault() {
-  const rootHandle = await navigator.storage.getDirectory()
+  const rootHandle = await openRoot()
   try {
     await rootHandle.getDirectoryHandle(storageFolder)
     return

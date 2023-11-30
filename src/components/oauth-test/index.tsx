@@ -35,7 +35,7 @@ export default function OauthTest() {
       access_type: 'offline',
     }).toString()
     const url = 'https://accounts.google.com/o/oauth2/v2/auth?' + queryStr
-    window.open(url)
+    window.open(url)  // TODO: not working on Safari
   }
 
 
@@ -48,7 +48,7 @@ export default function OauthTest() {
       state: requestId(),
     }).toString()
     const url = 'https://github.com/login/oauth/authorize?' + queryStr
-    window.open(url)
+    window.open(url)  // TODO: not working on Safari
   }
 
 
