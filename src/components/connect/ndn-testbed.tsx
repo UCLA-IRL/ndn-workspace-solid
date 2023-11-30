@@ -67,21 +67,30 @@ export default function NdnTestbed(props: {
         setTempFace(nfdWsFace)
       }
 
-      // Request profile
-      const caProfile = await ndncert.retrieveCaProfile({
-        caCertFullName: TestbedAnchorName,
-      })
-      // Probe step
-      const probeRes = await ndncert.requestProbe({
-        profile: caProfile,
-        parameters: { email: new TextEncoder().encode(curEmail) },
-      })
-      if (probeRes.entries.length <= 0) {
-        console.error('No available name to register')
-        return
+      let caProfile: ndncert.CaProfile | undefined = undefined
+      let caFullName = TestbedAnchorName
+      let probeRes
+      while (caProfile === undefined) {
+        // Request profile
+        caProfile = await ndncert.retrieveCaProfile({
+          caCertFullName: caFullName,
+        })
+        // Probe step
+        probeRes = await ndncert.requestProbe({
+          profile: caProfile,
+          parameters: { email: new TextEncoder().encode(curEmail) },
+        })
+        if (probeRes.entries.length <= 0) {
+          console.error('No available name to register')
+          return
+        }
+        if (probeRes.redirects.length > 0) {
+          caFullName = probeRes.redirects[0].caCertFullName
+          caProfile = undefined
+        }
       }
       // Generate key pair
-      const myPrefix = probeRes.entries[0].prefix
+      const myPrefix = probeRes!.entries[0].prefix
       const keyName = keychain.CertNaming.makeKeyName(myPrefix)
       const algo = keychain.ECDSA
       const gen = await keychain.ECDSA.cryptoGenerate({}, true)
