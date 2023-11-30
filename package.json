@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build && ./fix-sw.bash",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "peer-server": "peerjs --port 8000 --key peerjs --path /aincraft --allow_discovery true",
@@ -50,6 +50,7 @@
     "diff": "^5.1.0",
     "event-iterator": "^2.0.0",
     "eventemitter3": "^5.0.1",
+    "file-system-access": "^1.0.4",
     "jszip": "^3.10.1",
     "peerjs": "^1.5.1",
     "qr-scanner": "^1.4.2",

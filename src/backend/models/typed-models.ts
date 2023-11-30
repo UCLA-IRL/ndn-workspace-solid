@@ -1,4 +1,4 @@
-import { encodeKey as encodePath } from "../../utils"
+import { encodeKey as encodePath, openRoot } from "../../utils"
 
 export class TypedModel<T> {
   constructor(
@@ -7,7 +7,7 @@ export class TypedModel<T> {
   ) { }
 
   async save(object: T) {
-    const rootHandle = await navigator.storage.getDirectory()
+    const rootHandle = await openRoot()
     const connections = await rootHandle.getDirectoryHandle(this.storageFolder, { create: true })
     const fileHandle = await connections.getFileHandle(encodePath(this.getName(object)), { create: true })
     const textFile = await fileHandle.createWritable()
@@ -16,7 +16,7 @@ export class TypedModel<T> {
   }
 
   async remove(connName: string) {
-    const rootHandle = await navigator.storage.getDirectory()
+    const rootHandle = await openRoot()
     const objects = await rootHandle.getDirectoryHandle(this.storageFolder, { create: true })
     try {
       await objects.removeEntry(encodePath(connName), { recursive: true })
@@ -27,7 +27,7 @@ export class TypedModel<T> {
   }
 
   async isExisting(connName: string) {
-    const rootHandle = await navigator.storage.getDirectory()
+    const rootHandle = await openRoot()
     const objects = await rootHandle.getDirectoryHandle(this.storageFolder, { create: true })
     try {
       await objects.getFileHandle(encodePath(connName), { create: false })
@@ -38,7 +38,7 @@ export class TypedModel<T> {
   }
 
   async load(connName: string) {
-    const rootHandle = await navigator.storage.getDirectory()
+    const rootHandle = await openRoot()
     const objects = await rootHandle.getDirectoryHandle(this.storageFolder, { create: true })
     try {
       const file = await objects.getFileHandle(encodePath(connName), { create: false })
@@ -52,12 +52,12 @@ export class TypedModel<T> {
   }
 
   async loadAll() {
-    const rootHandle = await navigator.storage.getDirectory()
+    const rootHandle = await openRoot()
 
     const objects = await rootHandle.getDirectoryHandle(this.storageFolder, { create: true })
     const ret: Array<T> = []
     for await (const [, handle] of objects.entries()) {
-      if (handle instanceof FileSystemFileHandle) {
+      if (handle.kind === 'file') {
         const jsonFile = await handle.getFile()
         const jsonText = await jsonFile.text()
         const object = JSON.parse(jsonText) as T
