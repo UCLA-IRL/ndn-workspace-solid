@@ -21,7 +21,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       injectRegister: null,
       devOptions: {
-        enabled: true  // SW and devtools adds > 1 sec to loading time. Enable only when nesessary.
+        enabled: false  // SW and devtools adds > 1 sec to loading time. Enable only when nesessary.
       },
       includeAssets: ['ndn_app.png', 'ndn.svg', 'font', 'font/*.woff2', 'swiftlatex/swiftlatexpdftex.wasm'],
       manifest: {

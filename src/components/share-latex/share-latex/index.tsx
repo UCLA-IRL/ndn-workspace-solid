@@ -14,6 +14,7 @@ import { Encoder } from '@ndn/tlv'
 import * as segObj from '@ndn/segmented-object'
 import { PdfTeXEngine } from '../../../vendor/swiftlatex/PdfTeXEngine'
 import { LatexEnginePath } from '../../../constants'
+import { ViewValues } from '../types'
 
 export default function ShareLatex(props: {
   rootUri: string
@@ -40,6 +41,8 @@ export default function ShareLatex(props: {
 
   const [folderChildren, setFolderChildren] = createSignal<string[]>()
   const [modalState, setModalState] = createSignal<ModalState>('')
+  const [view, setView] = createSignal<ViewValues>('Editor')
+  const [compilationLog, setCompilationLog] = createSignal<string>('')
 
   if (!booted()) {
     navigate('/', { replace: true })
@@ -166,7 +169,7 @@ export default function ShareLatex(props: {
   }
 
   const [texEngine, setTexEngine] = createSignal<PdfTeXEngine>()
-  const onCompileLocal = async () => {
+  const onCompile = async () => {
     let engine = texEngine()
     if (!engine) {
       engine = new PdfTeXEngine()
@@ -185,13 +188,14 @@ export default function ShareLatex(props: {
 
     // Compile main.tex
     engine.setEngineMainFile("main.tex")
+    setCompilationLog('Start compiling ...')
     const res = await engine.compileLaTeX()
-    console.log(res.log)
+    setCompilationLog(res.log)
 
     // Check if PDF is generated
     if (!res.pdf) {
       alert('Failed to compile PDF file')
-      console.error(res)
+      setCompilationLog(res.log)
       return
     }
 
@@ -205,7 +209,9 @@ export default function ShareLatex(props: {
     window.open(fileUrl)  // TODO: not working on Safari
   }
 
-  const onCompileRemote = async () => {
+  // Preservec unused
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _onCompileRemote = async () => {
     const agent = syncAgent()
     if (!agent) {
       return
@@ -315,9 +321,11 @@ export default function ShareLatex(props: {
     deleteItem={deleteItem}
     createItem={createItem}
     onExportZip={onExportZip}
-    onCompileLocal={onCompileLocal}
-    onCompileRemote={onCompileRemote}
+    onCompile={onCompile}
     onMapFolder={onMapFolder}
     onDownloadBlob={onDownloadBlob}
+    view={view}
+    setView={setView}
+    compilationLog={compilationLog()}
   />
 }
