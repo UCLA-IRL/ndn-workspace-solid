@@ -7,6 +7,7 @@ import { project } from '../../../backend/models'
 import { Accessor, Match, Setter, Show, Switch } from 'solid-js'
 import RichDoc from '../rich-doc'
 import { ViewValues } from '../types'
+import PdfViewer from '../pdf-viewer'
 
 export default function ShareLatexComponent(
   props: {
@@ -26,6 +27,7 @@ export default function ShareLatexComponent(
     view: Accessor<ViewValues>
     setView: Setter<ViewValues>
     compilationLog: string
+    pdfUrl: string | undefined
   }
 ) {
   return <>
@@ -76,7 +78,7 @@ export default function ShareLatexComponent(
       </Switch>
     </Show>
     <Show when={props.view() === 'PDF' || props.view() === 'Both'}>
-      <></>
+      <PdfViewer pdfUrl={props.pdfUrl} />
     </Show>
     <Show when={props.view() === 'Log'}>
       <TextField

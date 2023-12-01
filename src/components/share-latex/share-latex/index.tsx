@@ -43,6 +43,7 @@ export default function ShareLatex(props: {
   const [modalState, setModalState] = createSignal<ModalState>('')
   const [view, setView] = createSignal<ViewValues>('Editor')
   const [compilationLog, setCompilationLog] = createSignal<string>('')
+  const [pdfUrl, setPdfUrl] = createSignal<string>()
 
   if (!booted()) {
     navigate('/', { replace: true })
@@ -175,7 +176,10 @@ export default function ShareLatex(props: {
       engine = new PdfTeXEngine()
       setTexEngine(engine)
       await engine.loadEngine(LatexEnginePath)
-      engine.setTexliveEndpoint(`${location.origin}/stored/`)
+      if (process.env.NODE_ENV && process.env.NODE_ENV !== 'development') {
+        // Only set URL in production mode
+        engine.setTexliveEndpoint(`${location.origin}/stored/`)
+      }
     }
 
     // Store all files in the WASM filesystem
@@ -206,7 +210,11 @@ export default function ShareLatex(props: {
     // URL.revokeObjectURL(previewUrl()!);
     // setPreviewUrl(URL.createObjectURL(blob))
     const fileUrl = URL.createObjectURL(blob)
-    window.open(fileUrl)  // TODO: not working on Safari
+    const oldUrl = pdfUrl()
+    if (oldUrl) {
+      URL.revokeObjectURL(oldUrl)
+    }
+    setPdfUrl(fileUrl)
   }
 
   // Preservec unused
@@ -248,7 +256,7 @@ export default function ShareLatex(props: {
       const pdfContent = await segObj.fetch(`/ndn/workspace-compiler/result/${reqId}`)
       const file = new Blob([pdfContent], { type: 'application/pdf;base64' })
       const fileUrl = URL.createObjectURL(file)
-      window.open(fileUrl)  // TODO: not working on Safari
+      window.open(fileUrl)
     }
   }
 
@@ -327,5 +335,6 @@ export default function ShareLatex(props: {
     view={view}
     setView={setView}
     compilationLog={compilationLog()}
+    pdfUrl={pdfUrl()}
   />
 }
