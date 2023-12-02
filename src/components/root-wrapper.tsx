@@ -85,11 +85,11 @@ export default function Root(props: {
         <ColorVariables theme={theme} />
       </Portal>
       <div>
-        {/* The left navigation bar. Breakpoint: 0 <= xs <= 600px, 600px < sm  */}
+        {/* The left navigation bar. Breakpoint: 0 <= xs <= 600px, 600px < sm,md <= 900,1200, 1200 <= lg  */}
         <Box sx={{ display: 'flex' }}>
           <Box
             component="nav"
-            sx={{ width: { sm: drawerWidth, xs: 0 }, flexShrink: 0 }}
+            sx={{ width: { md: drawerWidth, xs: 0 }, flexShrink: 0 }}
             aria-label="navibar"
           >
             <Drawer
@@ -100,7 +100,7 @@ export default function Root(props: {
                   width: drawerWidth,
                   boxSizing: 'border-box',
                 },
-                display: { sm: 'block', xs: 'none' },
+                display: { md: 'block', xs: 'none' },
               }}
               variant="permanent"
               anchor="left"
@@ -120,8 +120,8 @@ export default function Root(props: {
               flexGrow: 1,
               bgcolor: 'background.default',
               p: 3,
-              minHeight: { sm: '100vh', xs: `calc(100% - ${navBarHeight}px)` },
-              marginBottom: { sm: '0', xs: `${navBarHeight}px` },
+              minHeight: { md: '100vh', xs: `calc(100% - ${navBarHeight}px)` },
+              marginBottom: { md: '0', xs: `${navBarHeight}px` },
               overflowX: 'hidden',
               display: 'flex',
               flexDirection: 'column'
@@ -139,13 +139,13 @@ export default function Root(props: {
               left: 0,
               right: 0,
               height: `${navBarHeight}px`,
-              display: { sm: 'none', xs: 'flex' },
+              display: { md: 'none', xs: 'flex' },
             }}
           >
             <BottomNavigation
               showLabels
               sx={{
-                display: { sm: 'none', xs: 'flex' },
+                display: { md: 'none', xs: 'flex' },
                 width: "100%",
               }}
               component={Stack}
