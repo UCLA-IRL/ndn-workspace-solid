@@ -3,7 +3,7 @@ import { clientsClaim } from 'workbox-core'
 import * as navigationPreload from 'workbox-navigation-preload'
 import { registerRoute, NavigationRoute } from 'workbox-routing'
 import { DefaultTexliveEndpoint } from '../constants'
-import { encodeKey } from '../utils'
+import { encodeKey, openRoot } from '../utils'
 
 declare let self: ServiceWorkerGlobalScope;
 
@@ -43,8 +43,7 @@ registerRoute(/\/stored\/.*/, async (options) => {
     newUrl = originalUrl;
   }
 
-
-  const opfsRoot = await navigator.storage.getDirectory();
+  const opfsRoot = await openRoot();
   const stored = await opfsRoot.getDirectoryHandle('stored', { create: true });
   const hashStr = encodeKey(newUrl.toString());
   try {

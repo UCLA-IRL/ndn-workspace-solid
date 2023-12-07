@@ -14,6 +14,7 @@ import { Encoder } from '@ndn/tlv'
 import * as segObj from '@ndn/segmented-object'
 import { PdfTeXEngine } from '../../../vendor/swiftlatex/PdfTeXEngine'
 import { LatexEnginePath } from '../../../constants'
+import { ViewValues } from '../types'
 
 export default function ShareLatex(props: {
   rootUri: string
@@ -40,6 +41,9 @@ export default function ShareLatex(props: {
 
   const [folderChildren, setFolderChildren] = createSignal<string[]>()
   const [modalState, setModalState] = createSignal<ModalState>('')
+  const [view, setView] = createSignal<ViewValues>('Editor')
+  const [compilationLog, setCompilationLog] = createSignal<string>('')
+  const [pdfUrl, setPdfUrl] = createSignal<string>()
 
   if (!booted()) {
     navigate('/', { replace: true })
@@ -162,17 +166,20 @@ export default function ShareLatex(props: {
     const content = await zip.generateAsync({ type: "uint8array" })
     const file = new Blob([content], { type: 'application/zip;base64' })
     const fileUrl = URL.createObjectURL(file)
-    window.open(fileUrl)
+    window.open(fileUrl)  // TODO: not working on Safari
   }
 
   const [texEngine, setTexEngine] = createSignal<PdfTeXEngine>()
-  const onCompileLocal = async () => {
+  const onCompile = async () => {
     let engine = texEngine()
     if (!engine) {
       engine = new PdfTeXEngine()
       setTexEngine(engine)
       await engine.loadEngine(LatexEnginePath)
-      engine.setTexliveEndpoint(`${location.origin}/stored/`)
+      if (process.env.NODE_ENV && process.env.NODE_ENV !== 'development') {
+        // Only set URL in production mode
+        engine.setTexliveEndpoint(`${location.origin}/stored/`)
+      }
     }
 
     // Store all files in the WASM filesystem
@@ -185,13 +192,14 @@ export default function ShareLatex(props: {
 
     // Compile main.tex
     engine.setEngineMainFile("main.tex")
+    setCompilationLog('Start compiling ...')
     const res = await engine.compileLaTeX()
-    console.log(res.log)
+    setCompilationLog(res.log)
 
     // Check if PDF is generated
     if (!res.pdf) {
       alert('Failed to compile PDF file')
-      console.error(res)
+      setCompilationLog(res.log)
       return
     }
 
@@ -202,10 +210,16 @@ export default function ShareLatex(props: {
     // URL.revokeObjectURL(previewUrl()!);
     // setPreviewUrl(URL.createObjectURL(blob))
     const fileUrl = URL.createObjectURL(blob)
-    window.open(fileUrl)
+    const oldUrl = pdfUrl()
+    if (oldUrl) {
+      URL.revokeObjectURL(oldUrl)
+    }
+    setPdfUrl(fileUrl)
   }
 
-  const onCompileRemote = async () => {
+  // Preservec unused
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _onCompileRemote = async () => {
     const agent = syncAgent()
     if (!agent) {
       return
@@ -295,7 +309,7 @@ export default function ShareLatex(props: {
           if (blob !== undefined) {
             const file = new Blob([blob], { type: 'application/octet-stream;base64' })
             const fileUrl = URL.createObjectURL(file)
-            window.open(fileUrl)
+            window.open(fileUrl)  // TODO: not working on Safari
           }
         } catch (e) {
           console.error(`Unable to fetch blob file: `, e)
@@ -315,9 +329,12 @@ export default function ShareLatex(props: {
     deleteItem={deleteItem}
     createItem={createItem}
     onExportZip={onExportZip}
-    onCompileLocal={onCompileLocal}
-    onCompileRemote={onCompileRemote}
+    onCompile={onCompile}
     onMapFolder={onMapFolder}
     onDownloadBlob={onDownloadBlob}
+    view={view}
+    setView={setView}
+    compilationLog={compilationLog()}
+    pdfUrl={pdfUrl()}
   />
 }

@@ -19,6 +19,7 @@ export default defineConfig({
       srcDir: 'src/workers',
       filename: 'sw.ts',
       registerType: 'autoUpdate',
+      injectRegister: null,
       devOptions: {
         enabled: false  // SW and devtools adds > 1 sec to loading time. Enable only when nesessary.
       },

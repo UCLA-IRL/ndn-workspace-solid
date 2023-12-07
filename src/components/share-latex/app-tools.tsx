@@ -1,15 +1,18 @@
-import { AppBar, Button, IconButton, Toolbar, Divider, MenuItem, Menu } from "@suid/material"
+import { AppBar, Button, IconButton, Toolbar, Divider, MenuItem, Menu, Select } from "@suid/material"
 import MenuIcon from "@suid/icons-material/Menu"
 import PathBread from './path-bread'
-import { createSignal, For, Switch, type JSX, Match } from "solid-js"
+import { createSignal, For, Switch, type JSX, Match, Accessor, Setter } from "solid-js"
+import { SelectChangeEvent } from "@suid/material/Select"
+import { ViewValues } from "./types"
 
 export default function AppTools(props: {
   rootPath: string,
   pathIds: string[],
   resolveName: (id: string) => string | undefined,
   menuItems: Array<{ name: string, onClick?: () => void, icon?: JSX.Element }>,
-  onCompileLocal: () => Promise<void>,
-  onCompileRemote: () => Promise<void>,
+  onCompile: () => Promise<void>,
+  view: Accessor<ViewValues>,
+  setView: Setter<ViewValues>,
 }) {
   const [menuAnchor, setMenuAnchor] = createSignal<HTMLElement>()
   const menuOpen = () => menuAnchor() !== undefined
@@ -35,12 +38,19 @@ export default function AppTools(props: {
         <div style={{ 'flex-grow': 1 }}>
           <PathBread rootPath={props.rootPath} pathIds={props.pathIds} resolveName={props.resolveName} />
         </div>
-        <Button onClick={props.onCompileLocal}>
-          Compile (local)
+        <Button onClick={props.onCompile}>
+          Compile
         </Button>
-        <Button onClick={props.onCompileRemote}>
-          Compile (remote)
-        </Button>
+        <Select
+          id="view-select"
+          value={props.view()}
+          onChange={(event: SelectChangeEvent) => props.setView(event.target.value as ViewValues)}
+        >
+          <MenuItem value="Editor">Editor</MenuItem>
+          <MenuItem value="PDF">PDF</MenuItem>
+          <MenuItem value="Both">Both</MenuItem>
+          <MenuItem value="Log">Log</MenuItem>
+        </Select>
       </Toolbar>
 
       <Menu
