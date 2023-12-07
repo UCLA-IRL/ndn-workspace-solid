@@ -30,7 +30,7 @@ export class CompileResult {
 }
 
 type CommandString = 'compile' | 'compilelatex' | 'compileformat' | "settexliveurl" | "mkdir" |
-  "writefile" | "setmainfile" | "grace" | "flushcache";
+  "writefile" | "setmainfile" | "grace" | "flushcache" | "log";
 
 type MsgType = {
   result: string;
@@ -76,15 +76,18 @@ export class PdfTeXEngine {
     }
   }
 
-  public async compileLaTeX() {
+  public async compileLaTeX(logger: (log: string) => void) {
     this.checkEngineStatus();
     this.latexWorkerStatus = EngineStatus.Busy;
     const start_compile_time = performance.now();
     const res: CompileResult = await new Promise(resolve => {
       this.latexWorker!.onmessage = (ev: MessageEvent<MsgType>) => {
-        if (ev.data.cmd !== "compile") return;
+        if (ev.data.cmd === "log") {
+          logger(ev.data.log ?? "");
+          return;
+        } else if (ev.data.cmd !== "compile") return;
         this.latexWorkerStatus = EngineStatus.Ready;
-        console.log('Engine compilation finish ' + (performance.now() - start_compile_time));
+        logger('Engine compilation finish ' + (performance.now() - start_compile_time));
         const nice_report = new CompileResult();
         nice_report.status = ev.data.status!;
         nice_report.log = ev.data.log ?? '';
@@ -95,7 +98,7 @@ export class PdfTeXEngine {
         resolve(nice_report);
       };
       this.latexWorker!.postMessage({ 'cmd': 'compilelatex' });
-      console.log('Engine compilation start');
+      logger('Engine compilation start');
     });
     this.latexWorker!.onmessage = () => { };
 
@@ -157,7 +160,6 @@ export class PdfTeXEngine {
       // console.warn('Flushing');
       this.latexWorker.postMessage({ 'cmd': 'flushcache' });
     }
-
   }
 
   public setTexliveEndpoint(url: string) {

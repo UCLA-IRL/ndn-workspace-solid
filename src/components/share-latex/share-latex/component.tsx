@@ -85,7 +85,7 @@ export default function ShareLatexComponent(
         fullWidth
         multiline
         rows={props.compilationLog.split('\n').length}
-        minRows={1}
+        // minRows={1}
         label="Compilation Log"
         name="compilation-log"
         type="text"
