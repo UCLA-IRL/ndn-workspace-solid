@@ -40,6 +40,13 @@ export class NdnSvsAdaptor {
 
   private async handleSyncUpdate(content: Uint8Array) {
     // Apply patch
+    // Remark: `applyUpdate` will trigger a transaction after the update is decoded.
+    // We can register "beforeTransaction" event and throw an exception there to do access control.
+    // The exception is supposed to abort `applyUpdate` and propagated out of this call.
+    // This is the way we planned to implement access control.
+    // SA: https://docs.yjs.dev/api/y.doc#order-of-events
+    // https://github.com/yjs/yjs/blob/fe36ffd122a6f2384293098afd52d2c0025fce2a/src/utils/encoding.js#L384-L384
+    // https://github.com/yjs/yjs/blob/fe36ffd122a6f2384293098afd52d2c0025fce2a/src/utils/Transaction.js#L415-L426
     Y.applyUpdate(this.doc, content, this)
   }
 }
