@@ -136,7 +136,7 @@ export default function BootSafebag(props: {
             inputProps={{
               style: {
                 "font-family": '"Roboto Mono", ui-monospace, monospace',
-                "white-space": "nowrap"
+                "white-space": "pre"
               }
             }}
             disabled={readOnly()}

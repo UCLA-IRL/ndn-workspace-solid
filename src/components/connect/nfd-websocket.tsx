@@ -100,7 +100,7 @@ export default function NfdWebsocket(props: {
             inputProps={{
               style: {
                 "font-family": '"Roboto Mono", ui-monospace, monospace',
-                "white-space": "nowrap"
+                "white-space": "pre"
               }
             }}
             value={safebagText()}
