@@ -4,21 +4,6 @@ import suidPlugin from "@suid/vite-plugin"
 // import devtools from 'solid-devtools/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
-const getCache = ({ name, pattern }) => ({
-  urlPattern: pattern,
-  handler: "CacheFirst" as const,
-  options: {
-    cacheName: name,
-    expiration: {
-      maxEntries: 500,
-      maxAgeSeconds: 60 * 60 * 24 * 365 * 2 // 2 years
-    },
-    cacheableResponse: {
-      statuses: [200]
-    }
-  }
-});
-
 export default defineConfig({
   build: {
     target: ['es2022', 'chrome111', 'edge111', 'firefox111'],
@@ -65,14 +50,6 @@ export default defineConfig({
         "start_url": "/",
         "display": "standalone",
         "orientation": "portrait"
-      },
-      workbox: {
-        runtimeCaching: [
-          getCache({
-            pattern: /^https:\/\/cdn.jsdelivr.net\/npm/,
-            name: "pdf-slick-cdn"
-          })
-        ]
       }
     })
   ],
