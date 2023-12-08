@@ -192,14 +192,21 @@ export default function ShareLatex(props: {
 
     // Compile main.tex
     engine.setEngineMainFile("main.tex")
-    setCompilationLog('Start compiling ...')
-    const res = await engine.compileLaTeX()
-    setCompilationLog(res.log)
+    let compLog = 'Start compiling ...\n'
+    setCompilationLog(compLog)
+    const res = await engine.compileLaTeX(async log => {
+      console.log(log)
+      compLog += log + '\n'
+      setCompilationLog(compLog)
+    })
+    compLog += '=============================================\n'
+    compLog += res.log
+    setCompilationLog(compLog)
 
     // Check if PDF is generated
     if (!res.pdf) {
       alert('Failed to compile PDF file')
-      setCompilationLog(res.log)
+      // setCompilationLog(res.log)
       return
     }
 

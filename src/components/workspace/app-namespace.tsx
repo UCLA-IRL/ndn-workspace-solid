@@ -147,7 +147,7 @@ export default function AppNamespace(props: {
           inputProps={{
             style: {
               "font-family": '"Roboto Mono", ui-monospace, monospace',
-              "white-space": "nowrap"
+              "white-space": "pre"
             }
           }}
           // disabled={readOnly()}  // disabled not working with multiline

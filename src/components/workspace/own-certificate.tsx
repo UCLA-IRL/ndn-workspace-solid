@@ -74,7 +74,7 @@ export default function OwnCertificate(props: {
             // readOnly: true,  // readOnly does not work with multiline
             style: {
               "font-family": '"Roboto Mono", ui-monospace, monospace',
-              "white-space": "nowrap"
+              "white-space": "pre"
             },
           }}
           value={certText()}
