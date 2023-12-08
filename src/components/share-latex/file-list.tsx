@@ -16,7 +16,6 @@ import {
   Delete as DeleteIcon,
 } from '@suid/icons-material'
 import { project } from '../../backend/models'
-import { Link as RouterLink } from '@solidjs/router'
 import { For, Match, Switch } from 'solid-js'
 
 export default function FileList(props: {
@@ -48,7 +47,6 @@ export default function FileList(props: {
       underline='hover'
       sx={{ display: 'flex', alignItems: 'left' }}
       color="inherit"
-      component={RouterLink}
       href={to()}>
       {getItemIcon(item)}
       {item?.name}

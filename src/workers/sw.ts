@@ -4,6 +4,9 @@ import * as navigationPreload from 'workbox-navigation-preload'
 import { registerRoute, NavigationRoute } from 'workbox-routing'
 import { DefaultTexliveEndpoint } from '../constants'
 import { encodeKey, openRoot } from '../utils'
+import { CacheableResponsePlugin } from 'workbox-cacheable-response/CacheableResponsePlugin'
+import { CacheFirst } from 'workbox-strategies/CacheFirst'
+import { ExpirationPlugin } from 'workbox-expiration/ExpirationPlugin'
 
 declare let self: ServiceWorkerGlobalScope;
 
@@ -103,3 +106,22 @@ registerRoute(/\/stored\/.*/, async (options) => {
 
   return result;
 });
+
+registerRoute(
+  /^https:\/\/cdn.jsdelivr.net\/npm/,
+  new CacheFirst({
+    cacheName: 'pdf-slick-cdn',
+    matchOptions: {
+      ignoreVary: true
+    },
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 500,
+        maxAgeSeconds: 60 * 60 * 24 * 365 * 2, // 2 years
+        purgeOnQuotaError: true,
+      }),
+      new CacheableResponsePlugin({
+        statuses: [200]
+      }),
+    ]
+  }));

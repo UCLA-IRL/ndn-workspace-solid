@@ -14,8 +14,7 @@ import {
   Stack,
 } from "@suid/material"
 import { Breakpoint, createTheme, Theme, ThemeProvider } from "@suid/material/styles"
-import { Outlet, Link } from "@solidjs/router"
-import { For, JSX } from "solid-js"
+import { For, JSX, ParentProps } from "solid-js"
 import { useNdnWorkspace } from "../Context"
 import { Portal } from "solid-js/web"
 
@@ -25,7 +24,7 @@ const navBarHeight = 56
 function RouteItem(props: { icon: JSX.Element, title: string, href: string }) {
   return (
     <ListItem disablePadding>
-      <ListItemButton component={Link} href={props.href}>
+      <ListItemButton component="a" href={props.href}>
         <ListItemIcon>
           {props.icon}
         </ListItemIcon>
@@ -65,9 +64,9 @@ const ColorVariables = (props: { theme: Theme<Breakpoint> }) => <style>{`
 }
 `}</style>
 
-export default function Root(props: {
+export default function Root(props: ParentProps<{
   routes: Array<{ icon: JSX.Element, title: string, href: string }>
-}) {
+}>) {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
   const theme = createTheme({
     palette: {
@@ -127,7 +126,7 @@ export default function Root(props: {
               flexDirection: 'column'
             }}
           >
-            <Outlet />
+            {props.children}
           </Box>
 
           {/* The bottom navigation bar */}
@@ -153,7 +152,7 @@ export default function Root(props: {
               justifyContent="center"
             >
               <For each={props.routes}>{item =>
-                <BottomNavigationAction component={Link} icon={item.icon} href={item.href} label={item.title} />
+                <BottomNavigationAction component="a" icon={item.icon} href={item.href} label={item.title} />
               }</For>
             </BottomNavigation>
           </Paper>
