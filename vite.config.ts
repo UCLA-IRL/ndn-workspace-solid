@@ -50,6 +50,9 @@ export default defineConfig({
         "start_url": "/",
         "display": "standalone",
         "orientation": "portrait"
+      },
+      injectManifest: {
+        maximumFileSizeToCacheInBytes: 10000000,  // increasing the file size to cached 10mb
       }
     })
   ],
