@@ -1,11 +1,9 @@
 /* @refresh reload */
 import { render } from 'solid-js/web'
 import { Router, Route, RouteSectionProps } from "@solidjs/router"
-// import 'solid-devtools'
 
 import {
   Description as DescriptionIcon,
-  // ViewInAr as ViewInArIcon,
   Apps as AppsIcon,
   SettingsEthernet as SettingsEthernetIcon,
   Home as HomeIcon,
@@ -27,8 +25,8 @@ const rootComponent = (props: RouteSectionProps) =>
   <Root routes={[
     { icon: <HomeIcon />, href: '/', title: 'Home' },
     { icon: <AppsIcon />, href: '/profile', title: 'Workspace' },
+    { icon: <DescriptionIcon />, href: `/latex/${project.RootId}`, title: 'Editor' },
     { icon: <SettingsEthernetIcon />, href: '/connection', title: 'Connection' },
-    { icon: <DescriptionIcon />, href: `/latex/${project.RootId}`, title: 'LaTeX' },
     { icon: <SettingsIcon />, href: '/', title: 'Settings' },
   ]} >
     {props.children}

@@ -25,7 +25,7 @@ function RouteItem(props: { icon: JSX.Element, title: string, href: string }) {
   return (
     <ListItem disablePadding>
       <ListItemButton component="a" href={props.href}>
-        <ListItemIcon>
+        <ListItemIcon sx={{ color: 'inherit' }}>
           {props.icon}
         </ListItemIcon>
         <ListItemText primary={props.title} />
@@ -68,9 +68,18 @@ export default function Root(props: ParentProps<{
   routes: Array<{ icon: JSX.Element, title: string, href: string }>
 }>) {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
+  // blue theme
   const theme = createTheme({
     palette: {
-      mode: prefersDarkMode() ? "dark" : "light"
+      mode: prefersDarkMode() ? "dark" : "light",
+      background: {
+        default: prefersDarkMode() ? "#121212" : "#F4F5F6",
+        paper: prefersDarkMode() ? "#1E1E1E" : "#FFFFFF",
+      },
+      text: {
+        primary: prefersDarkMode() ? "#FFFFFF" : "#000000",
+        secondary: prefersDarkMode() ? "#FFFFFF" : "#000000",
+      },
     },
   })
   const { setTheme } = useNdnWorkspace()!
@@ -80,7 +89,7 @@ export default function Root(props: ParentProps<{
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Portal mount={document.getElementsByTagName("head")[0]}>
+      <Portal mount={document.querySelector('head')!}>
         <ColorVariables theme={theme} />
       </Portal>
       <div>
@@ -98,6 +107,8 @@ export default function Root(props: ParentProps<{
                 '& .MuiDrawer-paper': {
                   width: drawerWidth,
                   boxSizing: 'border-box',
+                  backgroundColor: '#283593',
+                  color: '#FFFFFF',
                 },
                 display: { md: 'block', xs: 'none' },
               }}
@@ -139,6 +150,12 @@ export default function Root(props: ParentProps<{
               right: 0,
               height: `${navBarHeight}px`,
               display: { md: 'none', xs: 'flex' },
+              '& .MuiStack-root': {
+                backgroundColor: '#283593',
+                "*": {
+                  color: '#FFFFFF',
+                }
+              }
             }}
           >
             <BottomNavigation
