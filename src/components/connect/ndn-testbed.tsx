@@ -20,6 +20,7 @@ import { Encoder } from "@ndn/tlv"
 import { WsTransport } from "@ndn/ws-transport"
 import { Endpoint } from "@ndn/endpoint"
 import { fchQuery } from "@ndn/autoconfig"
+import { doFch } from "../../testbed";
 
 type Resolver = { resolve: (pin: string | PromiseLike<string>) => void }
 
@@ -34,20 +35,7 @@ export default function NdnTestbed(props: {
   // const [keyPair, setKeyPair] = createSignal<KeyPair>()
   const [pinResolver, setPinResolver] = createSignal<Resolver>()
 
-  const onFch = async () => {
-    try {
-      const fchRes = await fchQuery({
-        transport: 'wss',
-        network: "ndn",
-      })
-      if (fchRes.routers.length > 0) {
-        const url = new URL(fchRes.routers[0].connect)
-        setHost(url.host)
-      }
-    } catch {
-      console.error('FCH server is down.')
-    }
-  }
+  const onFch = async () => setHost((await doFch())?.host ?? '')
 
   const onInputPin = () => {
     const resolve = pinResolver()?.resolve
