@@ -6,7 +6,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
   build: {
-    target: ['es2022', 'chrome111', 'edge111', 'firefox111'],
+    target: ['es2022', 'chrome111', 'edge111', 'firefox111', 'safari16'],
   },
   plugins: [
     suidPlugin(),
