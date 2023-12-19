@@ -18,3 +18,8 @@
     height: 100%;
     flex: 1;
 }
+
+/** PDF Slick component */
+.pdfSlick {
+    position: relative;
+}
