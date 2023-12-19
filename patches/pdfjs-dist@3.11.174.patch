@@ -1,7 +1,7 @@
-diff --git a/node_modules/pdfjs-dist/build/pdf.js b/node_modules/pdfjs-dist/build/pdf.js
-index 4acf16b..a5e346b 100644
---- a/node_modules/pdfjs-dist/build/pdf.js
-+++ b/node_modules/pdfjs-dist/build/pdf.js
+diff --git a/build/pdf.js b/build/pdf.js
+index 4acf16b1d6f9351bda1a98649ea4f926618fe617..10f64593db330ee9c77a87deeaa8c01d11e5f340 100644
+--- a/build/pdf.js
++++ b/build/pdf.js
 @@ -4260,7 +4260,7 @@ class AnnotationEditorUIManager {
      this.#activeEditor = null;
      this.#selectedEditors.clear();
