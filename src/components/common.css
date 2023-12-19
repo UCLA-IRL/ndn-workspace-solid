@@ -1,0 +1,20 @@
+.h-full {
+    height: 100%;
+}
+
+.w-half {
+    width: 50%;
+}
+
+/** ShareLatex Component */
+.sl-outer {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+}
+
+.sl-panel {
+    height: 100%;
+    flex: 1;
+}

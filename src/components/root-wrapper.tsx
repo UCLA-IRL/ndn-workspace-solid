@@ -17,6 +17,7 @@ import { Breakpoint, createTheme, Theme, ThemeProvider } from "@suid/material/st
 import { For, JSX, ParentProps } from "solid-js"
 import { useNdnWorkspace } from "../Context"
 import { Portal } from "solid-js/web"
+import "./common.css"
 
 const drawerWidth = 200
 const navBarHeight = 56
@@ -129,8 +130,8 @@ export default function Root(props: ParentProps<{
             sx={{
               flexGrow: 1,
               bgcolor: 'background.default',
-              p: 3,
-              minHeight: { md: '100vh', xs: `calc(100% - ${navBarHeight}px)` },
+              p: 2,
+              height: { md: '100vh', xs: `calc(100vh - ${navBarHeight}px)` },
               marginBottom: { md: '0', xs: `${navBarHeight}px` },
               overflowX: 'hidden',
               display: 'flex',
