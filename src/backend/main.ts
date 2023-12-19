@@ -1,6 +1,6 @@
 // This file is the main file gluing all components and maintain a global context.
 // Should be changed to something better if refactor.
-import { Endpoint } from "@ndn/endpoint"
+import { Endpoint, Producer } from "@ndn/endpoint"
 import { Data, Name, Signer, digestSigning } from '@ndn/packet'
 import { ControlCommand, enableNfdPrefixReg } from "@ndn/nfdmgmt"
 import { FwFace } from "@ndn/fw"
@@ -36,9 +36,6 @@ export let nodeId: Name | undefined
 export let trustAnchor: Certificate | undefined
 export let ownCertificate: Certificate | undefined
 
-// TODO: Decouple backend with frontend. Consider Redux?
-// TODO: Separate CRDT document with data packets. Add data storage to store updates from other peers.
-// TODO: Setup persistent storage using IndexDB
 export let rootDoc: RootDocStore | undefined
 export let yjsAdaptor: NdnSvsAdaptor | undefined
 export let yjsSnapshotMgr: YjsStateManager | undefined
@@ -48,6 +45,7 @@ export let nfdWsFace: FwFace | undefined = undefined
 const connState = new BackendSignal<ConnState>('DISCONNECTED')
 export let nfdCmdSigner: Signer = digestSigning
 export let nfdCertificate: Certificate | undefined
+let nfdCertProducer: Producer | undefined
 let commandPrefix = ControlCommand.localhopPrefix
 
 // ============= Connectivity =============
@@ -65,6 +63,7 @@ async function connectNfdWs(uri: string, isLocal: boolean) {
   if (UseAutoAnnouncement) {
     enableNfdPrefixReg(nfdWsFace, {
       signer: nfdCmdSigner,
+      // TODO: Do I need to set `preloadCertName`?
     })
   }
   commandPrefix = ControlCommand.getPrefix(isLocal)
@@ -319,6 +318,7 @@ export async function stopWorkspace() {
 async function checkPrefixRegistration(cancel: boolean) {
   if (cancel && nfdWsFace !== undefined) {
     if (!UseAutoAnnouncement) {
+      // Unregister prefixes
       await ControlCommand.call("rib/unregister", {
         name: nodeId!,
         origin: 65,  // client
@@ -335,6 +335,10 @@ async function checkPrefixRegistration(cancel: boolean) {
         commandPrefix: commandPrefix,
         signer: nfdCmdSigner,
       })
+
+      // Stop serving certificate
+      nfdCertProducer?.close()
+      nfdCertProducer = undefined
     }
   } else if (!cancel && nfdWsFace !== undefined && bootstrapped) {
     // Note: UseAutoAnnouncement works, the following code is kept for test.
@@ -343,6 +347,16 @@ async function checkPrefixRegistration(cancel: boolean) {
     //   an invalid certificate to connect to a testbed node.
     // - UseAutoAnnouncement will announce sync prefixes
     if (!UseAutoAnnouncement) {
+      // Serve the certificate back to the forwarder
+      if (nfdCertProducer) {
+        console.error(`[FATAL] There should only be one transport running.`)
+        nfdCertProducer?.close()
+      }
+      if (nfdCertificate) {
+        nfdCertProducer = endpoint.produce(nfdCertificate.name, async () => nfdCertificate?.data)
+      }
+
+      // Register prefixes
       const cr = await ControlCommand.call("rib/register", {
         name: appPrefix!,
         origin: 65,  // client
@@ -355,7 +369,8 @@ async function checkPrefixRegistration(cancel: boolean) {
       })
       if (cr.statusCode !== 200) {
         window.alert(`Unable to register route: ${cr.statusCode} ${cr.statusText}`)
-        // TODO: Cut connection
+        // Cut connection
+        return await disconnect()
       }
       const cr2 = await ControlCommand.call("rib/register", {
         name: nodeId!,
@@ -369,7 +384,8 @@ async function checkPrefixRegistration(cancel: boolean) {
       })
       if (cr2.statusCode !== 200) {
         window.alert(`Unable to register route: ${cr2.statusCode} ${cr2.statusText}`)
-        // TODO: Cut connection
+        // Cut connection
+        return await disconnect()
       }
     }
   }
