@@ -1,6 +1,6 @@
 // This file is the main file gluing all components and maintain a global context.
 // Should be changed to something better if refactor.
-import { Endpoint } from "@ndn/endpoint"
+import { Endpoint, Producer } from "@ndn/endpoint"
 import { Data, Name, Signer, digestSigning } from '@ndn/packet'
 import { ControlCommand, enableNfdPrefixReg } from "@ndn/nfdmgmt"
 import { FwFace } from "@ndn/fw"
@@ -45,6 +45,7 @@ export let nfdWsFace: FwFace | undefined = undefined
 const connState = new BackendSignal<ConnState>('DISCONNECTED')
 export let nfdCmdSigner: Signer = digestSigning
 export let nfdCertificate: Certificate | undefined
+let nfdCertProducer: Producer | undefined
 let commandPrefix = ControlCommand.localhopPrefix
 
 // ============= Connectivity =============
@@ -306,6 +307,7 @@ export async function stopWorkspace() {
 async function checkPrefixRegistration(cancel: boolean) {
   if (cancel && nfdWsFace !== undefined) {
     if (!UseAutoAnnouncement) {
+      // Unregister prefixes
       await ControlCommand.call("rib/unregister", {
         name: nodeId!,
         origin: 65,  // client
@@ -322,6 +324,9 @@ async function checkPrefixRegistration(cancel: boolean) {
         commandPrefix: commandPrefix,
         signer: nfdCmdSigner,
       })
+
+      // Stop serving certificate
+      nfdCertProducer?.close()
     }
   } else if (!cancel && nfdWsFace !== undefined && bootstrapped) {
     // Note: UseAutoAnnouncement works, the following code is kept for test.
@@ -330,6 +335,13 @@ async function checkPrefixRegistration(cancel: boolean) {
     //   an invalid certificate to connect to a testbed node.
     // - UseAutoAnnouncement will announce sync prefixes
     if (!UseAutoAnnouncement) {
+      // Serve the certificate back to the forwarder
+      nfdCertProducer?.close()
+      if (nfdCertificate) {
+        nfdCertProducer = endpoint.produce(nfdCertificate.name, async () => nfdCertificate?.data)
+      }
+
+      // Register prefixes
       const cr = await ControlCommand.call("rib/register", {
         name: appPrefix!,
         origin: 65,  // client
