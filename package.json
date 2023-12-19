@@ -9,8 +9,7 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "peer-server": "peerjs --port 8000 --key peerjs --path /aincraft --allow_discovery true",
-    "upload": "firebase deploy --only hosting",
-    "postinstall": "patch-package"
+    "upload": "firebase deploy --only hosting"
   },
   "dependencies": {
     "@codemirror/language": "^6.10.0",
@@ -75,7 +74,6 @@
     "@typescript-eslint/parser": "^6.16.0",
     "eslint": "^8.56.0",
     "eslint-plugin-solid": "^0.13.0",
-    "patch-package": "^8.0.0",
     "peer": "^1.0.2",
     "solid-devtools": "^0.29.2",
     "typescript": "^5.3.3",
@@ -90,5 +88,10 @@
     "workbox-precaching": "^7.0.0",
     "workbox-routing": "^7.0.0",
     "workbox-strategies": "^7.0.0"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "pdfjs-dist@3.11.174": "patches/pdfjs-dist@3.11.174.patch"
+    }
   }
 }

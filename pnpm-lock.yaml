@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  pdfjs-dist@3.11.174:
+    hash: nfrzzc54owtwxa3k4hkcfowqpu
+    path: patches/pdfjs-dist@3.11.174.patch
+
 dependencies:
   '@codemirror/language':
     specifier: ^6.10.0
@@ -2180,7 +2185,7 @@ packages:
   /@pdfslick/core@1.2.6(react@18.2.0):
     resolution: {integrity: sha512-0IPiJTdl3vbR9QyF5zRpoJZvj6rpgBHnIW2WabRj4gaBe1hcfc+3VkD5AcBwn750Eo6fQU5M4rT7SeZAwMngVw==}
     dependencies:
-      pdfjs-dist: 3.11.174
+      pdfjs-dist: 3.11.174(patch_hash=nfrzzc54owtwxa3k4hkcfowqpu)
       zustand: 4.4.7(react@18.2.0)
     transitivePeerDependencies:
       - '@types/react'
@@ -6148,7 +6153,7 @@ packages:
     dev: false
     optional: true
 
-  /pdfjs-dist@3.11.174:
+  /pdfjs-dist@3.11.174(patch_hash=nfrzzc54owtwxa3k4hkcfowqpu):
     resolution: {integrity: sha512-TdTZPf1trZ8/UFu5Cx/GXB7GZM30LT+wWUNfsi6Bq8ePLnb+woNKtDymI2mxZYBpMbonNFqKmiz684DIfnd8dA==}
     engines: {node: '>=18'}
     optionalDependencies:
@@ -6158,6 +6163,7 @@ packages:
       - encoding
       - supports-color
     dev: false
+    patched: true
 
   /peberminta@0.9.0:
     resolution: {integrity: sha512-XIxfHpEuSJbITd1H3EeQwpcZbTLHc+VVr8ANI9t5sit565tsI4/xK3KWTUFE2e6QiangUkh3B0jihzmGnNrRsQ==}
