@@ -17,6 +17,8 @@ import { Certificate, ECDSA, createSigner } from "@ndn/keychain"
 import { v4 as uuidv4 } from "uuid"
 import { base64ToBytes, encodeKey as encodePath, Signal as BackendSignal, openRoot } from "../utils"
 import { Decoder } from "@ndn/tlv"
+import { YjsStateManager } from "../adaptors/yjs-state-manager"
+import { encodeSyncState, parseSyncState } from "./sync-agent/deliveries"
 
 export const UseAutoAnnouncement = false
 
@@ -39,6 +41,7 @@ export let ownCertificate: Certificate | undefined
 // TODO: Setup persistent storage using IndexDB
 export let rootDoc: RootDocStore | undefined
 export let yjsAdaptor: NdnSvsAdaptor | undefined
+export let yjsSnapshotMgr: YjsStateManager | undefined
 
 export let listener: PeerJsListener | undefined = undefined
 export let nfdWsFace: FwFace | undefined = undefined
@@ -234,6 +237,12 @@ export async function bootstrapWorkspace(opts: {
     getYjsDoc(rootDoc),
     'doc'
   )
+  yjsSnapshotMgr = new YjsStateManager(
+    () => encodeSyncState(syncAgent!.getUpdateSyncSV()),
+    getYjsDoc(rootDoc),
+    // No key conflict in this case. If we are worried, use anothe sub-folder.
+    persistStore,
+  )
 
   // Load or create
   if (opts.createNew) {
@@ -257,7 +266,8 @@ export async function bootstrapWorkspace(opts: {
     }
     rootDoc.latex[project.RootId].items.push(mainUuid)
   } else {
-    await syncAgent.replayUpdates('doc')
+    const state = await yjsSnapshotMgr.loadLocalSnapshot(update => yjsAdaptor!.handleSyncUpdate(update))
+    await syncAgent.replayUpdates('doc', state ? parseSyncState(state) : undefined)
   }
 
   if (!opts.inMemory) {
@@ -287,6 +297,9 @@ export async function stopWorkspace() {
   appPrefix = undefined
 
   syncAgent!.ready = false
+
+  yjsSnapshotMgr!.destroy()
+  yjsSnapshotMgr = undefined
 
   yjsAdaptor!.destroy()
   yjsAdaptor = undefined

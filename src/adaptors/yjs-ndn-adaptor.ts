@@ -38,7 +38,7 @@ export class NdnSvsAdaptor {
     this.syncAgent.publishUpdate(this.topic, content)
   }
 
-  private async handleSyncUpdate(content: Uint8Array) {
+  public async handleSyncUpdate(content: Uint8Array) {
     // Apply patch
     // Remark: `applyUpdate` will trigger a transaction after the update is decoded.
     // We can register "beforeTransaction" event and throw an exception there to do access control.

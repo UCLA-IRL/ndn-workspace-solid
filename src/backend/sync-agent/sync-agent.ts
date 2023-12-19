@@ -360,6 +360,10 @@ export class SyncAgent {
     })
   }
 
+  public getUpdateSyncSV() {
+    return new SvStateVector(this.atLeastOnce.syncState)
+  }
+
   static async create(
     nodeId: Name,
     persistStorage: Storage,
