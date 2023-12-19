@@ -19,7 +19,6 @@ import { bytesToBase64 } from "../../utils"
 import { Encoder } from "@ndn/tlv"
 import { WsTransport } from "@ndn/ws-transport"
 import { Endpoint } from "@ndn/endpoint"
-import { fchQuery } from "@ndn/autoconfig"
 import { doFch } from "../../testbed";
 
 type Resolver = { resolve: (pin: string | PromiseLike<string>) => void }
