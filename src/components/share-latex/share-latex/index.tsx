@@ -206,21 +206,17 @@ export default function ShareLatex(props: {
     // Check if PDF is generated
     if (!res.pdf) {
       alert('Failed to compile PDF file')
-      // setCompilationLog(res.log)
+      setCompilationLog(res.log)
       return
     }
 
     const data: Uint8Array = res.pdf
     const blob = new Blob([data], { type: 'application/pdf' })
 
-    // Replace PDF preview  -> Open a new window for now.
-    // URL.revokeObjectURL(previewUrl()!);
-    // setPreviewUrl(URL.createObjectURL(blob))
-    const fileUrl = URL.createObjectURL(blob)
     const oldUrl = pdfUrl()
-    if (oldUrl) {
-      URL.revokeObjectURL(oldUrl)
-    }
+    if (oldUrl) URL.revokeObjectURL(oldUrl)
+
+    const fileUrl = URL.createObjectURL(blob)
     setPdfUrl(fileUrl)
   }
 

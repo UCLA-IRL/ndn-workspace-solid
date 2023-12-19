@@ -9,7 +9,7 @@
 /** ShareLatex Component */
 .sl-outer {
     flex: 1;
-    overflow: hidden;
+    overflow: visible;
     display: flex;
     flex-direction: row;
 }

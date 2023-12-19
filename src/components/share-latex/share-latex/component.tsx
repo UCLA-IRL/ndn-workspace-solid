@@ -89,7 +89,7 @@ export default function ShareLatexComponent(
         <div class="sl-panel" classList={{
           'w-half': props.view() === 'Both'
         }}>
-          <PdfViewer pdfUrl={props.pdfUrl} />
+          { props.pdfUrl ? <PdfViewer pdfUrl={props.pdfUrl} /> : <div></div> }
         </div>
       </Show>
       <Show when={props.view() === 'Log'}>
@@ -98,7 +98,6 @@ export default function ShareLatexComponent(
             fullWidth
             multiline
             rows={props.compilationLog.split('\n').length}
-            // minRows={1}
             label="Compilation Log"
             name="compilation-log"
             type="text"
@@ -108,7 +107,6 @@ export default function ShareLatexComponent(
                 "white-space": "pre"
               }
             }}
-            // disabled={readOnly()}  // disabled not working with multiline
             value={props.compilationLog}
           />
         </div>
