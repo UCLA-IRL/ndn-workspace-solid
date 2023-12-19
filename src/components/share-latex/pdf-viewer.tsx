@@ -21,9 +21,7 @@ export default function PdfViewer(props: {
     }
   }, () => 100)
 
-  return <div class="absolute inset-0 pdfSlick">
-    <div class="flex-1 relative h-full" style={{ padding: "1px 20px" }}>
-      <PDFSlickViewer {...{ store, viewerRef }} />
-    </div>
+  return <div class="absolute inset-0 pdfSlick h-full">
+      <PDFSlickViewer {...{ store, viewerRef }} class="h-full" />
   </div >
 }

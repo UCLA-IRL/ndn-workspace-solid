@@ -54,50 +54,63 @@ export default function ShareLatexComponent(
         { name: 'Download as zip', onClick: props.onExportZip },
         { name: 'Map to a folder', onClick: props.onMapFolder },
       ]} />
-    <Show when={props.view() === 'Editor' || props.view() === 'Both'}>
-      <Switch fallback={<></>}>
-        <Match when={props.folderChildren !== undefined}>
-          <FileList
-            rootUri={props.rootUri}
-            subItems={props.folderChildren!}
-            resolveItem={props.resolveItem}
-            deleteItem={props.deleteItem}
+
+    <div class="sl-outer">
+      <Show when={props.view() === 'Editor' || props.view() === 'Both'}>
+        <div class="sl-panel" classList={{
+          'w-half': props.view() === 'Both'
+        }}>
+          <Switch fallback={<></>}>
+            <Match when={props.folderChildren !== undefined}>
+              <FileList
+                rootUri={props.rootUri}
+                subItems={props.folderChildren!}
+                resolveItem={props.resolveItem}
+                deleteItem={props.deleteItem}
+              />
+            </Match>
+            <Match when={props.item?.kind === 'text'}>
+              <LatexDoc doc={(props.item as project.TextDoc).text} />
+            </Match>
+            <Match when={props.item?.kind === 'xmldoc'}>
+              <RichDoc doc={(props.item as project.XmlDoc).text} />
+            </Match>
+            <Match when={props.item?.kind === 'blob'}>
+              <Button onClick={props.onDownloadBlob}>
+                Download
+              </Button>
+            </Match>
+          </Switch>
+        </div>
+      </Show>
+      <Show when={props.view() === 'PDF' || props.view() === 'Both'}>
+        <div class="sl-panel" classList={{
+          'w-half': props.view() === 'Both'
+        }}>
+          <PdfViewer pdfUrl={props.pdfUrl} />
+        </div>
+      </Show>
+      <Show when={props.view() === 'Log'}>
+        <div class="sl-panel">
+          <TextField
+            fullWidth
+            multiline
+            rows={props.compilationLog.split('\n').length}
+            // minRows={1}
+            label="Compilation Log"
+            name="compilation-log"
+            type="text"
+            inputProps={{
+              style: {
+                "font-family": '"Roboto Mono", ui-monospace, monospace',
+                "white-space": "pre"
+              }
+            }}
+            // disabled={readOnly()}  // disabled not working with multiline
+            value={props.compilationLog}
           />
-        </Match>
-        <Match when={props.item?.kind === 'text'}>
-          <LatexDoc doc={(props.item as project.TextDoc).text} />
-        </Match>
-        <Match when={props.item?.kind === 'xmldoc'}>
-          <RichDoc doc={(props.item as project.XmlDoc).text} />
-        </Match>
-        <Match when={props.item?.kind === 'blob'}>
-          <Button onClick={props.onDownloadBlob}>
-            DOWNLOAD
-          </Button>
-        </Match>
-      </Switch>
-    </Show>
-    <Show when={props.view() === 'PDF' || props.view() === 'Both'}>
-      <PdfViewer pdfUrl={props.pdfUrl} />
-    </Show>
-    <Show when={props.view() === 'Log'}>
-      <TextField
-        fullWidth
-        multiline
-        rows={props.compilationLog.split('\n').length}
-        // minRows={1}
-        label="Compilation Log"
-        name="compilation-log"
-        type="text"
-        inputProps={{
-          style: {
-            "font-family": '"Roboto Mono", ui-monospace, monospace',
-            "white-space": "pre"
-          }
-        }}
-        // disabled={readOnly()}  // disabled not working with multiline
-        value={props.compilationLog}
-      />
-    </Show>
+        </div>
+      </Show>
+    </div>
   </>
 }
