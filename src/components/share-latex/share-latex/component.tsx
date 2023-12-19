@@ -2,7 +2,7 @@ import AppTools from '../app-tools'
 import FileList from '../file-list'
 import LatexDoc from '../latex-doc'
 import NewItemModal, { ModalState } from '../new-item-modal'
-import { Button, TextField } from '@suid/material'
+import { Button, Paper, TextField } from '@suid/material'
 import { project } from '../../../backend/models'
 import { Accessor, Match, Setter, Show, Switch } from 'solid-js'
 import RichDoc from '../rich-doc'
@@ -62,12 +62,14 @@ export default function ShareLatexComponent(
         }}>
           <Switch fallback={<></>}>
             <Match when={props.folderChildren !== undefined}>
-              <FileList
-                rootUri={props.rootUri}
-                subItems={props.folderChildren!}
-                resolveItem={props.resolveItem}
-                deleteItem={props.deleteItem}
-              />
+              <Paper>
+                <FileList
+                  rootUri={props.rootUri}
+                  subItems={props.folderChildren!}
+                  resolveItem={props.resolveItem}
+                  deleteItem={props.deleteItem}
+                />
+              </Paper>
             </Match>
             <Match when={props.item?.kind === 'text'}>
               <LatexDoc doc={(props.item as project.TextDoc).text} />
