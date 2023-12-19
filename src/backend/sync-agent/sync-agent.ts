@@ -360,21 +360,8 @@ export class SyncAgent {
     })
   }
 
-  /** 
-   * Save the current status into a local snapshot.
-   * This snapshot includes everyone's update and is not supposed to be published.
-   * Public snapshots use a different mechanism.
-   */
-  async saveLocalSnapshot() {
-    
-  }
-
-  /**
-   * Load from a local snapshot.
-   * @returns a SVS vector that can be used as a start point for `replayUpdates`.
-   */
-  async loadLocalSnapshot() {
-    
+  public getUpdateSyncSV() {
+    return new SvStateVector(this.atLeastOnce.syncState)
   }
 
   static async create(
