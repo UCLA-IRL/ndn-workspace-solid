@@ -13,7 +13,7 @@ import { FwFace } from "@ndn/fw"
 import * as ndncert from '@ndn/ndncert'
 import * as keychain from "@ndn/keychain"
 import {
-  GitHubOAuthClientId, GitHubOIDCChallengeId, GoogleOAuthClientId, GoogleOIDCChallengeId, TestbedAnchorName
+  GitHubOAuthClientId, GitHubOIDCChallengeId, GoogleOAuthClientId, GoogleOIDCChallengeId, TestbedOidcAnchorPrefix
 } from "../../constants"
 import { bytesToBase64 } from "../../utils"
 import { Encoder } from "@ndn/tlv"
@@ -21,10 +21,15 @@ import { WsTransport } from "@ndn/ws-transport"
 import { Endpoint } from "@ndn/endpoint"
 import { fchQuery } from "@ndn/autoconfig"
 import { ClientOidcChallenge } from "../../adaptors/oidc-challenge"
+import { Interest, Name } from "@ndn/packet"
+import { retrieveMetadata } from "@ndn/rdr"
+import { Segment } from "@ndn/naming-convention2"
+import { useNdnWorkspace } from "../../Context"
 
 export default function NdnTestbedOidc(props: {
   onAdd: (config: Conn) => void
 }) {
+  const { endpoint } = useNdnWorkspace()!
   const [tempFace, setTempFace] = createSignal<FwFace>()
 
   const [requestId, setRequestId] = createSignal('')
@@ -77,30 +82,18 @@ export default function NdnTestbedOidc(props: {
         setTempFace(nfdWsFace)
       }
 
-      let caProfile: ndncert.CaProfile | undefined = undefined
-      let caFullName = TestbedAnchorName
-      let probeRes
-      while (caProfile === undefined) {
-        // Request profile
-        caProfile = await ndncert.retrieveCaProfile({
-          caCertFullName: caFullName,
-        })
-        // Probe step
-        probeRes = await ndncert.requestProbe({
-          profile: caProfile,
-          parameters: { 'access-code': new TextEncoder().encode(accessCode) }, // TODO: Verify this works
-        })
-        if (probeRes.entries.length <= 0) {
-          console.error('No available name to register')
-          return
-        }
-        if (probeRes.redirects.length > 0) {
-          caFullName = probeRes.redirects[0].caCertFullName
-          caProfile = undefined
-        }
-      }
+      // This is the current work-around for some technical issue on the CA side.
+      // It is not secure and is supposed to change in future.
+      // const caProfileUnsafe = async (caPrefix: Name) => {
+      //   const metadata = await retrieveMetadata(caPrefix.append("CA", "INFO"), { endpoint })
+      //   const profileData = await endpoint.consume(new Interest(metadata.name.append(Segment, 0)))
+      //   return await ndncert.CaProfile.fromData(profileData)
+      // }
+      const caProfile = await ndncert.retrieveCaProfile({
+        caCertFullName: TestbedOidcAnchorPrefix,
+      })
       // Generate key pair
-      const myPrefix = probeRes!.entries[0].prefix
+      const myPrefix = new Name('/ndn/to-be-assigned')
       const keyName = keychain.CertNaming.makeKeyName(myPrefix)
       const algo = keychain.ECDSA
       const gen = await keychain.ECDSA.cryptoGenerate({}, true)
@@ -111,6 +104,7 @@ export default function NdnTestbedOidc(props: {
       const maximalValidityDays = Math.floor(caProfile.maxValidityPeriod / 86400000) - 1
 
       // New step
+      const redirectUri = redirectTarget
       const cert = await ndncert.requestCertificate({
         endpoint: new Endpoint({
           retx: {
@@ -122,7 +116,7 @@ export default function NdnTestbedOidc(props: {
         privateKey: prvKey,
         publicKey: pubKey,
         validity: keychain.ValidityPeriod.daysFromNow(maximalValidityDays),
-        challenges: [new ClientOidcChallenge(challengeId, { oidcId, accessCode })],
+        challenges: [new ClientOidcChallenge(challengeId, { oidcId, accessCode, redirectUri })],
       })
 
       // Finish

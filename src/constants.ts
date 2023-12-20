@@ -5,6 +5,13 @@ export const TestbedAnchorName = AltUri3.parseName(
   '/sha256digest=64f43dcb8e787c967b6fbf7a82f200bc123d56f5dc078cd01eb7b92f77321723'
 )
 
+// This is the current work-around for some technical issue on the CA side.
+// It is not secure and is supposed to change in future.
+export const TestbedOidcAnchorPrefix = AltUri3.parseName(
+  '/8=ndn/8=edu/8=ucla/8=workspace/8=KEY/8=%B3%F8%83%C9%9BR_%22/8=webapp/54=%00%00%01%8Bm%FFb%84' +
+  '/1=%DFS%DB%A9%90k%DE%85%CC%82%F3%F7f%CC%1D%60%20%82%0A%AC%1F%3E%FD%11%E20V%C7%E2c%7B%EB'
+)
+
 export const WorkspaceAnchorName = AltUri3.parseName(
   '/ndn/multicast/workspace-test/KEY/-%BE%A9%A9%01d%B67/self/v=1699662749518' +
   '/sha256digest=0880e74e252781f58f715a2c906b2e0cf12f10b8cc8277527ee2b3fbf30f6bd1'
