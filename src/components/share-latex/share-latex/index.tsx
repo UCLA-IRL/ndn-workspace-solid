@@ -206,7 +206,6 @@ export default function ShareLatex(props: {
     // Check if PDF is generated
     if (!res.pdf) {
       alert('Failed to compile PDF file')
-      setCompilationLog(res.log)
       return
     }
 
