@@ -2,6 +2,10 @@ const EditorTheme = {
   '&': {
     whiteSpace: "nowrap",
     textAlign: "left",
+    height: "100%",
+  },
+  '&.cm-focused': {
+    outline: 'none',
   },
   '.cm-content': {
     fontFamily: '"Roboto Mono", ui-monospace, monospace',

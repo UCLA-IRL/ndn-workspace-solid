@@ -1,9 +1,8 @@
 import { usePDFSlick } from "@pdfslick/solid"
-import { createInterval } from "../../utils"
-// import { createSignal, createEffect } from "solid-js"
+import { createEffect } from "solid-js"
 
 export default function PdfViewer(props: {
-  pdfUrl: string | undefined
+  pdfUrl: string
 }) {
   const {
     viewerRef,
@@ -13,17 +12,16 @@ export default function PdfViewer(props: {
     // eslint-disable-next-line solid/reactivity
   } = usePDFSlick(props.pdfUrl, {})
 
-  createInterval(() => {
-    // TODO: Need some CSS expert to find a better way
-    const ele = document.getElementById('viewerContainer')
-    if (ele) {
-      ele.style.position = 'relative'
+  createEffect(() => {
+    // This requires a patch to pdfjs (see patches folder)
+    // https://github.com/mozilla/pdf.js/pull/17445 (contributed upstream)
+    // This also reloads the worker every time, but no big deal due to caching
+    if (store.url && store.url !== props.pdfUrl) {
+      store.pdfSlick?.loadDocument(props.pdfUrl)
     }
-  }, () => 100)
+  });
 
-  return <div class="absolute inset-0 pdfSlick">
-    <div class="flex-1 relative h-full" style={{ padding: "1px 20px" }}>
-      <PDFSlickViewer {...{ store, viewerRef }} />
-    </div>
+  return <div class="inset-0 pdfSlick h-full" >
+      <PDFSlickViewer {...{ store, viewerRef }} class="h-full" />
   </div >
 }

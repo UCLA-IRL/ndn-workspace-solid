@@ -10,6 +10,8 @@ import * as main from "./backend/main"
 import { type Certificate } from "@ndn/keychain"
 import { type Theme, type Breakpoint } from "@suid/material/styles"
 import { Endpoint } from "@ndn/endpoint"
+import { doFch } from "./testbed";
+import { loadAll } from "./backend/models/connections";
 
 type ContextType = {
   rootDoc: Accessor<RootDocStore | undefined>
@@ -113,4 +115,37 @@ export function NdnWorkspaceProvider(props: ParentProps<unknown>) {
 
 export function useNdnWorkspace() {
   return useContext(NdnWorkspaceContext)
+}
+
+export async function initTestbed() {
+  const ctx = useNdnWorkspace()
+  if (!ctx) throw new Error('NdnWorkspaceContext not initialized')
+
+  if (ctx.connectionStatus() !== 'DISCONNECTED') {
+    return // already connected or connecting
+  }
+
+  const url = await doFch();
+  if (url === null) {
+    alert('Failed to connect to the NDN testbed. Please try again later.')
+    throw new Error('Failed to connect to testbed.')
+  }
+
+  // Attempt to get a config for nfdWs
+  const configs = await loadAll()
+  for (const config of configs) {
+    if (config.kind !== 'nfdWs') continue;
+
+    // Found a config, connect to it
+    // TODO: make sure this is a testbed forwarder
+    // TODO: prefer local forwarders if any configured
+    ctx.connectFuncs.connect({
+      ...config,
+      uri: url.toString(),
+    })
+
+    // TODO: break on success only
+    // TODO: remove config if connection fails?
+    break;
+  }
 }

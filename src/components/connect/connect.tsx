@@ -9,8 +9,9 @@ import NdnTestbedOidc from "./ndn-testbed-oidc"
 export default function Connect() {
   const navigate = useNavigate()
 
-  const onAdd = (config: Conn) => {
-    db.save(config).then(() => navigate('/connection', { replace: true }))
+  const onAdd = async (config: Conn) => {
+    await db.save(config)
+    navigate('/connection', { replace: true })
   }
 
   return <Stack spacing={2}>

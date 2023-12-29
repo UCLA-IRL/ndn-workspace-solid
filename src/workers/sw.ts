@@ -108,9 +108,9 @@ registerRoute(/\/stored\/.*/, async (options) => {
 });
 
 registerRoute(
-  /^https:\/\/cdn.jsdelivr.net\/npm/,
+  /^https?:\/\/(cdn\.jsdelivr\.net|texlive2\.swiftlatex\.com)/,
   new CacheFirst({
-    cacheName: 'pdf-slick-cdn',
+    cacheName: 'external-cdn',
     matchOptions: {
       ignoreVary: true
     },

@@ -8,7 +8,7 @@ import { EditorView, basicSetup } from "codemirror"
 import { StreamLanguage } from '@codemirror/language'
 import { stex } from '@codemirror/legacy-modes/mode/stex'
 import * as Y from 'yjs'
-import { useMediaQuery } from "@suid/material"
+import { Paper, useMediaQuery } from "@suid/material"
 import EditorTheme from './theme'
 
 export default function LatexDoc(props: {
@@ -31,5 +31,5 @@ export default function LatexDoc(props: {
   // eslint-disable-next-line solid/reactivity
   createExtension(yCollab(props.doc, null))
 
-  return <div ref={ref} style={{ "text-align": "left" }} />
+  return <Paper ref={ref} sx={{ height: 1 }} />
 }
