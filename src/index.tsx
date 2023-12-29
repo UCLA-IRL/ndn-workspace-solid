@@ -18,7 +18,7 @@ import ShareLatex from './components/share-latex'
 import OauthTest from './components/oauth-test'
 import { NdnWorkspaceProvider } from './Context'
 import { Connect, StoredConns } from './components/connect'
-import { Workspace, Profile, Hackathon } from './components/workspace'
+import { Workspace, Profile, ConvertTestbed } from './components/workspace'
 import { project } from './backend/models'
 
 const root = document.getElementById('root')
@@ -44,7 +44,7 @@ render(
         <Route path="/connection" component={StoredConns} />
         <Route path="/workspace" component={Workspace} />
         <Route path="/profile" component={Profile} />
-        <Route path="/hackathon" component={Hackathon} />
+        <Route path="/convert-testbed" component={ConvertTestbed} />
         <Route path="/oauth-test" component={OauthTest} />
       </Router>
     </NdnWorkspaceProvider >

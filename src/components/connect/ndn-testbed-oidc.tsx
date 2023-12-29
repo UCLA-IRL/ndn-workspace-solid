@@ -21,15 +21,12 @@ import { WsTransport } from "@ndn/ws-transport"
 import { Endpoint } from "@ndn/endpoint"
 import { fchQuery } from "@ndn/autoconfig"
 import { ClientOidcChallenge } from "../../adaptors/oidc-challenge"
-import { Interest, Name } from "@ndn/packet"
-import { retrieveMetadata } from "@ndn/rdr"
-import { Segment } from "@ndn/naming-convention2"
-import { useNdnWorkspace } from "../../Context"
+import { Name } from "@ndn/packet"
 
 export default function NdnTestbedOidc(props: {
   onAdd: (config: Conn) => void
 }) {
-  const { endpoint } = useNdnWorkspace()!
+  // const { endpoint } = useNdnWorkspace()!
   const [tempFace, setTempFace] = createSignal<FwFace>()
 
   const [requestId, setRequestId] = createSignal('')

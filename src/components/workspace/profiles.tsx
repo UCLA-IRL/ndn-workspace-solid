@@ -70,8 +70,8 @@ export default function Profiles() {
         >
           Profiles
         </Typography>
-        <Button onClick={() => navigate('/hackathon', { replace: true })} variant="outlined" color="secondary">
-          Hackathon
+        <Button onClick={() => navigate('/convert-testbed', { replace: true })} variant="outlined" color="secondary">
+          Convert
         </Button>
         <IconButton onClick={() => navigate('/workspace', { replace: true })}>
           <PersonAddIcon color="primary" />

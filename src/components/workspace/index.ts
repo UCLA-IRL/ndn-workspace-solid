@@ -1,4 +1,4 @@
 import Workspace from './workspace'
 import Profile from './profiles'
-import Hackathon from './hackathon'
-export { Workspace, Profile, Hackathon }
+import ConvertTestbed from './convert-testbed'
+export { Workspace, Profile, ConvertTestbed }

@@ -12,10 +12,11 @@ export const TestbedOidcAnchorPrefix = AltUri3.parseName(
   '/1=%DFS%DB%A9%90k%DE%85%CC%82%F3%F7f%CC%1D%60%20%82%0A%AC%1F%3E%FD%11%E20V%C7%E2c%7B%EB'
 )
 
-export const WorkspaceAnchorName = AltUri3.parseName(
-  '/ndn/multicast/workspace-test/KEY/-%BE%A9%A9%01d%B67/self/v=1699662749518' +
-  '/sha256digest=0880e74e252781f58f715a2c906b2e0cf12f10b8cc8277527ee2b3fbf30f6bd1'
-)
+// Used only in NDN Hackathon
+// export const WorkspaceAnchorName = AltUri3.parseName(
+//   '/ndn/multicast/workspace-test/KEY/-%BE%A9%A9%01d%B67/self/v=1699662749518' +
+//   '/sha256digest=0880e74e252781f58f715a2c906b2e0cf12f10b8cc8277527ee2b3fbf30f6bd1'
+// )
 
 export const GoogleOAuthClientId = '960085847794-jgd05gg3b6l3ijm8khdiu8du8hb44h2i.apps.googleusercontent.com'
 export const GoogleOIDCChallengeId = 'google-oidc'
