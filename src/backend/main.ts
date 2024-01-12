@@ -2,7 +2,7 @@
 // Should be changed to something better if refactor.
 import { Endpoint, Producer } from "@ndn/endpoint"
 import { Data, Name, Signer, digestSigning } from '@ndn/packet'
-import * as nfdmgmt from "@ndn/nfdmgmt"
+import { ControlCommand, enableNfdPrefixReg } from "@ndn/nfdmgmt"
 import { FwFace } from "@ndn/fw"
 import { WsTransport } from "@ndn/ws-transport"
 import { getYjsDoc } from '@syncedstore/core'
@@ -46,7 +46,7 @@ const connState = new BackendSignal<ConnState>('DISCONNECTED')
 export let nfdCmdSigner: Signer = digestSigning
 export let nfdCertificate: Certificate | undefined
 let nfdCertProducer: Producer | undefined
-let commandPrefix = nfdmgmt.localhopPrefix
+let commandPrefix = ControlCommand.localhopPrefix
 
 // ============= Connectivity =============
 
@@ -61,12 +61,12 @@ async function connectNfdWs(uri: string, isLocal: boolean) {
   // The automatic announcement is turned off by default to gain a finer control.
   // See checkPrefixRegistration for details.
   if (UseAutoAnnouncement) {
-    nfdmgmt.enableNfdPrefixReg(nfdWsFace, {
+    enableNfdPrefixReg(nfdWsFace, {
       signer: nfdCmdSigner,
       // TODO: Do I need to set `preloadCertName`?
     })
   }
-  commandPrefix = nfdmgmt.getPrefix(isLocal)
+  commandPrefix = ControlCommand.getPrefix(isLocal)
   await checkPrefixRegistration(false)
   return nfdWsFace
 }
@@ -319,20 +319,20 @@ async function checkPrefixRegistration(cancel: boolean) {
   if (cancel && nfdWsFace !== undefined) {
     if (!UseAutoAnnouncement) {
       // Unregister prefixes
-      await nfdmgmt.invoke("rib/unregister", {
+      await ControlCommand.call("rib/unregister", {
         name: nodeId!,
         origin: 65,  // client
       }, {
         endpoint: endpoint,
-        prefix: commandPrefix,
+        commandPrefix: commandPrefix,
         signer: nfdCmdSigner,
       })
-      await nfdmgmt.invoke("rib/unregister", {
+      await ControlCommand.call("rib/unregister", {
         name: appPrefix!,
         origin: 65,  // client
       }, {
         endpoint: endpoint,
-        prefix: commandPrefix,
+        commandPrefix: commandPrefix,
         signer: nfdCmdSigner,
       })
 
@@ -357,14 +357,14 @@ async function checkPrefixRegistration(cancel: boolean) {
       }
 
       // Register prefixes
-      const cr = await nfdmgmt.invoke("rib/register", {
+      const cr = await ControlCommand.call("rib/register", {
         name: appPrefix!,
         origin: 65,  // client
         cost: 0,
         flags: 0x02,  // CAPTURE
       }, {
         endpoint: endpoint,
-        prefix: commandPrefix,
+        commandPrefix: commandPrefix,
         signer: nfdCmdSigner,
       })
       if (cr.statusCode !== 200) {
@@ -372,14 +372,14 @@ async function checkPrefixRegistration(cancel: boolean) {
         // Cut connection
         return await disconnect()
       }
-      const cr2 = await nfdmgmt.invoke("rib/register", {
+      const cr2 = await ControlCommand.call("rib/register", {
         name: nodeId!,
         origin: 65,  // client
         cost: 0,
         flags: 0x02,  // CAPTURE
       }, {
         endpoint: endpoint,
-        prefix: commandPrefix,
+        commandPrefix: commandPrefix,
         signer: nfdCmdSigner,
       })
       if (cr2.statusCode !== 200) {
