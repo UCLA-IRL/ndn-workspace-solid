@@ -34,3 +34,8 @@
 #editor > .ProseMirror {
     outline: none !important;
 }
+
+/** Patching MUI components */
+.MuiSelect-root {
+    height: 40px;
+}
