@@ -8,6 +8,7 @@
 
 /** ShareLatex Component */
 .sl-outer {
+    z-index: 10000;
     flex: 1;
     overflow: visible;
     display: flex;
@@ -16,6 +17,7 @@
 
 .sl-panel {
     height: 100%;
+    max-width: 100%;
     flex: 1;
 }
 
@@ -25,6 +27,10 @@
 }
 
 /** Rich editor */
+#editor {
+    padding: 0 16px;
+}
+
 #editor > .ProseMirror {
     outline: none !important;
 }
