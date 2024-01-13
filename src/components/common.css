@@ -23,3 +23,8 @@
 .pdfSlick {
     position: relative;
 }
+
+/** Rich editor */
+#editor > .ProseMirror {
+    outline: none !important;
+}
