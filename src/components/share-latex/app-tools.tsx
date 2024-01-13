@@ -23,7 +23,7 @@ export default function AppTools(props: {
   }
 
   return (
-    <AppBar position="sticky" color="transparent" sx={{ boxShadow: 'none' }}>
+    <AppBar position="relative" color="transparent" sx={{ boxShadow: 'none' }}>
       <Toolbar>
         <IconButton
           size="large"

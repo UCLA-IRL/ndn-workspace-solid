@@ -8,7 +8,6 @@
 
 /** ShareLatex Component */
 .sl-outer {
-    z-index: 10000;
     flex: 1;
     overflow: visible;
     display: flex;
