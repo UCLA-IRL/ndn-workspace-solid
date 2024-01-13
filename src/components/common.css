@@ -28,6 +28,7 @@
 /** Rich editor */
 #editor {
     padding: 0 16px;
+    max-height: 10px; /* This is a hack, don't even know why it works */
 }
 
 #editor > .ProseMirror {

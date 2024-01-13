@@ -52,8 +52,8 @@ export default function RichDoc(props: {
   }))
 
   // TODO: Should use ToggleButton for better appearance. Or at least some CSS.
-  return <Card sx={{ width: '100%' }}>
-    <CardContent>
+  return <Card sx={{ width: '100%', height: '100%', overflow: 'auto' }}>
+    <CardContent sx={{ position: 'sticky', top: 0, zIndex: 10000, background: 'white', borderBottom: '1px solid #ddd' }}>
       <Stack
         spacing={0}
         direction="row"
