@@ -8,6 +8,7 @@ import {
   TextField,
   Grid,
   Button,
+  CircularProgress
 } from "@suid/material"
 import { Config as Conn } from '../../backend/models/connections'
 import { createSignal, onCleanup } from "solid-js"
@@ -33,6 +34,7 @@ export default function NdnTestbed(props: {
   const wsUri = () => `wss://${host()}/ws/`
   // const [keyPair, setKeyPair] = createSignal<KeyPair>()
   const [pinResolver, setPinResolver] = createSignal<Resolver>()
+  const [isRequesting, setIsRequesting] = createSignal(false)
 
   const onFch = async () => setHost((await doFch())?.host ?? '')
 
@@ -44,6 +46,7 @@ export default function NdnTestbed(props: {
   }
 
   const onRequest = async () => {
+    setIsRequesting(true)
     try {
       const curEmail = email()
       const curUri = wsUri()
@@ -101,7 +104,10 @@ export default function NdnTestbed(props: {
         validity: keychain.ValidityPeriod.daysFromNow(maximalValidityDays),
         challenges: [
           new ndncert.ClientEmailChallenge(curEmail, () => {
-            return new Promise(resolve => setPinResolver({ resolve }))
+            return new Promise(resolve => {
+              setIsRequesting(false);
+              setPinResolver({ resolve })
+            })
           })
         ],
       })
@@ -180,11 +186,11 @@ export default function NdnTestbed(props: {
           />
         </Grid>
         <Grid item xs={4}>
-          <Button variant="text" color="primary"
+          {isRequesting() ? <CircularProgress /> : <Button variant="text" color="primary"
             onClick={onRequest}
             disabled={host() === '' || email() === '' || pinResolver() !== undefined}>
             Request
-          </Button>
+          </Button>}
         </Grid>
         <Grid item xs={8}>
           <TextField
