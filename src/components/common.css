@@ -1,0 +1,60 @@
+/** Globals */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #aaa;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: #eee;
+}
+
+* {
+    scrollbar-width: thin;
+}
+
+/** Utilities */
+.h-full {
+    height: 100%;
+}
+
+.w-half {
+    width: 50%;
+}
+
+/** ShareLatex Component */
+.sl-outer {
+    flex: 1;
+    overflow: visible;
+    display: flex;
+    flex-direction: row;
+}
+
+.sl-panel {
+    height: 100%;
+    max-width: 100%;
+    flex: 1;
+}
+
+/** PDF Slick component */
+.pdfSlick {
+    position: relative;
+}
+
+/** Rich editor */
+#editor {
+    padding: 0 16px;
+    max-height: 10px; /* This is a hack, don't even know why it works */
+}
+
+#editor > .ProseMirror {
+    outline: none !important;
+}
+
+/** Patching MUI components */
+.MuiSelect-root {
+    height: 40px;
+}
