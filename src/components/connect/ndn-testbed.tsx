@@ -8,25 +8,23 @@ import {
   TextField,
   Grid,
   Button,
-  CircularProgress
-} from "@suid/material"
+  CircularProgress,
+} from '@suid/material'
 import { Config as Conn } from '../../backend/models/connections'
-import { createSignal, onCleanup } from "solid-js"
-import { FwFace } from "@ndn/fw"
+import { createSignal, onCleanup } from 'solid-js'
+import { FwFace } from '@ndn/fw'
 import * as ndncert from '@ndn/ndncert'
-import * as keychain from "@ndn/keychain"
-import { TestbedAnchorName } from "../../constants"
-import { bytesToBase64 } from "../../utils"
-import { Encoder } from "@ndn/tlv"
-import { WsTransport } from "@ndn/ws-transport"
-import { Endpoint } from "@ndn/endpoint"
-import { doFch } from "../../testbed";
+import * as keychain from '@ndn/keychain'
+import { TestbedAnchorName } from '../../constants'
+import { bytesToBase64 } from '../../utils'
+import { Encoder } from '@ndn/tlv'
+import { WsTransport } from '@ndn/ws-transport'
+import { Endpoint } from '@ndn/endpoint'
+import { doFch } from '../../testbed'
 
 type Resolver = { resolve: (pin: string | PromiseLike<string>) => void }
 
-export default function NdnTestbed(props: {
-  onAdd: (config: Conn) => void
-}) {
+export default function NdnTestbed(props: { onAdd: (config: Conn) => void }) {
   const [host, setHost] = createSignal('')
   const [email, setEmail] = createSignal('')
   const [pin, setPin] = createSignal('')
@@ -96,7 +94,7 @@ export default function NdnTestbed(props: {
           retx: {
             limit: 4,
             interval: 5000,
-          }
+          },
         }),
         profile: caProfile,
         privateKey: prvKey,
@@ -104,11 +102,11 @@ export default function NdnTestbed(props: {
         validity: keychain.ValidityPeriod.daysFromNow(maximalValidityDays),
         challenges: [
           new ndncert.ClientEmailChallenge(curEmail, () => {
-            return new Promise(resolve => {
-              setIsRequesting(false);
+            return new Promise((resolve) => {
+              setIsRequesting(false)
               setPinResolver({ resolve })
             })
-          })
+          }),
         ],
       })
 
@@ -141,84 +139,80 @@ export default function NdnTestbed(props: {
     }
   })
 
-  return <Card>
-    <CardHeader
-      sx={{ textAlign: 'left' }}
-      title="NDN Testbed with NDNCert Bootstrapping"
-    />
-    <Divider />
-    <CardContent>
-      <Grid container spacing={1} alignItems='center'>
-        <Grid item xs={8}>
-          <TextField
-            fullWidth
-            label="Closest Testbed Node"
-            name="uri"
-            type="text"
-            InputProps={{
-              startAdornment:
-                <InputAdornment position="start">
-                  wss://
-                </InputAdornment>,
-              endAdornment:
-                <InputAdornment position="start">
-                  /ws/
-                </InputAdornment>,
-            }}
-            value={host()}
-            onChange={event => setHost(event.target.value)}
-          />
+  return (
+    <Card>
+      <CardHeader sx={{ textAlign: 'left' }} title="NDN Testbed with NDNCert Bootstrapping" />
+      <Divider />
+      <CardContent>
+        <Grid container spacing={1} alignItems="center">
+          <Grid item xs={8}>
+            <TextField
+              fullWidth
+              label="Closest Testbed Node"
+              name="uri"
+              type="text"
+              InputProps={{
+                startAdornment: <InputAdornment position="start">wss://</InputAdornment>,
+                endAdornment: <InputAdornment position="start">/ws/</InputAdornment>,
+              }}
+              value={host()}
+              onChange={(event) => setHost(event.target.value)}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <Button variant="text" color="primary" onClick={onFch}>
+              Reach Testbed
+            </Button>
+          </Grid>
+          <Grid item xs={8}>
+            <TextField
+              fullWidth
+              label="Email"
+              name="email"
+              type="email"
+              value={email()}
+              onChange={(event) => setEmail(event.target.value)}
+              disabled={host() === ''}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            {isRequesting() ? (
+              <CircularProgress />
+            ) : (
+              <Button
+                variant="text"
+                color="primary"
+                onClick={onRequest}
+                disabled={host() === '' || email() === '' || pinResolver() !== undefined}
+              >
+                Request
+              </Button>
+            )}
+          </Grid>
+          <Grid item xs={8}>
+            <TextField
+              fullWidth
+              label="Pin"
+              name="pin"
+              type="text"
+              value={pin()}
+              onChange={(event) => setPin(event.target.value)}
+              disabled={pinResolver() === undefined}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <Button variant="text" color="primary" onClick={onInputPin} disabled={pinResolver() === undefined}>
+              Get Cert
+            </Button>
+          </Grid>
         </Grid>
-        <Grid item xs={4}>
-          <Button variant="text" color="primary" onClick={onFch}>
-            Reach Testbed
-          </Button>
-        </Grid>
-        <Grid item xs={8}>
-          <TextField
-            fullWidth
-            label="Email"
-            name="email"
-            type="email"
-            value={email()}
-            onChange={event => setEmail(event.target.value)}
-            disabled={host() === ''}
-          />
-        </Grid>
-        <Grid item xs={4}>
-          {isRequesting() ? <CircularProgress /> : <Button variant="text" color="primary"
-            onClick={onRequest}
-            disabled={host() === '' || email() === '' || pinResolver() !== undefined}>
-            Request
-          </Button>}
-        </Grid>
-        <Grid item xs={8}>
-          <TextField
-            fullWidth
-            label="Pin"
-            name="pin"
-            type="text"
-            value={pin()}
-            onChange={event => setPin(event.target.value)}
-            disabled={pinResolver() === undefined}
-          />
-        </Grid>
-        <Grid item xs={4}>
-          <Button variant="text" color="primary" onClick={onInputPin} disabled={pinResolver() === undefined}>
-            Get Cert
-          </Button>
-        </Grid>
-      </Grid>
-    </CardContent>
-    <Divider />
-    <CardActions sx={{ justifyContent: 'flex-end' }}>
-      <Button
-        variant="text"
-        color="primary"
-        disabled
-      >
-        AUTO SAVE WHEN DONE
-      </Button>
-    </CardActions>
-  </Card>
+      </CardContent>
+      <Divider />
+      <CardActions sx={{ justifyContent: 'flex-end' }}>
+        <Button variant="text" color="primary" disabled>
+          AUTO SAVE WHEN DONE
+        </Button>
+      </CardActions>
+    </Card>
+  )
 }

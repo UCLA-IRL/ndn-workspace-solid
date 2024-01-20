@@ -9,7 +9,6 @@ const SnapshotKey = 'localSnapshot'
  * It receives and emits updates, encodes and loads local state as updates.
  */
 export class YjsStateManager {
-
   private readonly callback = this.docUpdateHandler.bind(this)
   private counter = 0
 
@@ -28,18 +27,20 @@ export class YjsStateManager {
   }
 
   private docUpdateHandler(_update: Uint8Array, origin: undefined) {
-    if (origin !== this) {  // This condition must be true
+    if (origin !== this) {
+      // This condition must be true
       this.counter += 1
       if (this.counter >= this.threshold) {
         this.saveLocalSnapshot(this.getState())
       }
     } else {
-      console.error('[FATAL] YjsStateManager is not supposed to apply updates itself.' +
-        'Call the NDN Adaptor instead.')
+      console.error(
+        '[FATAL] YjsStateManager is not supposed to apply updates itself.' + 'Call the NDN Adaptor instead.',
+      )
     }
   }
 
-  /** 
+  /**
    * Save the current status into a local snapshot.
    * This snapshot includes everyone's update and is not supposed to be published.
    * Public snapshots use a different mechanism.

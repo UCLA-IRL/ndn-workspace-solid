@@ -70,6 +70,7 @@ Solid JS is a vary new frontend framework so that there are only very limited le
 In the case you cannot find the tutorials or documents you are looking for, you may use the corresponding React versions.
 Most of the time they can be easily translated into Solid.
 Just be aware of the following differences:
+
 - Solid uses signal `state()` instead of (dirty) value `state`.
 - Solid only support function components.
 - Solid components are rendered (as a whole) only once,

@@ -5,7 +5,7 @@ export function callCC<T>(callback: (exit: (result: T) => void) => T): T {
       throw { callCCBox, result }
     })
   } catch (e) {
-    const errBox = e as { callCCBox?: symbol, result?: T }
+    const errBox = e as { callCCBox?: symbol; result?: T }
     if (errBox?.callCCBox == callCCBox) {
       return errBox!.result!
     }

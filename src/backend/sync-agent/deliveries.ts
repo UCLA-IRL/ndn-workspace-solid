@@ -1,12 +1,12 @@
-import { type Endpoint } from "@ndn/endpoint"
-import { SvSync, type SyncNode, type SyncUpdate } from "@ndn/sync"
-import { Name, Data, digestSigning, type Verifier, Signer, Interest } from "@ndn/packet"
-import { SequenceNum } from "@ndn/naming-convention2"
-import { Decoder, Encoder } from "@ndn/tlv"
-import { SvStateVector } from "@ndn/sync"
-import { getNamespace } from "./namespace"
-import { Storage } from "../storage"
-import { panic } from "../../utils"
+import { type Endpoint } from '@ndn/endpoint'
+import { SvSync, type SyncNode, type SyncUpdate } from '@ndn/sync'
+import { Name, Data, digestSigning, type Verifier, Signer, Interest } from '@ndn/packet'
+import { SequenceNum } from '@ndn/naming-convention2'
+import { Decoder, Encoder } from '@ndn/tlv'
+import { SvStateVector } from '@ndn/sync'
+import { getNamespace } from './namespace'
+import { Storage } from '../storage'
+import { panic } from '../../utils'
 
 export function encodeSyncState(state: SvStateVector): Uint8Array {
   return Encoder.encode(state)
@@ -25,7 +25,7 @@ export function parseSyncState(vector: Uint8Array): SvStateVector {
 export type UpdateEvent = (content: Uint8Array, id: Name, instance: SyncDelivery) => Promise<void>
 
 const fireSvSync = (inst: SvSync) => {
-  (inst as unknown as { resetTimer: (immediate?: boolean) => void }).resetTimer(true)
+  ;(inst as unknown as { resetTimer: (immediate?: boolean) => void }).resetTimer(true)
 }
 
 /**
@@ -53,7 +53,7 @@ export abstract class SyncDelivery {
   ) {
     // const nodeId = getNamespace().nodeIdFromSigner(this.signer.name)
     this.baseName = getNamespace().baseName(nodeId, syncPrefix)
-    this._startPromise = new Promise(resolve => {
+    this._startPromise = new Promise((resolve) => {
       this._startPromiseResolve = resolve
       if (this._ready) {
         resolve()
@@ -67,12 +67,12 @@ export abstract class SyncDelivery {
       initialStateVector: new SvStateVector(state),
       initialize: async (svSync) => {
         this._syncInst = svSync
-        this._syncInst.addEventListener("update", update => this.handleSyncUpdate(update))
+        this._syncInst.addEventListener('update', (update) => this.handleSyncUpdate(update))
         this._syncNode = this._syncInst.add(nodeId)
         this._onUpdate = await onUpdatePromise
         await this._startPromise
-      }
-    }).then(value => {
+      },
+    }).then((value) => {
       // Force triggering the SvSync to fire
       // NOTE: NDNts does not expose a way to trigger the SVS manually
       fireSvSync(value)
@@ -114,7 +114,6 @@ export abstract class SyncDelivery {
     this._onReset = value
   }
 
-
   start() {
     if (!this._ready) {
       this._ready = true
@@ -152,11 +151,11 @@ export abstract class SyncDelivery {
       initialStateVector: new SvStateVector(this.state),
       initialize: async (svSync) => {
         this._syncInst = svSync
-        this._syncInst.addEventListener("update", update => this.handleSyncUpdate(update))
+        this._syncInst.addEventListener('update', (update) => this.handleSyncUpdate(update))
         // const nodeId = getNamespace().nodeIdFromSigner(this.signer.name)
         this._syncNode = this._syncInst.add(this.nodeId)
         // this._ready should already be true
-      }
+      },
     })
     // Force trigger the SvSync to fire
     fireSvSync(svSync)
@@ -180,9 +179,7 @@ export abstract class SyncDelivery {
 
   protected async storeSyncState(storage: Storage) {
     if (this.state !== undefined) {
-      storage.set(
-        getNamespace().syncStateKey(this.baseName),
-        encodeSyncState(this.state))
+      storage.set(getNamespace().syncStateKey(this.baseName), encodeSyncState(this.state))
     }
   }
 
@@ -222,11 +219,7 @@ export class AtLeastOnceDelivery extends SyncDelivery {
     for (let i = update.loSeqNum; i <= update.hiSeqNum; i++) {
       const name = prefix.append(SequenceNum.create(i))
       try {
-        const data = await this.endpoint.consume(new Interest(
-          name,
-          Interest.MustBeFresh,
-          Interest.Lifetime(5000),
-        ), {
+        const data = await this.endpoint.consume(new Interest(name, Interest.MustBeFresh, Interest.Lifetime(5000)), {
           verifier: this.verifier,
           retx: 5,
         })
@@ -265,7 +258,7 @@ export class AtLeastOnceDelivery extends SyncDelivery {
     // Putting this out of the loop makes it not exactly once:
     // If the application is down before all messages in the update is handled,
     // some may be redelivered the next time the application starts.
-    // Sinc Yjs allows an update to be applied multiple times, this should be fine. 
+    // Sinc Yjs allows an update to be applied multiple times, this should be fine.
     await this.setSyncState(update.id, lastHandled, this.storage)
   }
 
@@ -275,14 +268,10 @@ export class AtLeastOnceDelivery extends SyncDelivery {
     }
     // REQUIRE ATOMIC {
     const seqNum = this.syncNode.seqNum + 1
-    this.syncNode.seqNum = seqNum  // This line must be called immediately to prevent race condition
+    this.syncNode.seqNum = seqNum // This line must be called immediately to prevent race condition
     // }
     const name = this.baseName.append(SequenceNum.create(seqNum))
-    const data = new Data(
-      name,
-      Data.FreshnessPeriod(60000),
-      content,
-    )
+    const data = new Data(name, Data.FreshnessPeriod(60000), content)
     await this.signer.sign(data)
 
     this.storage.set(name.toString(), Encoder.encode(data))
@@ -357,7 +346,9 @@ export class LatestOnlyDelivery extends SyncDelivery {
     const prefix = getNamespace().baseName(update.id, this.syncPrefix)
     const name = prefix.append(SequenceNum.create(update.hiSeqNum))
     try {
-      const data = await this.endpoint.consume(name, { verifier: this.verifier })
+      const data = await this.endpoint.consume(name, {
+        verifier: this.verifier,
+      })
 
       // Update the storage
       // Note that this will overwrite old data
@@ -381,14 +372,10 @@ export class LatestOnlyDelivery extends SyncDelivery {
     }
     // REQUIRE ATOMIC {
     const seqNum = this.syncNode.seqNum + 1
-    this.syncNode.seqNum = seqNum  // This line must be called immediately to prevent race condition
+    this.syncNode.seqNum = seqNum // This line must be called immediately to prevent race condition
     // }
     const name = this.baseName.append(SequenceNum.create(seqNum))
-    const data = new Data(
-      name,
-      Data.FreshnessPeriod(60000),
-      content,
-    )
+    const data = new Data(name, Data.FreshnessPeriod(60000), content)
     await this.signer.sign(data)
 
     this.pktStorage.set(getNamespace().latestOnlyKey(name), Encoder.encode(data))
@@ -418,7 +405,15 @@ export class LatestOnlyDelivery extends SyncDelivery {
       syncState = parseSyncState(encoded)
     }
     return new LatestOnlyDelivery(
-      nodeId, endpoint, syncPrefix, signer, verifier, pktStorage, stateStorage, onUpdatePromise, syncState
+      nodeId,
+      endpoint,
+      syncPrefix,
+      signer,
+      verifier,
+      pktStorage,
+      stateStorage,
+      onUpdatePromise,
+      syncState,
     )
   }
 

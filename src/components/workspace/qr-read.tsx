@@ -3,8 +3,8 @@ import { Show, createEffect, createSignal, onCleanup } from 'solid-js'
 
 export default function QrReader(props: {
   //open or close video stream
-  popupOpen: boolean,
-  setValue: (value: string) => void,
+  popupOpen: boolean
+  setValue: (value: string) => void
 }) {
   const [videoElem, setVideoElem] = createSignal<HTMLVideoElement>()
 
@@ -13,12 +13,15 @@ export default function QrReader(props: {
     const vid = videoElem()
     const setValue = props.setValue
     if (props.popupOpen && vid) {
-      const scanner = new QrScanner(vid, result => {
-        console.debug('Scanned QR code:', result)
-        setValue(result.data)
-        scanner.stop()
-      },
-        { returnDetailedScanResult: true })
+      const scanner = new QrScanner(
+        vid,
+        (result) => {
+          console.debug('Scanned QR code:', result)
+          setValue(result.data)
+          scanner.stop()
+        },
+        { returnDetailedScanResult: true },
+      )
       scanner.start()
       onCleanup(() => {
         scanner.stop()
@@ -26,8 +29,9 @@ export default function QrReader(props: {
     }
   })
 
-
-  return <Show when={props.popupOpen}>
-    <video ref={setVideoElem} />
-  </Show>
+  return (
+    <Show when={props.popupOpen}>
+      <video ref={setVideoElem} />
+    </Show>
+  )
 }

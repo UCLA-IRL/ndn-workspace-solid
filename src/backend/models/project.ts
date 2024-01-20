@@ -1,6 +1,6 @@
 import * as Y from 'yjs'
 import JSZip from 'jszip'
-import { Name } from "@ndn/packet"
+import { Name } from '@ndn/packet'
 
 export type ItemBase = {
   /** Item UUID */
@@ -142,7 +142,7 @@ export function itemIdAt(items: PartItems, pathNames: string[], baseId: string =
       // ''.split('/') === ['']
       return prev
     } else if (prevItem?.kind === 'folder') {
-      return prevItem.items.find(item => items[item]?.name === current)
+      return prevItem.items.find((item) => items[item]?.name === current)
     } else {
       // Invalid path
       return undefined
@@ -153,7 +153,7 @@ export function itemIdAt(items: PartItems, pathNames: string[], baseId: string =
 export async function exportAsZip(
   resolveBlob: (name: Name) => Promise<Uint8Array | undefined>,
   items: PartItems,
-  baseId: string = RootId
+  baseId: string = RootId,
 ) {
   const zip = new JSZip()
   await walk(resolveBlob, items, null, zip.file.bind(zip), baseId)
@@ -165,7 +165,7 @@ export async function walk(
   items: PartItems,
   callbackFolder: null | ((path: string) => void),
   callbackFile: null | ((path: string, item: string | Uint8Array) => void),
-  baseId: string = RootId
+  baseId: string = RootId,
 ) {
   const examine = async (basePath: string, curId: string) => {
     const curItem = items[curId]

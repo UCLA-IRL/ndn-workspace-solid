@@ -1,15 +1,15 @@
-import { AltUri3 } from "@ndn/naming-convention2"
+import { AltUri3 } from '@ndn/naming-convention2'
 
 export const TestbedAnchorName = AltUri3.parseName(
   '/ndn/KEY/%27%C4%B2%2A%9F%7B%81%27/ndn/v=1651246789556' +
-  '/sha256digest=64f43dcb8e787c967b6fbf7a82f200bc123d56f5dc078cd01eb7b92f77321723'
+    '/sha256digest=64f43dcb8e787c967b6fbf7a82f200bc123d56f5dc078cd01eb7b92f77321723',
 )
 
 // This is the current work-around for some technical issue on the CA side.
 // It is not secure and is supposed to change in future.
 export const TestbedOidcAnchorPrefix = AltUri3.parseName(
   '/8=ndn/8=edu/8=ucla/8=workspace/8=KEY/8=%B3%F8%83%C9%9BR_%22/8=webapp/54=%00%00%01%8Bm%FFb%84' +
-  '/1=%DFS%DB%A9%90k%DE%85%CC%82%F3%F7f%CC%1D%60%20%82%0A%AC%1F%3E%FD%11%E20V%C7%E2c%7B%EB'
+    '/1=%DFS%DB%A9%90k%DE%85%CC%82%F3%F7f%CC%1D%60%20%82%0A%AC%1F%3E%FD%11%E20V%C7%E2c%7B%EB',
 )
 
 // Used only in NDN Hackathon

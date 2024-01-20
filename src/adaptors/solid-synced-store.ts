@@ -1,5 +1,5 @@
-import { observeDeep } from "@syncedstore/core"
-import { Accessor, createEffect, createSignal, from, onCleanup } from "solid-js"
+import { observeDeep } from '@syncedstore/core'
+import { Accessor, createEffect, createSignal, from, onCleanup } from 'solid-js'
 
 /**
  * Solid hook to export a subobject of the store as a signal.
@@ -15,7 +15,7 @@ import { Accessor, createEffect, createSignal, from, onCleanup } from "solid-js"
  * // In your component:
  * const people = createSyncedStore(globalStore.people)
  * <div>{people()![1].name}</div>
- * 
+ *
  * @param syncedObject The subobject to sync on
  * @returns a signal tracking the subobject
  */
@@ -29,7 +29,7 @@ export function createSyncedStore<T>(syncedObject: T): Accessor<{ value: T } | u
       })
       return cancel
     } else {
-      return () => { }
+      return () => {}
     }
   })
 }

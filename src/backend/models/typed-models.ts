@@ -1,10 +1,10 @@
-import { encodeKey as encodePath, openRoot } from "../../utils"
+import { encodeKey as encodePath, openRoot } from '../../utils'
 
 export class TypedModel<T> {
   constructor(
     readonly storageFolder: string,
-    readonly getName: (object: T) => string
-  ) { }
+    readonly getName: (object: T) => string,
+  ) {}
 
   async save(object: T) {
     const rootHandle = await openRoot()
@@ -17,7 +17,9 @@ export class TypedModel<T> {
 
   async remove(connName: string) {
     const rootHandle = await openRoot()
-    const objects = await rootHandle.getDirectoryHandle(this.storageFolder, { create: true })
+    const objects = await rootHandle.getDirectoryHandle(this.storageFolder, {
+      create: true,
+    })
     try {
       await objects.removeEntry(encodePath(connName), { recursive: true })
       await rootHandle.removeEntry(encodePath(connName), { recursive: true })
@@ -28,7 +30,9 @@ export class TypedModel<T> {
 
   async isExisting(connName: string) {
     const rootHandle = await openRoot()
-    const objects = await rootHandle.getDirectoryHandle(this.storageFolder, { create: true })
+    const objects = await rootHandle.getDirectoryHandle(this.storageFolder, {
+      create: true,
+    })
     try {
       await objects.getFileHandle(encodePath(connName), { create: false })
       return true
@@ -39,9 +43,13 @@ export class TypedModel<T> {
 
   async load(connName: string) {
     const rootHandle = await openRoot()
-    const objects = await rootHandle.getDirectoryHandle(this.storageFolder, { create: true })
+    const objects = await rootHandle.getDirectoryHandle(this.storageFolder, {
+      create: true,
+    })
     try {
-      const file = await objects.getFileHandle(encodePath(connName), { create: false })
+      const file = await objects.getFileHandle(encodePath(connName), {
+        create: false,
+      })
       const jsonFile = await file.getFile()
       const jsonText = await jsonFile.text()
       const object = JSON.parse(jsonText) as T
@@ -54,7 +62,9 @@ export class TypedModel<T> {
   async loadAll() {
     const rootHandle = await openRoot()
 
-    const objects = await rootHandle.getDirectoryHandle(this.storageFolder, { create: true })
+    const objects = await rootHandle.getDirectoryHandle(this.storageFolder, {
+      create: true,
+    })
     const ret: Array<T> = []
     for await (const [, handle] of objects.entries()) {
       if (handle.kind === 'file') {

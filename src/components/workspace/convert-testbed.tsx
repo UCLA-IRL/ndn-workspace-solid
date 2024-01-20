@@ -1,18 +1,18 @@
-import { Button, Card, CardContent, CardHeader, Divider, Stack, TextField, Typography } from "@suid/material"
-import * as main from "../../backend/main"
-import { createSignal } from "solid-js"
-import { digestSigning } from "@ndn/packet"
+import { Button, Card, CardContent, CardHeader, Divider, Stack, TextField, Typography } from '@suid/material'
+import * as main from '../../backend/main'
+import { createSignal } from 'solid-js'
+import { digestSigning } from '@ndn/packet'
 import * as ndncert from '@ndn/ndncert'
-import * as keychain from "@ndn/keychain"
-import { useNavigate } from "@solidjs/router"
-import { useNdnWorkspace } from "../../Context"
-import { AltUri } from "@ndn/naming-convention2"
+import * as keychain from '@ndn/keychain'
+import { useNavigate } from '@solidjs/router'
+import { useNdnWorkspace } from '../../Context'
+import { AltUri } from '@ndn/naming-convention2'
 
 export default function ConvertTestbed() {
   const [disabled, setDisabled] = createSignal(false)
   const [anchorNameStr, setAnchorNameStr] = createSignal('')
   const navigate = useNavigate()
-  const { bootstrapWorkspace, } = useNdnWorkspace()!
+  const { bootstrapWorkspace } = useNdnWorkspace()!
 
   const run = async (init: boolean) => {
     setDisabled(true)
@@ -27,7 +27,7 @@ export default function ConvertTestbed() {
       console.error('Please make sure you are using a valid certificate.')
       return
     }
-    const workspaceAnchorName = AltUri.parseName(anchorNameStr());
+    const workspaceAnchorName = AltUri.parseName(anchorNameStr())
 
     // Request profile
     const caProfile = await ndncert.retrieveCaProfile({
@@ -57,9 +57,7 @@ export default function ConvertTestbed() {
       privateKey: prvKey,
       publicKey: pubKey,
       validity: keychain.ValidityPeriod.daysFromNow(maximalValidityDays),
-      challenges: [
-        new ndncert.ClientPossessionChallenge(pofp, signer)
-      ],
+      challenges: [new ndncert.ClientPossessionChallenge(pofp, signer)],
     })
 
     try {
@@ -76,49 +74,54 @@ export default function ConvertTestbed() {
     }
   }
 
-  return <Card>
-    <CardHeader
-      sx={{ textAlign: 'left' }}
-      title="Convert Testbed Cert as Workspace Identity"
-      subheader={
-        <Typography color="primary" fontFamily='"Roboto Mono", ui-monospace, monospace'>
-          /ndn/multicast/workspace-test
-        </Typography>
-      } />
-    <Divider />
-    <CardContent>
-      This page will let you convert a testbed certificate into a workspace certificate using proof-of-possession.
-      Please connect to the testbed with a valid certificate and provide the full name of the trust anchor.
-    </CardContent>
-    <Divider />
-    <CardContent>
-      <TextField
-        fullWidth
-        label="Trust Anchor Full Name"
-        name="trust-anchor"
-        type="text"
-        value={anchorNameStr()}
-        onChange={event => setAnchorNameStr(event.target.value)}
+  return (
+    <Card>
+      <CardHeader
+        sx={{ textAlign: 'left' }}
+        title="Convert Testbed Cert as Workspace Identity"
+        subheader={
+          <Typography color="primary" fontFamily='"Roboto Mono", ui-monospace, monospace'>
+            /ndn/multicast/workspace-test
+          </Typography>
+        }
       />
-    </CardContent>
-    <Divider />
-    <CardContent>
-      <Stack direction="row" spacing={2} justifyContent='flex-end'>
-        <Button
-          variant="outlined"
-          onClick={() => run(true)}
-          color='secondary'
-          disabled={disabled() || anchorNameStr() === ''}>
-          CREATE
-        </Button>
-        <Button
-          variant="outlined"
-          onClick={() => run(false)}
-          color='primary'
-          disabled={disabled() || anchorNameStr() === ''}>
-          JOIN
-        </Button>
-      </Stack>
-    </CardContent>
-  </Card >
+      <Divider />
+      <CardContent>
+        This page will let you convert a testbed certificate into a workspace certificate using proof-of-possession.
+        Please connect to the testbed with a valid certificate and provide the full name of the trust anchor.
+      </CardContent>
+      <Divider />
+      <CardContent>
+        <TextField
+          fullWidth
+          label="Trust Anchor Full Name"
+          name="trust-anchor"
+          type="text"
+          value={anchorNameStr()}
+          onChange={(event) => setAnchorNameStr(event.target.value)}
+        />
+      </CardContent>
+      <Divider />
+      <CardContent>
+        <Stack direction="row" spacing={2} justifyContent="flex-end">
+          <Button
+            variant="outlined"
+            onClick={() => run(true)}
+            color="secondary"
+            disabled={disabled() || anchorNameStr() === ''}
+          >
+            CREATE
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={() => run(false)}
+            color="primary"
+            disabled={disabled() || anchorNameStr() === ''}
+          >
+            JOIN
+          </Button>
+        </Stack>
+      </CardContent>
+    </Card>
+  )
 }

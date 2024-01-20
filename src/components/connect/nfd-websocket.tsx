@@ -1,22 +1,11 @@
-import {
-  Card,
-  CardActions,
-  CardContent,
-  CardHeader,
-  Divider,
-  TextField,
-  Grid,
-  Button,
-} from "@suid/material"
+import { Card, CardActions, CardContent, CardHeader, Divider, TextField, Grid, Button } from '@suid/material'
 import { Config as Conn } from '../../backend/models/connections'
-import { createSignal } from "solid-js"
-import { base64ToBytes, bytesToBase64 } from "../../utils"
-import { Decoder, Encoder } from "@ndn/tlv"
-import { SafeBag } from "@ndn/ndnsec"
+import { createSignal } from 'solid-js'
+import { base64ToBytes, bytesToBase64 } from '../../utils'
+import { Decoder, Encoder } from '@ndn/tlv'
+import { SafeBag } from '@ndn/ndnsec'
 
-export default function NfdWebsocket(props: {
-  onAdd: (config: Conn) => void
-}) {
+export default function NfdWebsocket(props: { onAdd: (config: Conn) => void }) {
   const [uriText, setUriText] = createSignal('ws://localhost:9696/')
   const [safebagText, setSafebagText] = createSignal('')
   const [passphrase, setPassphrase] = createSignal('')
@@ -29,15 +18,22 @@ export default function NfdWebsocket(props: {
       uri += '/'
     }
     const hostname = new URL(uri).hostname
-    const isLocal = ['localhost', '127.0.0.1'].some(v => v === hostname)
+    const isLocal = ['localhost', '127.0.0.1'].some((v) => v === hostname)
     if (safebagB64 === '' && pass === '') {
       // No signing
-      props.onAdd({ kind: 'nfdWs', uri: uri, isLocal: isLocal, ownCertificateB64: '', prvKeyB64: '' })
+      props.onAdd({
+        kind: 'nfdWs',
+        uri: uri,
+        isLocal: isLocal,
+        ownCertificateB64: '',
+        prvKeyB64: '',
+      })
       return
     }
     if (safebagB64 === '' || pass === '') {
-      console.error('Leave both passphrase and safebag as empty to use a digest signer.' +
-        'Otherwise, you need to provide both.')
+      console.error(
+        'Leave both passphrase and safebag as empty to use a digest signer.' + 'Otherwise, you need to provide both.',
+      )
       return
     }
     try {
@@ -50,7 +46,13 @@ export default function NfdWebsocket(props: {
       // TODO: Is cbor a better choice?
       const certB64 = bytesToBase64(Encoder.encode(cert.data))
       const prvKeyB64 = bytesToBase64(prvKeyBits)
-      props.onAdd({ kind: 'nfdWs', uri, isLocal, ownCertificateB64: certB64, prvKeyB64 })
+      props.onAdd({
+        kind: 'nfdWs',
+        uri,
+        isLocal,
+        ownCertificateB64: certB64,
+        prvKeyB64,
+      })
       return
     } catch (err) {
       console.error('Unable to decode the provided credential.')
@@ -58,66 +60,61 @@ export default function NfdWebsocket(props: {
     }
   }
 
-  return <Card>
-    <CardHeader
-      sx={{ textAlign: 'left' }}
-      title="WebSocket to NFD"
-    />
-    <Divider />
-    <CardContent>
-      <Grid container spacing={1}>
-        <Grid item xs={12}>
-          <TextField
-            fullWidth
-            label="URI"
-            name="uri"
-            type="text"
-            value={uriText()}
-            onChange={event => setUriText(event.target.value)}
-          />
+  return (
+    <Card>
+      <CardHeader sx={{ textAlign: 'left' }} title="WebSocket to NFD" />
+      <Divider />
+      <CardContent>
+        <Grid container spacing={1}>
+          <Grid item xs={12}>
+            <TextField
+              fullWidth
+              label="URI"
+              name="uri"
+              type="text"
+              value={uriText()}
+              onChange={(event) => setUriText(event.target.value)}
+            />
+          </Grid>
+          {/* TODO: Reuse workspace's safebag component */}
+          <Grid item xs={12}>
+            <TextField
+              fullWidth
+              required
+              label="Passphrase for private"
+              name="passphrase"
+              type="password"
+              value={passphrase()}
+              onChange={(event) => setPassphrase(event.target.value)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              fullWidth
+              required
+              multiline
+              label="Safebag"
+              name="safebag"
+              type="text"
+              rows={15}
+              inputProps={{
+                style: {
+                  'font-family': '"Roboto Mono", ui-monospace, monospace',
+                  'white-space': 'pre',
+                },
+              }}
+              value={safebagText()}
+              onChange={(event) => setSafebagText(event.target.value)}
+            />
+          </Grid>
         </Grid>
-        {/* TODO: Reuse workspace's safebag component */}
-        <Grid item xs={12}>
-          <TextField
-            fullWidth
-            required
-            label="Passphrase for private"
-            name="passphrase"
-            type="password"
-            value={passphrase()}
-            onChange={event => setPassphrase(event.target.value)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <TextField
-            fullWidth
-            required
-            multiline
-            label="Safebag"
-            name="safebag"
-            type="text"
-            rows={15}
-            inputProps={{
-              style: {
-                "font-family": '"Roboto Mono", ui-monospace, monospace',
-                "white-space": "pre"
-              }
-            }}
-            value={safebagText()}
-            onChange={event => setSafebagText(event.target.value)}
-          />
-        </Grid>
-      </Grid>
-    </CardContent>
-    <Divider />
-    <CardActions sx={{ justifyContent: 'flex-end' }}>
-      <Button
-        variant="text"
-        color="primary"
-        onClick={() => onClickAdd()}
-      >
-        ADD
-      </Button>
-    </CardActions>
-  </Card>
+      </CardContent>
+      <Divider />
+      <CardActions sx={{ justifyContent: 'flex-end' }}>
+        <Button variant="text" color="primary" onClick={() => onClickAdd()}>
+          ADD
+        </Button>
+      </CardActions>
+    </Card>
+  )
 }

@@ -1,4 +1,3 @@
-
 // SA: https://github.com/azu/kvs/blob/master/packages/types/src/index.ts
 export interface Storage {
   /**

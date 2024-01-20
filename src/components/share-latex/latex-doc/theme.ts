@@ -1,8 +1,8 @@
 const EditorTheme = {
   '&': {
-    whiteSpace: "nowrap",
-    textAlign: "left",
-    height: "100%",
+    whiteSpace: 'nowrap',
+    textAlign: 'left',
+    height: '100%',
   },
   '&.cm-focused': {
     outline: 'none',
@@ -20,25 +20,32 @@ const EditorTheme = {
     backgroundColor: 'var(--md-sys-color-shadow)',
     color: 'var(--md-sys-color-on-primary)',
   },
-  '.ͼc': {  // Tokens {HERE}
+  '.ͼc': {
+    // Tokens {HERE}
     color: 'var(--md-sys-color-secondary)',
   },
-  '.ͼi': {  // Commands  \HERE
+  '.ͼi': {
+    // Commands  \HERE
     color: 'var(--theme-color-success)',
   },
-  '.ͼm': {  // Comments  %HERE
+  '.ͼm': {
+    // Comments  %HERE
     color: 'var(--theme-color-grey-600)',
   },
-  '.ͼn': {  // Error
+  '.ͼn': {
+    // Error
     color: 'var(--md-sys-color-error)',
   },
-  '.ͼb': {  // Math dollor  $ <- THIS
+  '.ͼb': {
+    // Math dollor  $ <- THIS
     color: 'var(--md-sys-color-secondary)',
   },
-  '.ͼk': {  // Symbols in math mode  $HERE$
+  '.ͼk': {
+    // Symbols in math mode  $HERE$
     color: 'var(--md-sys-color-primary)',
   },
-  '.ͼd': {  // Numbers in math mode  %HERE
+  '.ͼd': {
+    // Numbers in math mode  %HERE
     color: 'var(--theme-color-success)',
   },
 }

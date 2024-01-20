@@ -1,5 +1,5 @@
-import { openRoot } from "../../utils"
-import { TypedModel } from "./typed-models"
+import { openRoot } from '../../utils'
+import { TypedModel } from './typed-models'
 
 export type ConfigBase = {
   kind: string
@@ -41,7 +41,7 @@ export function getName(conn?: Config): string {
   switch (conn.kind) {
     case 'nfdWs':
       return conn.uri
-    case "peerJs":
+    case 'peerJs':
       return `peerjs://${conn.host}:${conn.port}${conn.path}`
   }
 }
@@ -65,10 +65,10 @@ export async function initDefault() {
     })
     connections.save({
       kind: 'peerJs',
-      host: "localhost",
+      host: 'localhost',
       port: 8000,
-      path: "/aincraft",
-      key: "peerjs",
+      path: '/aincraft',
+      key: 'peerjs',
     })
   }
 }

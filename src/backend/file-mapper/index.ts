@@ -16,12 +16,11 @@ export class FileMapper {
   private caches: { [id: string]: LastWriteCacheData } = {}
   private inSync = false
 
-
   constructor(
     readonly syncAgent: SyncAgent,
     readonly rootDoc: RootDocStore,
     readonly rootHandle: FileSystemDirectoryHandle,
-  ) { }
+  ) {}
 
   private async UpdateYDocContent(item: project.Item, fileObj: File) {
     // Note: modifying item has side effects. Preceed with caution.
@@ -55,7 +54,11 @@ export class FileMapper {
     }
   }
 
-  private async WriteBackLocalFile(item: project.Item, remoteContent: string, writeHandle: FileSystemWritableFileStream) {
+  private async WriteBackLocalFile(
+    item: project.Item,
+    remoteContent: string,
+    writeHandle: FileSystemWritableFileStream,
+  ) {
     if (item.kind === 'xmldoc') {
       // ignore XML docs
       return
@@ -98,7 +101,9 @@ export class FileMapper {
       })()
       // Write back remote updates
       if (remoteContent !== undefined && remoteContent !== this.caches[item.id].content) {
-        const writeHandle = await fileHandle.createWritable({ keepExistingData: false })
+        const writeHandle = await fileHandle.createWritable({
+          keepExistingData: false,
+        })
         await this.WriteBackLocalFile(item, remoteContent, writeHandle)
         await writeHandle.close()
 
@@ -115,10 +120,14 @@ export class FileMapper {
         for (const uid of item.items) {
           const subItem = this.rootDoc.latex[uid]
           if (subItem?.kind === 'folder') {
-            const subHandle = await dirHandle.getDirectoryHandle(subItem.name, { create: true })
+            const subHandle = await dirHandle.getDirectoryHandle(subItem.name, {
+              create: true,
+            })
             await this.SyncWithItem(subItem, subHandle)
           } else if (subItem !== undefined) {
-            const subHandle = await dirHandle.getFileHandle(subItem.name, { create: true })
+            const subHandle = await dirHandle.getFileHandle(subItem.name, {
+              create: true,
+            })
             await this.SyncWithItem(subItem, subHandle)
           }
         }
@@ -127,7 +136,7 @@ export class FileMapper {
   }
 
   public async SyncAll() {
-    if(this.inSync) {
+    if (this.inSync) {
       return
     }
     this.inSync = true

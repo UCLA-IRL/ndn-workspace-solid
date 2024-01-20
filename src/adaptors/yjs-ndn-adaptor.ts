@@ -1,4 +1,4 @@
-import { SyncAgent } from "../backend/sync-agent"
+import { SyncAgent } from '../backend/sync-agent'
 import * as Y from 'yjs'
 
 /**
@@ -17,7 +17,7 @@ export class NdnSvsAdaptor {
   constructor(
     public syncAgent: SyncAgent,
     public readonly doc: Y.Doc,
-    public readonly topic: string
+    public readonly topic: string,
   ) {
     syncAgent.register('update', topic, (content) => this.handleSyncUpdate(content))
     doc.on('update', this.callback)
@@ -30,7 +30,7 @@ export class NdnSvsAdaptor {
 
   private docUpdateHandler(update: Uint8Array, origin: undefined) {
     if (origin !== this) {
-      this.produce(update)  // No need to await
+      this.produce(update) // No need to await
     }
   }
 

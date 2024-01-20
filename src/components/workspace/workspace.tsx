@@ -1,11 +1,11 @@
-import { Button, Stack } from "@suid/material"
-import { Match, Switch, createEffect, createSignal } from "solid-js"
-import AppNamespace from "./app-namespace"
-import BootSafebag from "./boot-safebag"
-import { useNdnWorkspace } from "../../Context"
-import { Certificate, ECDSA, createVerifier } from "@ndn/keychain"
-import OwnCertificate from "./own-certificate"
-import { useNavigate } from "@solidjs/router"
+import { Button, Stack } from '@suid/material'
+import { Match, Switch, createEffect, createSignal } from 'solid-js'
+import AppNamespace from './app-namespace'
+import BootSafebag from './boot-safebag'
+import { useNdnWorkspace } from '../../Context'
+import { Certificate, ECDSA, createVerifier } from '@ndn/keychain'
+import OwnCertificate from './own-certificate'
+import { useNavigate } from '@solidjs/router'
 
 export default function Workspace() {
   const {
@@ -50,7 +50,7 @@ export default function Workspace() {
       setInProgress(false)
       return
     }
-    (async () => {
+    ;(async () => {
       try {
         const validator = await createVerifier(anchor, { algoList: [ECDSA] })
         validator.verify(cert.data)
@@ -78,24 +78,18 @@ export default function Workspace() {
   }
 
   const onStop = () => {
-    stopWorkspace().then(() => { navigate('/profile', { replace: true }) })
+    stopWorkspace().then(() => {
+      navigate('/profile', { replace: true })
+    })
   }
 
   return (
     <Stack spacing={2}>
-      <AppNamespace
-        trustAnchor={trustAnchor()}
-        setTrustAnchor={setTrustAnchor}
-        readOnly={inProgress() || booted()}
-      />
+      <AppNamespace trustAnchor={trustAnchor()} setTrustAnchor={setTrustAnchor} readOnly={inProgress() || booted()} />
       <Switch>
         <Match when={!booted()}>
-          <BootSafebag
-            setCertificate={setCertificate}
-            setPrvKeyBytes={setPrvKeyBytes}
-            inProgress={inProgress()}
-          />
-          <Stack direction="row" spacing={2} justifyContent='flex-end'>
+          <BootSafebag setCertificate={setCertificate} setPrvKeyBytes={setPrvKeyBytes} inProgress={inProgress()} />
+          <Stack direction="row" spacing={2} justifyContent="flex-end">
             <Button
               variant="contained"
               color="secondary"
@@ -117,10 +111,8 @@ export default function Workspace() {
           </Stack>
         </Match>
         <Match when={booted()}>
-          <OwnCertificate
-            certificate={certificate()}
-          />
-          <Stack direction="row" spacing={2} justifyContent='flex-end'>
+          <OwnCertificate certificate={certificate()} />
+          <Stack direction="row" spacing={2} justifyContent="flex-end">
             <Button
               variant="contained"
               color="error"

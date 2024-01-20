@@ -1,4 +1,4 @@
-import { syncedStore } from "@syncedstore/core"
+import { syncedStore } from '@syncedstore/core'
 import * as project from './project'
 import * as connections from './connections'
 import * as profiles from './profiles'

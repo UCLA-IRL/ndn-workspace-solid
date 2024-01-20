@@ -1,4 +1,4 @@
-import { Storage } from "./types"
+import { Storage } from './types'
 
 export class InMemoryStorage implements Storage {
   private cache: { [name: string]: Uint8Array } = {}
@@ -8,7 +8,7 @@ export class InMemoryStorage implements Storage {
   }
 
   async set(key: string, value: Uint8Array | undefined) {
-    if (typeof value === "undefined") {
+    if (typeof value === 'undefined') {
       delete this.cache[key]
     } else {
       this.cache[key] = value
@@ -32,5 +32,5 @@ export class InMemoryStorage implements Storage {
     this.cache = {}
   }
 
-  async close() { }
+  async close() {}
 }

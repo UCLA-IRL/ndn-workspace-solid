@@ -1,8 +1,4 @@
-import {
-  AttachFile as AttachFileIcon,
-  Clear as ClearIcon,
-  CloudUpload as CloudUploadIcon
-} from '@suid/icons-material'
+import { AttachFile as AttachFileIcon, Clear as ClearIcon, CloudUpload as CloudUploadIcon } from '@suid/icons-material'
 import {
   Dialog,
   Button,
@@ -12,7 +8,7 @@ import {
   TextField,
   InputAdornment,
   IconButton,
-  styled
+  styled,
 } from '@suid/material'
 import { Show, createSignal } from 'solid-js'
 
@@ -31,9 +27,9 @@ const VisuallyHiddenInput = styled('input')({
 })
 
 export default function NewItemModal(props: {
-  modalState: ModalState,
-  onSubmit: (name: string, state: ModalState, blob?: Uint8Array) => void,
-  onCancel: () => void,
+  modalState: ModalState
+  onSubmit: (name: string, state: ModalState, blob?: Uint8Array) => void
+  onCancel: () => void
 }) {
   const [name, setName] = createSignal('')
   const [inputRef, setInputRef] = createSignal<HTMLInputElement>()
@@ -61,47 +57,45 @@ export default function NewItemModal(props: {
       if (name() === '') {
         setName(files[0].name)
       }
-      files[0].arrayBuffer().then(arrayBuf => {
+      files[0].arrayBuffer().then((arrayBuf) => {
         setBlob(new Uint8Array(arrayBuf))
       })
     }
   }
 
   return (
-    <Dialog
-      open={props.modalState !== ''}
-    >
-      <DialogTitle>
-        {title()}
-      </DialogTitle>
+    <Dialog open={props.modalState !== ''}>
+      <DialogTitle>{title()}</DialogTitle>
       <DialogContent>
         <TextField
           fullWidth
           required
-          label='Name'
-          margin='normal'
+          label="Name"
+          margin="normal"
           value={name()}
           onChange={(event) => setName(event.target.value)}
         />
         <Show when={props.modalState === 'upload'}>
           <TextField
             fullWidth
-            label='File Attachment'
-            margin='normal'
-            variant='filled'
+            label="File Attachment"
+            margin="normal"
+            variant="filled"
             value={fileName()}
             InputProps={{
               readOnly: true,
-              startAdornment:
+              startAdornment: (
                 <InputAdornment position="start">
                   <AttachFileIcon />
-                </InputAdornment>,
-              endAdornment:
+                </InputAdornment>
+              ),
+              endAdornment: (
                 <InputAdornment position="end">
                   <IconButton>
                     <ClearIcon />
                   </IconButton>
-                </InputAdornment>,
+                </InputAdornment>
+              ),
             }}
           />
           <Button component="label" variant="contained" startIcon={<CloudUploadIcon />}>
@@ -111,9 +105,7 @@ export default function NewItemModal(props: {
         </Show>
       </DialogContent>
       <DialogActions>
-        <Button
-          type="reset"
-          onClick={props.onCancel}>
+        <Button type="reset" onClick={props.onCancel}>
           Back
         </Button>
         <Button
@@ -126,7 +118,8 @@ export default function NewItemModal(props: {
             }
           }}
           disabled={name() === '' || (props.modalState === 'upload' && blob().length <= 0)}
-          autofocus>
+          autofocus
+        >
           Add
         </Button>
       </DialogActions>

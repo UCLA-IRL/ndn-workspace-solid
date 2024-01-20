@@ -4,7 +4,7 @@ name: Deploy to Firebase Hosting on merge
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches: ['main']
+    branches: ["main"]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -17,7 +17,7 @@ permissions:
 
 # Allow one concurrent deployment
 concurrency:
-  group: 'pages'
+  group: "pages"
   cancel-in-progress: true
 
 jobs:
@@ -25,7 +25,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     if: github.repository == 'UCLA-IRL/ndn-workspace-solid'
-    environment: 
+    environment:
       name: firebase
       url: https://ndn-workspace.web.app/
     steps:
@@ -38,14 +38,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 21
-          cache: 'pnpm'
+          cache: "pnpm"
       - name: Install dependencies
         run: pnpm install
       - name: Build
         run: pnpm build
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_NDN_WORKSPACE }}'
+          repoToken: "${{ secrets.GITHUB_TOKEN }}"
+          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_NDN_WORKSPACE }}"
           channelId: live
           projectId: ndn-workspace

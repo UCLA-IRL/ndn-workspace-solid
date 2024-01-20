@@ -1,4 +1,4 @@
-import { EventEmitter } from "eventemitter3"
+import { EventEmitter } from 'eventemitter3'
 
 interface UpdateEvents<T> {
   update(newValue: T, oldValue: T): void
@@ -12,7 +12,9 @@ export class Signal<T> extends EventEmitter<UpdateEvents<T>> {
     this.val = initialValue
   }
 
-  public get value() { return this.val }
+  public get value() {
+    return this.val
+  }
 
   public set value(newValue: T) {
     const oldValue = this.val

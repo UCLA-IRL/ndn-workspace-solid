@@ -8,7 +8,7 @@ This document describes the design decision of SyncAgent, a data access layer bu
   - Different application components can subscribe and publish messages by topics
   - Note: different from partial sync, this is not related to the network, but software modularization.
 - Downward multiplexing by methods of sync and storage
- - E.g., different sync prefixes, temporary and persistent storage.
+- E.g., different sync prefixes, temporary and persistent storage.
 - Guaranteed delivery if requested
   - This specifically means obtaining an acknowledge from the caller component.
 - Reassembly and data verification
@@ -37,7 +37,7 @@ Example:
 
 ## Delivery
 
-A *Sync delivery* is a SVS instance with an independent namespace.
+A _Sync delivery_ is a SVS instance with an independent namespace.
 There are two types of delivery: At-Least-Once and Latest-Only.
 (The names come from message queues but may have different meanings)
 In SyncAgent, deliveries are underlying SVS pipes used by an agent.
@@ -47,6 +47,7 @@ In SyncAgent, deliveries are underlying SVS pipes used by an agent.
 At-Least-Once Delivery guarantees every message is delivered and acknowledged at least once.
 
 To justify the usage, suppose the following use case:
+
 - (1) The delivery receives an update message to a document
 - (2) The application parses the message and updates the document
 - (3) The application stores the updated document into the persistent storage
@@ -57,6 +58,7 @@ when the application restarts, the loaded document does not contain the update, 
 will treat the message as delivered.
 
 To prevent this from happening, the workflow must be modified to the following
+
 - (1) The delivery receives an update message to a document
 - (2) The application parses the message and updates the document
 - (3) The application stores the updated document into the persistent storage
@@ -67,7 +69,7 @@ In SyncAgent, the application receives messages via async callbacks,
 and the acknowledge is represented by the resolution of the promise.
 The application is required to register the callback before SVS sync starts to operate.
 If there is any problem with the message, including validation failure and promise rejection of the callback,
-At-Least-Once Delivery will reset by storing the *previous* SVS state into the storage and disconnecting.
+At-Least-Once Delivery will reset by storing the _previous_ SVS state into the storage and disconnecting.
 
 Note: At-Least-Once Delivery does not guarantee the order.
 The current implementation will only do in-order delivery when there is no restart nor reset.
@@ -100,11 +102,13 @@ A **channel** is a set of API to the upper layer, representing a specific way to
 Current implementation provides 3 channels for the share latex project
 
 - `update`: Reliable delivery designed for delta updates
+
   - Embedded in sync packets without segmentation support
   - Use AtLeastOnce delivery
   - Stored in persistent storage
 
 - `blob`: Reliable delivery designed for blob files uploaded by users
+
   - Segmented in a seperate namespace
   - Only object name is embedded in the sync packet
   - Use AtLeastOnce delivery for blob name

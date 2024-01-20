@@ -1,22 +1,23 @@
-import { Endpoint } from "@ndn/endpoint"
-import { Name, Data, type Interest, type Verifier, Signer } from "@ndn/packet"
-import { Decoder, Encoder } from "@ndn/tlv"
-import { fetch, DataProducer, makeChunkSource } from "@ndn/segmented-object"
-import { v4 as uuidv4 } from "uuid"
-import { concatBuffers } from "@ndn/util"
-import { AtLeastOnceDelivery, LatestOnlyDelivery, UpdateEvent } from "./deliveries"
-import { getNamespace } from "./namespace"
-import { InMemoryStorage, Storage } from "../storage"
-import { SvStateVector } from "@ndn/sync"
-import { panic } from "../../utils"
-
+import { Endpoint } from '@ndn/endpoint'
+import { Name, Data, type Interest, type Verifier, Signer } from '@ndn/packet'
+import { Decoder, Encoder } from '@ndn/tlv'
+import { fetch, DataProducer, makeChunkSource } from '@ndn/segmented-object'
+import { v4 as uuidv4 } from 'uuid'
+import { concatBuffers } from '@ndn/util'
+import { AtLeastOnceDelivery, LatestOnlyDelivery, UpdateEvent } from './deliveries'
+import { getNamespace } from './namespace'
+import { InMemoryStorage, Storage } from '../storage'
+import { SvStateVector } from '@ndn/sync'
+import { panic } from '../../utils'
 
 export type ChannelType = 'update' | 'blob' | 'status' | 'blobUpdate'
 const AllChannelValues = ['update', 'blob', 'status', 'blobUpdate']
 
 export class SyncAgent {
   private _ready = false
-  readonly listeners: { [key: string]: (content: Uint8Array, id: Name) => void } = {}
+  readonly listeners: {
+    [key: string]: (content: Uint8Array, id: Name) => void
+  } = {}
   readonly producer
   readonly trafficAttractor
 
@@ -30,7 +31,7 @@ export class SyncAgent {
     readonly verifier: Verifier,
     readonly atLeastOnce: AtLeastOnceDelivery,
     readonly latestOnly: LatestOnlyDelivery,
-    readonly onReset?: () => void
+    readonly onReset?: () => void,
   ) {
     atLeastOnce.onReset = () => this.onResetTriggered()
     latestOnly.onReset = () => this.onResetTriggered()
@@ -39,13 +40,17 @@ export class SyncAgent {
     // TODO: Design a better namespace
     // TODO: Make sure this producer does not conflict with the certificate storage's
     // @ndn/repo/DataStore may be a better choice, but needs more time to write code
-    this.producer = endpoint.produce(appPrefix, interest => {
-      return this.serve(interest)
-    }, {
-      describe: 'SyncAgent.serve',
-      routeCapture: false,
-      announcement: appPrefix,
-    })
+    this.producer = endpoint.produce(
+      appPrefix,
+      (interest) => {
+        return this.serve(interest)
+      },
+      {
+        describe: 'SyncAgent.serve',
+        routeCapture: false,
+        announcement: appPrefix,
+      },
+    )
     // NodeID should be announced to attract traffic.
     // Design decision: suppose node A, B and C connect to the same network.
     // When C is offline, A will fetch `/workspace/`C from B, using the route announced by `appPrefix`
@@ -82,7 +87,6 @@ export class SyncAgent {
     }
   }
 
-
   private parseInnerData(content: Uint8Array) {
     try {
       const data = Decoder.decode(content, Data)
@@ -93,7 +97,7 @@ export class SyncAgent {
         return undefined
       }
       const channelText = data.name.get(0)!.text
-      if (!AllChannelValues.find(x => x === channelText)) {
+      if (!AllChannelValues.find((x) => x === channelText)) {
         console.error(`Malformed encapsulated packet: ${data.name}`)
         return undefined
       }
@@ -102,7 +106,7 @@ export class SyncAgent {
       return {
         channel: channel,
         topic: topic,
-        content: data.content
+        content: data.content,
       }
     } catch (e) {
       console.error(`Unable to decode encapsulated packet: `, e)
@@ -111,10 +115,7 @@ export class SyncAgent {
   }
 
   private makeInnerData(channel: ChannelType, topic: string, content: Uint8Array) {
-    const data = new Data(
-      new Name([channel, topic, uuidv4()]),
-      content
-    )
+    const data = new Data(new Name([channel, topic, uuidv4()]), content)
     return Encoder.encode(data)
   }
 
@@ -155,8 +156,10 @@ export class SyncAgent {
       if (listener) {
         listener(content, id)
       } else if (channel === 'update') {
-        console.error('Execution order violation at SyncAgent:',
-          'listeners for update channel must be registered before the first update arrives')
+        console.error(
+          'Execution order violation at SyncAgent:',
+          'listeners for update channel must be registered before the first update arrives',
+        )
       }
     } else {
       // Segmented update is both a blob and an update
@@ -243,7 +246,9 @@ export class SyncAgent {
     await this.persistStorage.set(name.toString(), blobContent)
 
     // Put segmented packets
-    const producer = DataProducer.create(makeChunkSource(blobContent), name, { signer: this.signer })
+    const producer = DataProducer.create(makeChunkSource(blobContent), name, {
+      signer: this.signer,
+    })
     for await (const segment of producer.listData()) {
       this.persistStorage.set(segment.name.toString(), Encoder.encode(segment))
     }
@@ -294,7 +299,6 @@ export class SyncAgent {
     if (isLatestOnly) {
       const key = intName.getPrefix(intName.length - 1).toString()
       wire = await this.tempStorage.get(key)
-
     } else {
       const key = intName.toString()
       wire = await this.persistStorage.get(key)
@@ -333,7 +337,7 @@ export class SyncAgent {
       throw new Error('You cannot call replayUpdates without a listener')
     }
 
-    const start = startFrom ?? new SvStateVector
+    const start = startFrom ?? new SvStateVector()
     await this.atLeastOnce.replay(start, async (wire, id) => {
       const inner = this.parseInnerData(wire)
       if (!inner) {
@@ -370,7 +374,7 @@ export class SyncAgent {
     endpoint: Endpoint,
     signer: Signer,
     verifier: Verifier,
-    onReset?: () => void
+    onReset?: () => void,
   ) {
     const tempStorage = new InMemoryStorage()
     // Note: we need the signer name to be /[appPrefix]/<nodeId>/KEY/<keyID>
@@ -380,11 +384,25 @@ export class SyncAgent {
     const aloSyncPrefix = appPrefix.append(getNamespace().syncKeyword, getNamespace().atLeastOnceKeyword)
     const lateSyncPrefix = appPrefix.append(getNamespace().syncKeyword, getNamespace().latestOnlyKeyword)
     let resolver: ((event: UpdateEvent) => void) | undefined = undefined
-    const onUpdatePromise = new Promise<UpdateEvent>(resolve => resolver = resolve)
+    const onUpdatePromise = new Promise<UpdateEvent>((resolve) => (resolver = resolve))
     const latestOnly = await LatestOnlyDelivery.create(
-      nodeId, endpoint, lateSyncPrefix, signer, verifier, tempStorage, persistStorage, onUpdatePromise)
+      nodeId,
+      endpoint,
+      lateSyncPrefix,
+      signer,
+      verifier,
+      tempStorage,
+      persistStorage,
+      onUpdatePromise,
+    )
     const atLeastOnce = await AtLeastOnceDelivery.create(
-      nodeId, endpoint, aloSyncPrefix, signer, verifier, persistStorage, onUpdatePromise
+      nodeId,
+      endpoint,
+      aloSyncPrefix,
+      signer,
+      verifier,
+      persistStorage,
+      onUpdatePromise,
     )
     const ret = new SyncAgent(
       nodeId,
@@ -396,7 +414,7 @@ export class SyncAgent {
       verifier,
       atLeastOnce,
       latestOnly,
-      onReset
+      onReset,
     )
     resolver!((content, id) => ret.onUpdate(content, id))
     return ret

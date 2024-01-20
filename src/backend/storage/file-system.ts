@@ -1,5 +1,5 @@
-import { Storage } from "./types"
-import { encodeKey } from "../../utils"
+import { Storage } from './types'
+import { encodeKey } from '../../utils'
 
 /**
  * A storage based on [File System API](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API).
@@ -15,7 +15,7 @@ export class FsStorage implements Storage {
    * const handle2 = await navigator.storage.getDirectory()  // OPFS
    * ```
    */
-  constructor(public readonly root: FileSystemDirectoryHandle) { }
+  constructor(public readonly root: FileSystemDirectoryHandle) {}
 
   async get(key: string): Promise<Uint8Array | undefined> {
     const fileName = encodeKey(key)
@@ -38,7 +38,9 @@ export class FsStorage implements Storage {
     } else {
       try {
         await this.root.removeEntry(fileName)
-      } catch { /**/ }
+      } catch {
+        /**/
+      }
     }
   }
 
@@ -68,5 +70,5 @@ export class FsStorage implements Storage {
     }
   }
 
-  async close(): Promise<void> { }
+  async close(): Promise<void> {}
 }

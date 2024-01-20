@@ -12,30 +12,29 @@ import {
   BottomNavigationAction,
   Paper,
   Stack,
-} from "@suid/material"
-import { Breakpoint, createTheme, Theme, ThemeProvider } from "@suid/material/styles"
-import { For, JSX, ParentProps } from "solid-js"
-import { useNdnWorkspace } from "../Context"
-import { Portal } from "solid-js/web"
-import "./common.css"
+} from '@suid/material'
+import { Breakpoint, createTheme, Theme, ThemeProvider } from '@suid/material/styles'
+import { For, JSX, ParentProps } from 'solid-js'
+import { useNdnWorkspace } from '../Context'
+import { Portal } from 'solid-js/web'
+import './common.css'
 
 const drawerWidth = 200
 const navBarHeight = 56
 
-function RouteItem(props: { icon: JSX.Element, title: string, href: string }) {
+function RouteItem(props: { icon: JSX.Element; title: string; href: string }) {
   return (
     <ListItem disablePadding>
       <ListItemButton component="a" href={props.href}>
-        <ListItemIcon sx={{ color: 'inherit' }}>
-          {props.icon}
-        </ListItemIcon>
+        <ListItemIcon sx={{ color: 'inherit' }}>{props.icon}</ListItemIcon>
         <ListItemText primary={props.title} />
       </ListItemButton>
     </ListItem>
   )
 }
 
-const ColorVariables = (props: { theme: Theme<Breakpoint> }) => <style>{`
+const ColorVariables = (props: { theme: Theme<Breakpoint> }) => (
+  <style>{`
 :root {
   --md-sys-color-primary: ${props.theme.palette.primary.main};
   --md-sys-color-on-primary: ${props.theme.palette.primary.contrastText};
@@ -64,22 +63,25 @@ const ColorVariables = (props: { theme: Theme<Breakpoint> }) => <style>{`
   --theme-color-grey-600: ${props.theme.palette.grey[600]};
 }
 `}</style>
+)
 
-export default function Root(props: ParentProps<{
-  routes: Array<{ icon: JSX.Element, title: string, href: string }>
-}>) {
+export default function Root(
+  props: ParentProps<{
+    routes: Array<{ icon: JSX.Element; title: string; href: string }>
+  }>,
+) {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
   // blue theme
   const theme = createTheme({
     palette: {
-      mode: prefersDarkMode() ? "dark" : "light",
+      mode: prefersDarkMode() ? 'dark' : 'light',
       background: {
-        default: prefersDarkMode() ? "#121212" : "#F4F5F6",
-        paper: prefersDarkMode() ? "#1E1E1E" : "#FFFFFF",
+        default: prefersDarkMode() ? '#121212' : '#F4F5F6',
+        paper: prefersDarkMode() ? '#1E1E1E' : '#FFFFFF',
       },
       text: {
-        primary: prefersDarkMode() ? "#FFFFFF" : "#000000",
-        secondary: prefersDarkMode() ? "#FFFFFF" : "#000000",
+        primary: prefersDarkMode() ? '#FFFFFF' : '#000000',
+        secondary: prefersDarkMode() ? '#FFFFFF' : '#000000',
       },
     },
   })
@@ -96,11 +98,7 @@ export default function Root(props: ParentProps<{
       <div>
         {/* The left navigation bar. Breakpoint: 0 <= xs <= 600px, 600px < sm,md <= 900,1200, 1200 <= lg  */}
         <Box sx={{ display: 'flex' }}>
-          <Box
-            component="nav"
-            sx={{ width: { md: drawerWidth, xs: 0 }, flexShrink: 0 }}
-            aria-label="navibar"
-          >
+          <Box component="nav" sx={{ width: { md: drawerWidth, xs: 0 }, flexShrink: 0 }} aria-label="navibar">
             <Drawer
               sx={{
                 width: drawerWidth,
@@ -117,9 +115,9 @@ export default function Root(props: ParentProps<{
               anchor="left"
             >
               <List>
-                <For each={props.routes}>{item =>
-                  <RouteItem icon={item.icon} href={item.href} title={item.title} />
-                }</For>
+                <For each={props.routes}>
+                  {(item) => <RouteItem icon={item.icon} href={item.href} title={item.title} />}
+                </For>
               </List>
             </Drawer>
           </Box>
@@ -135,7 +133,7 @@ export default function Root(props: ParentProps<{
               marginBottom: { md: '0', xs: `${navBarHeight}px` },
               overflowX: 'hidden',
               display: 'flex',
-              flexDirection: 'column'
+              flexDirection: 'column',
             }}
           >
             {props.children}
@@ -153,25 +151,27 @@ export default function Root(props: ParentProps<{
               display: { md: 'none', xs: 'flex' },
               '& .MuiStack-root': {
                 backgroundColor: '#283593',
-                "*": {
+                '*': {
                   color: '#FFFFFF',
-                }
-              }
+                },
+              },
             }}
           >
             <BottomNavigation
               showLabels
               sx={{
                 display: { md: 'none', xs: 'flex' },
-                width: "100%",
+                width: '100%',
               }}
               component={Stack}
               direction="row"
               justifyContent="center"
             >
-              <For each={props.routes}>{item =>
-                <BottomNavigationAction component="a" icon={item.icon} href={item.href} label={item.title} />
-              }</For>
+              <For each={props.routes}>
+                {(item) => (
+                  <BottomNavigationAction component="a" icon={item.icon} href={item.href} label={item.title} />
+                )}
+              </For>
             </BottomNavigation>
           </Paper>
         </Box>

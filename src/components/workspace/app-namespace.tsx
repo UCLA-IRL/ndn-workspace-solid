@@ -1,28 +1,20 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  Divider,
-  TextField,
-  IconButton,
-  Typography,
-} from "@suid/material"
+import { Card, CardContent, CardHeader, Divider, TextField, IconButton, Typography } from '@suid/material'
 import {
   ExpandLess as ExpandLessIcon,
   ExpandMore as ExpandMoreIcon,
   QrCodeScanner as QRIcon,
 } from '@suid/icons-material'
-import { Show, createEffect, createSignal } from "solid-js"
-import { base64ToBytes, bytesToBase64 } from "../../utils/base64"
-import { Decoder, Encoder } from "@ndn/tlv"
-import { Data } from "@ndn/packet"
-import { Certificate } from "@ndn/keychain"
-import QrReader from "./qr-read"
+import { Show, createEffect, createSignal } from 'solid-js'
+import { base64ToBytes, bytesToBase64 } from '../../utils/base64'
+import { Decoder, Encoder } from '@ndn/tlv'
+import { Data } from '@ndn/packet'
+import { Certificate } from '@ndn/keychain'
+import QrReader from './qr-read'
 
 export default function AppNamespace(props: {
-  trustAnchor: Certificate | undefined,
-  setTrustAnchor: (value: Certificate | undefined) => void,
-  readOnly: boolean,
+  trustAnchor: Certificate | undefined
+  setTrustAnchor: (value: Certificate | undefined) => void
+  readOnly: boolean
 }) {
   const [expanded, setExpanded] = createSignal(true)
   const [value, setValue] = createSignal('')
@@ -100,65 +92,68 @@ export default function AppNamespace(props: {
       const cert = props.trustAnchor
       if (cert !== undefined) {
         const b64Text = bytesToBase64(Encoder.encode(cert.data))
-        const b64Breaks = b64Text.replace(/(.{64})/g, "$1\n")
+        const b64Breaks = b64Text.replace(/(.{64})/g, '$1\n')
         setValue(b64Breaks)
       }
     }
   })
 
-  return (<Card>
-    <CardHeader
-      sx={{ textAlign: 'left' }}
-      title="The Workspace"
-      subheader={
-        <Show when={nameStr().length === 0} fallback={
-          <Typography color="primary" fontFamily='"Roboto Mono", ui-monospace, monospace'>{nameStr()}</Typography>
-        }>
-          <IconButton onClick={() => setPopupOpen(!isPopupOpen())}>
-            <QRIcon color="primary" />
-          </IconButton>
-          <Typography color="secondary" component={'span'}>
-            Please input the trust anchor exported by cert-dump
-          </Typography>
-          <QrReader popupOpen={isPopupOpen()} setValue={setValue} />
-        </Show>
-      }
-      action={
-        <IconButton onClick={() => setExpanded(!expanded())} >
-          <Show when={expanded()} fallback={<ExpandMoreIcon />}>
-            <ExpandLessIcon />
-          </Show>
-        </IconButton>
-      }
-
-    />
-    <Show when={expanded()}>
-      <Divider />
-      <CardContent>
-
-        <TextField
-          fullWidth
-          required
-          multiline
-          label="Trust Anchor"
-          name="trust-anchor"
-          type="text"
-          rows={10}
-          inputProps={{
-            style: {
-              "font-family": '"Roboto Mono", ui-monospace, monospace',
-              "white-space": "pre"
+  return (
+    <Card>
+      <CardHeader
+        sx={{ textAlign: 'left' }}
+        title="The Workspace"
+        subheader={
+          <Show
+            when={nameStr().length === 0}
+            fallback={
+              <Typography color="primary" fontFamily='"Roboto Mono", ui-monospace, monospace'>
+                {nameStr()}
+              </Typography>
             }
-          }}
-          // disabled={readOnly()}  // disabled not working with multiline
-          helperText={errorText()}
-          error={errorText() != ''}
-          value={value()}
-          onChange={event => onChange(event.target.value)}
-        />
-      </CardContent>
-
-    </Show >
-  </Card >
+          >
+            <IconButton onClick={() => setPopupOpen(!isPopupOpen())}>
+              <QRIcon color="primary" />
+            </IconButton>
+            <Typography color="secondary" component={'span'}>
+              Please input the trust anchor exported by cert-dump
+            </Typography>
+            <QrReader popupOpen={isPopupOpen()} setValue={setValue} />
+          </Show>
+        }
+        action={
+          <IconButton onClick={() => setExpanded(!expanded())}>
+            <Show when={expanded()} fallback={<ExpandMoreIcon />}>
+              <ExpandLessIcon />
+            </Show>
+          </IconButton>
+        }
+      />
+      <Show when={expanded()}>
+        <Divider />
+        <CardContent>
+          <TextField
+            fullWidth
+            required
+            multiline
+            label="Trust Anchor"
+            name="trust-anchor"
+            type="text"
+            rows={10}
+            inputProps={{
+              style: {
+                'font-family': '"Roboto Mono", ui-monospace, monospace',
+                'white-space': 'pre',
+              },
+            }}
+            // disabled={readOnly()}  // disabled not working with multiline
+            helperText={errorText()}
+            error={errorText() != ''}
+            value={value()}
+            onChange={(event) => onChange(event.target.value)}
+          />
+        </CardContent>
+      </Show>
+    </Card>
   )
 }

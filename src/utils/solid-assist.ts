@@ -1,4 +1,4 @@
-import { Accessor, createEffect, onCleanup } from "solid-js"
+import { Accessor, createEffect, onCleanup } from 'solid-js'
 
 export function createInterval(callback: TimerHandler, delay: Accessor<number | undefined>) {
   createEffect(() => {

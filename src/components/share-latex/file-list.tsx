@@ -7,7 +7,7 @@ import {
   TableRow,
   Paper,
   Link,
-  IconButton
+  IconButton,
 } from '@suid/material'
 import {
   Folder as FolderIcon,
@@ -19,13 +19,13 @@ import { project } from '../../backend/models'
 import { For, Match, Switch } from 'solid-js'
 
 export default function FileList(props: {
-  rootUri: string,
-  subItems: string[],
-  resolveItem: (id: string) => project.Item | undefined,
-  deleteItem: (index: number) => void,
+  rootUri: string
+  subItems: string[]
+  resolveItem: (id: string) => project.Item | undefined
+  deleteItem: (index: number) => void
 }) {
   const getItemIcon = (item?: project.Item) => (
-    <Switch fallback={(<></>)}>
+    <Switch fallback={<></>}>
       <Match when={item?.kind === 'folder'}>
         <FolderIcon />
       </Match>
@@ -43,14 +43,12 @@ export default function FileList(props: {
 
   const getItemLink = (item?: project.Item) => {
     const to = () => props.rootUri + '/' + item?.id
-    return (<Link
-      underline='hover'
-      sx={{ display: 'flex', alignItems: 'left' }}
-      color="inherit"
-      href={to()}>
-      {getItemIcon(item)}
-      {item?.name}
-    </Link>)
+    return (
+      <Link underline="hover" sx={{ display: 'flex', alignItems: 'left' }} color="inherit" href={to()}>
+        {getItemIcon(item)}
+        {item?.name}
+      </Link>
+    )
   }
 
   return (
@@ -63,19 +61,19 @@ export default function FileList(props: {
           </TableRow>
         </TableHead>
         <TableBody>
-          <For each={props.subItems}>{((itemId, i) =>
-            <TableRow
-              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-            >
-              <TableCell component="th" scope="row">
-                {getItemLink(props.resolveItem(itemId))}
-              </TableCell>
-              <TableCell align="right">
-                <IconButton color='error' onClick={() => props.deleteItem(i())}>
-                  <DeleteIcon />
-                </IconButton>
-              </TableCell>
-            </TableRow>)}
+          <For each={props.subItems}>
+            {(itemId, i) => (
+              <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                <TableCell component="th" scope="row">
+                  {getItemLink(props.resolveItem(itemId))}
+                </TableCell>
+                <TableCell align="right">
+                  <IconButton color="error" onClick={() => props.deleteItem(i())}>
+                    <DeleteIcon />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            )}
           </For>
         </TableBody>
       </Table>

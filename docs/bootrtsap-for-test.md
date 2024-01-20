@@ -64,7 +64,6 @@ AqzhtnXfjep41mfBjBUuiw==
 
 ## (3) Create certificate for node 2
 
-
 ```text
 $ ndnsec key-gen /ndn-workspace/test/node-2
 <SNIP>
@@ -112,6 +111,7 @@ wTeeVxSVnsyT6d8V2bTA
   - Setup Connection if not yet
 
 NOTE:
+
 - Make sure exactly one node clicks the `CREATE` button
 - Make sure safebags are not reused
 - The order of bootstrapping and connection setup does not matter.

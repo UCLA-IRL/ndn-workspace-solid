@@ -1,10 +1,8 @@
-import { Encoder, Decoder } from "@ndn/tlv"
-import { Name, Data, Verifier, Signer, Interest } from "@ndn/packet"
-import {
-  Certificate, createVerifier, createSigner, ECDSA
-} from "@ndn/keychain"
-import { Storage } from "../storage"
-import { Endpoint } from "@ndn/endpoint"
+import { Encoder, Decoder } from '@ndn/tlv'
+import { Name, Data, Verifier, Signer, Interest } from '@ndn/packet'
+import { Certificate, createVerifier, createSigner, ECDSA } from '@ndn/keychain'
+import { Storage } from '../storage'
+import { Endpoint } from '@ndn/endpoint'
 
 /**
  * A Signer & Verifier that handles security authentication.
@@ -19,18 +17,22 @@ export class CertStorage {
     readonly ownCertificate: Certificate,
     readonly storage: Storage,
     readonly endpoint: Endpoint,
-    prvKeyBits: Uint8Array
+    prvKeyBits: Uint8Array,
   ) {
     this.readyEvent = (async () => {
       await this.importCert(trustAnchor)
       await this.importCert(ownCertificate)
-      const keyPair = await ECDSA.cryptoGenerate({
-        importPkcs8: [prvKeyBits, ownCertificate.publicKeySpki]
-      }, true)
+      const keyPair = await ECDSA.cryptoGenerate(
+        {
+          importPkcs8: [prvKeyBits, ownCertificate.publicKeySpki],
+        },
+        true,
+      )
       this._signer = createSigner(
         ownCertificate.name.getPrefix(ownCertificate.name.length - 2),
         ECDSA,
-        keyPair).withKeyLocator(ownCertificate.name)
+        keyPair,
+      ).withKeyLocator(ownCertificate.name)
     })()
   }
 
@@ -62,16 +64,15 @@ export class CertStorage {
         return undefined
       } else {
         try {
-          const result = await this.endpoint.consume(new Interest(
-            keyName,
-            Interest.MustBeFresh,
-            Interest.Lifetime(5000),
-          ), {
-            // Fetched key must be signed by a known key
-            // TODO: Find a better way to handle security
-            verifier: this.localVerifier,
-            retx: 5,
-          })
+          const result = await this.endpoint.consume(
+            new Interest(keyName, Interest.MustBeFresh, Interest.Lifetime(5000)),
+            {
+              // Fetched key must be signed by a known key
+              // TODO: Find a better way to handle security
+              verifier: this.localVerifier,
+              retx: 5,
+            },
+          )
 
           // Cache result certificates
           this.storage.set(result.name.toString(), Encoder.encode(result))
@@ -111,14 +112,14 @@ export class CertStorage {
   /** Obtain an verifier that fetches certificate */
   get verifier(): Verifier {
     return {
-      verify: pkt => this.verify(pkt, false)
+      verify: (pkt) => this.verify(pkt, false),
     }
   }
 
   /** Obtain an verifier that does not fetch certificate remotely */
   get localVerifier(): Verifier {
     return {
-      verify: pkt => this.verify(pkt, true)
+      verify: (pkt) => this.verify(pkt, true),
     }
   }
 
@@ -127,11 +128,9 @@ export class CertStorage {
     ownCertificate: Certificate,
     storage: Storage,
     endpoint: Endpoint,
-    prvKeyBits: Uint8Array
+    prvKeyBits: Uint8Array,
   ) {
-    const result = new CertStorage(
-      trustAnchor, ownCertificate, storage, endpoint, prvKeyBits
-    )
+    const result = new CertStorage(trustAnchor, ownCertificate, storage, endpoint, prvKeyBits)
     await result.readyEvent
     return result
   }

@@ -5,7 +5,7 @@ import { project } from '../../../backend/models'
 import { createEffect, createSignal, onCleanup } from 'solid-js'
 import { observeDeep } from '@syncedstore/core'
 import { Interest, Name, digestSigning } from '@ndn/packet'
-import { v4 as uuidv4 } from "uuid"
+import { v4 as uuidv4 } from 'uuid'
 import { useNdnWorkspace } from '../../../Context'
 import { FileMapper } from '../../../backend/file-mapper'
 import { createInterval } from '../../../utils'
@@ -16,9 +16,7 @@ import { PdfTeXEngine } from '../../../vendor/swiftlatex/PdfTeXEngine'
 import { LatexEnginePath } from '../../../constants'
 import { ViewValues } from '../types'
 
-export default function ShareLatex(props: {
-  rootUri: string
-}) {
+export default function ShareLatex(props: { rootUri: string }) {
   const { rootDoc, syncAgent, booted, endpoint } = useNdnWorkspace()!
   const navigate = useNavigate()
   const params = useParams<{ itemId: string }>()
@@ -86,10 +84,10 @@ export default function ShareLatex(props: {
   }
 
   const createItem = (name: string, state: ModalState, blob?: Uint8Array) => {
-    const cur = item()  // Convenient for TS check
+    const cur = item() // Convenient for TS check
     const rootDocVal = rootDoc()
     if (name !== '' && cur?.kind === 'folder') {
-      const existId = cur.items.find(obj => rootDocVal!.latex[obj]?.name === name)
+      const existId = cur.items.find((obj) => rootDocVal!.latex[obj]?.name === name)
       const newId = existId ?? uuidv4()
       const to = props.rootUri + '/' + newId
       if (state === 'folder') {
@@ -135,38 +133,37 @@ export default function ShareLatex(props: {
         }
         navigate(to, { replace: true })
       } else if (state === 'upload' && blob !== undefined && blob.length > 0) {
-        syncAgent()!.publishBlob('latexBlob', blob).then(blobName => {
-          if (existId === undefined) {
-            rootDocVal!.latex[newId] = {
-              id: newId,
-              kind: 'blob',
-              // fullPath: cur.fullPath + '/' + name,
-              name: name,
-              parentId: cur.id,
-              blobName: blobName.toString(),
+        syncAgent()!
+          .publishBlob('latexBlob', blob)
+          .then((blobName) => {
+            if (existId === undefined) {
+              rootDocVal!.latex[newId] = {
+                id: newId,
+                kind: 'blob',
+                // fullPath: cur.fullPath + '/' + name,
+                name: name,
+                parentId: cur.id,
+                blobName: blobName.toString(),
+              }
+              cur.items.push(newId)
+            } else {
+              const existItem = rootDocVal!.latex[existId]
+              if (existItem?.kind === 'blob') {
+                existItem.blobName = blobName.toString()
+              }
             }
-            cur.items.push(newId)
-          } else {
-            const existItem = rootDocVal!.latex[existId]
-            if (existItem?.kind === 'blob') {
-              existItem.blobName = blobName.toString()
-            }
-          }
-        })
+          })
       }
     }
     setModalState('')
   }
 
   const onExportZip = async () => {
-    const zip = await project.exportAsZip(
-      async name => await syncAgent()?.getBlob(name),
-      rootDoc()!.latex,
-    )
-    const content = await zip.generateAsync({ type: "uint8array" })
+    const zip = await project.exportAsZip(async (name) => await syncAgent()?.getBlob(name), rootDoc()!.latex)
+    const content = await zip.generateAsync({ type: 'uint8array' })
     const file = new Blob([content], { type: 'application/zip;base64' })
     const fileUrl = URL.createObjectURL(file)
-    window.open(fileUrl)  // TODO: not working on Safari
+    window.open(fileUrl) // TODO: not working on Safari
   }
 
   const [texEngine, setTexEngine] = createSignal<PdfTeXEngine>()
@@ -184,17 +181,17 @@ export default function ShareLatex(props: {
 
     // Store all files in the WASM filesystem
     await project.walk(
-      async name => await syncAgent()?.getBlob(name),
+      async (name) => await syncAgent()?.getBlob(name),
       rootDoc()!.latex,
       (path) => engine!.makeMemFSFolder(path),
       (path, item) => engine!.writeMemFSFile(path, item),
     )
 
     // Compile main.tex
-    engine.setEngineMainFile("main.tex")
+    engine.setEngineMainFile('main.tex')
     let compLog = 'Start compiling ...\n'
     setCompilationLog(compLog)
-    const res = await engine.compileLaTeX(async log => {
+    const res = await engine.compileLaTeX(async (log) => {
       console.log(log)
       compLog += log + '\n'
       setCompilationLog(compLog)
@@ -226,10 +223,8 @@ export default function ShareLatex(props: {
     if (!agent) {
       return
     }
-    const zip = await project.exportAsZip(
-      async name => await agent.getBlob(name),
-      rootDoc()!.latex)
-    const blobFile = await zip.generateAsync({ type: "uint8array" })
+    const zip = await project.exportAsZip(async (name) => await agent.getBlob(name), rootDoc()!.latex)
+    const blobFile = await zip.generateAsync({ type: 'uint8array' })
 
     // TODO: Disable the button when compiling is in progress
     // TODO: Remove this temporary blob after finish (so is the object URL)
@@ -273,7 +268,7 @@ export default function ShareLatex(props: {
     }
     let rootHandle
     try {
-      rootHandle = await window.showDirectoryPicker({ mode: "readwrite" })
+      rootHandle = await window.showDirectoryPicker({ mode: 'readwrite' })
     } catch (err) {
       console.log('Failed to open target folder: ', err)
       return
@@ -284,12 +279,15 @@ export default function ShareLatex(props: {
     await newMapper.SyncAll()
   }
 
-  createInterval(() => {
-    if (mapper() === undefined) {
-      return
-    }
-    mapper()?.SyncAll()
-  }, () => 1500)
+  createInterval(
+    () => {
+      if (mapper() === undefined) {
+        return
+      }
+      mapper()?.SyncAll()
+    },
+    () => 1500,
+  )
 
   createEffect(() => {
     const curRootDoc = rootDoc()
@@ -300,18 +298,19 @@ export default function ShareLatex(props: {
     }
   })
 
-
   const onDownloadBlob = () => {
-    (async () => {
+    ;(async () => {
       const curItem = item()
       if (curItem?.kind === 'blob') {
         try {
           const blobName = new Name(curItem.blobName)
           const blob = await syncAgent()!.getBlob(blobName)
           if (blob !== undefined) {
-            const file = new Blob([blob], { type: 'application/octet-stream;base64' })
+            const file = new Blob([blob], {
+              type: 'application/octet-stream;base64',
+            })
             const fileUrl = URL.createObjectURL(file)
-            window.open(fileUrl)  // TODO: not working on Safari
+            window.open(fileUrl) // TODO: not working on Safari
           }
         } catch (e) {
           console.error(`Unable to fetch blob file: `, e)
@@ -320,23 +319,25 @@ export default function ShareLatex(props: {
     })()
   }
 
-  return <ShareLatexComponent
-    rootUri={props.rootUri}
-    item={item()}
-    folderChildren={folderChildren()}
-    modalState={modalState}
-    setModalState={setModalState}
-    pathIds={pathIds}
-    resolveItem={resolveItem}
-    deleteItem={deleteItem}
-    createItem={createItem}
-    onExportZip={onExportZip}
-    onCompile={onCompile}
-    onMapFolder={onMapFolder}
-    onDownloadBlob={onDownloadBlob}
-    view={view}
-    setView={setView}
-    compilationLog={compilationLog()}
-    pdfUrl={pdfUrl()}
-  />
+  return (
+    <ShareLatexComponent
+      rootUri={props.rootUri}
+      item={item()}
+      folderChildren={folderChildren()}
+      modalState={modalState}
+      setModalState={setModalState}
+      pathIds={pathIds}
+      resolveItem={resolveItem}
+      deleteItem={deleteItem}
+      createItem={createItem}
+      onExportZip={onExportZip}
+      onCompile={onCompile}
+      onMapFolder={onMapFolder}
+      onDownloadBlob={onDownloadBlob}
+      view={view}
+      setView={setView}
+      compilationLog={compilationLog()}
+      pdfUrl={pdfUrl()}
+    />
+  )
 }

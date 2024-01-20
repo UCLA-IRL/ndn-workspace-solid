@@ -1,17 +1,22 @@
 // The Context component connecting backend and the fronent part.
 // Wrap up NDN stuffs into Solid signals.
 import {
-  createSignal, createContext, useContext,
-  type ParentProps, type Accessor, createEffect, Setter,
-} from "solid-js"
-import { RootDocStore, connections } from "./backend/models"
-import { SyncAgent } from "./backend/sync-agent"
-import * as main from "./backend/main"
-import { type Certificate } from "@ndn/keychain"
-import { type Theme, type Breakpoint } from "@suid/material/styles"
-import { Endpoint } from "@ndn/endpoint"
-import { doFch } from "./testbed";
-import { loadAll } from "./backend/models/connections";
+  createSignal,
+  createContext,
+  useContext,
+  type ParentProps,
+  type Accessor,
+  createEffect,
+  Setter,
+} from 'solid-js'
+import { RootDocStore, connections } from './backend/models'
+import { SyncAgent } from './backend/sync-agent'
+import * as main from './backend/main'
+import { type Certificate } from '@ndn/keychain'
+import { type Theme, type Breakpoint } from '@suid/material/styles'
+import { Endpoint } from '@ndn/endpoint'
+import { doFch } from './testbed'
+import { loadAll } from './backend/models/connections'
 
 type ContextType = {
   rootDoc: Accessor<RootDocStore | undefined>
@@ -49,10 +54,10 @@ export function NdnWorkspaceProvider(props: ParentProps<unknown>) {
 
   const [connStatus, setConnStatus] = createSignal<main.ConnState>(main.connectionStatus())
   const [connConfig, setConnConfig] = createSignal<connections.Config>()
-  const [fileSystemSupported,] = createSignal(typeof window.showDirectoryPicker === 'function')
+  const [fileSystemSupported] = createSignal(typeof window.showDirectoryPicker === 'function')
 
   createEffect(() => {
-    main.connectionStatusSig().on("update", (newValue) => setConnStatus(newValue))
+    main.connectionStatusSig().on('update', (newValue) => setConnStatus(newValue))
   })
 
   // Execute the connection
@@ -74,7 +79,7 @@ export function NdnWorkspaceProvider(props: ParentProps<unknown>) {
     main.disconnect().then(() => setConnStatus(main.connectionStatus()))
   }
 
-  const bootstrapWorkspace: ContextType['bootstrapWorkspace'] = async opts => {
+  const bootstrapWorkspace: ContextType['bootstrapWorkspace'] = async (opts) => {
     await main.bootstrapWorkspace(opts)
     setRootDocSig(main.rootDoc)
     setSyncAgentSig(main.syncAgent)
@@ -102,15 +107,12 @@ export function NdnWorkspaceProvider(props: ParentProps<unknown>) {
     },
     ownCertificate: () => main.ownCertificate,
     fileSystemSupported: fileSystemSupported,
-    theme, setTheme,
+    theme,
+    setTheme,
     endpoint: main.endpoint,
   }
 
-  return (
-    <NdnWorkspaceContext.Provider value={value}>
-      {props.children}
-    </NdnWorkspaceContext.Provider>
-  )
+  return <NdnWorkspaceContext.Provider value={value}>{props.children}</NdnWorkspaceContext.Provider>
 }
 
 export function useNdnWorkspace() {
@@ -125,7 +127,7 @@ export async function initTestbed() {
     return // already connected or connecting
   }
 
-  const url = await doFch();
+  const url = await doFch()
   if (url === null) {
     alert('Failed to connect to the NDN testbed. Please try again later.')
     throw new Error('Failed to connect to testbed.')
@@ -134,7 +136,7 @@ export async function initTestbed() {
   // Attempt to get a config for nfdWs
   const configs = await loadAll()
   for (const config of configs) {
-    if (config.kind !== 'nfdWs') continue;
+    if (config.kind !== 'nfdWs') continue
 
     // Found a config, connect to it
     // TODO: make sure this is a testbed forwarder
@@ -146,6 +148,6 @@ export async function initTestbed() {
 
     // TODO: break on success only
     // TODO: remove config if connection fails?
-    break;
+    break
   }
 }

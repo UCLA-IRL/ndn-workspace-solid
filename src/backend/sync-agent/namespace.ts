@@ -1,6 +1,6 @@
-import { Name, type Component } from "@ndn/packet"
-import { Keyword as KeywordComponent } from "@ndn/naming-convention2"
-import { v4 as uuidv4 } from "uuid"
+import { Name, type Component } from '@ndn/packet'
+import { Keyword as KeywordComponent } from '@ndn/naming-convention2'
+import { v4 as uuidv4 } from 'uuid'
 
 let currentNamespace: SyncAgentNamespace | undefined = undefined
 

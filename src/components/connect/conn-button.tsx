@@ -1,12 +1,7 @@
-import { Match, Switch } from "solid-js"
-import { IconButton } from "@suid/material"
-import {
-  PlayArrow as PlayArrowIcon,
-  MoreHoriz as MoreHorizIcon,
-  Stop as StopIcon,
-} from '@suid/icons-material'
-import { ConnState } from "../../backend/main"
-
+import { Match, Switch } from 'solid-js'
+import { IconButton } from '@suid/material'
+import { PlayArrow as PlayArrowIcon, MoreHoriz as MoreHorizIcon, Stop as StopIcon } from '@suid/icons-material'
+import { ConnState } from '../../backend/main'
 
 export default function ConnButton(props: {
   state: ConnState

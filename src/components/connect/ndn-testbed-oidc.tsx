@@ -1,31 +1,25 @@
-import {
-  Card,
-  CardActions,
-  CardContent,
-  CardHeader,
-  Divider,
-  Button,
-  Stack,
-} from "@suid/material"
+import { Card, CardActions, CardContent, CardHeader, Divider, Button, Stack } from '@suid/material'
 import { Config as Conn } from '../../backend/models/connections'
-import { createSignal, createUniqueId, onCleanup } from "solid-js"
-import { FwFace } from "@ndn/fw"
+import { createSignal, createUniqueId, onCleanup } from 'solid-js'
+import { FwFace } from '@ndn/fw'
 import * as ndncert from '@ndn/ndncert'
-import * as keychain from "@ndn/keychain"
+import * as keychain from '@ndn/keychain'
 import {
-  GitHubOAuthClientId, GitHubOIDCChallengeId, GoogleOAuthClientId, GoogleOIDCChallengeId, TestbedOidcAnchorPrefix
-} from "../../constants"
-import { bytesToBase64 } from "../../utils"
-import { Encoder } from "@ndn/tlv"
-import { WsTransport } from "@ndn/ws-transport"
-import { Endpoint } from "@ndn/endpoint"
-import { fchQuery } from "@ndn/autoconfig"
-import { ClientOidcChallenge } from "../../adaptors/oidc-challenge"
-import { Name } from "@ndn/packet"
+  GitHubOAuthClientId,
+  GitHubOIDCChallengeId,
+  GoogleOAuthClientId,
+  GoogleOIDCChallengeId,
+  TestbedOidcAnchorPrefix,
+} from '../../constants'
+import { bytesToBase64 } from '../../utils'
+import { Encoder } from '@ndn/tlv'
+import { WsTransport } from '@ndn/ws-transport'
+import { Endpoint } from '@ndn/endpoint'
+import { fchQuery } from '@ndn/autoconfig'
+import { ClientOidcChallenge } from '../../adaptors/oidc-challenge'
+import { Name } from '@ndn/packet'
 
-export default function NdnTestbedOidc(props: {
-  onAdd: (config: Conn) => void
-}) {
+export default function NdnTestbedOidc(props: { onAdd: (config: Conn) => void }) {
   // const { endpoint } = useNdnWorkspace()!
   const [tempFace, setTempFace] = createSignal<FwFace>()
 
@@ -33,7 +27,7 @@ export default function NdnTestbedOidc(props: {
   const [oidcId, setOidcId] = createSignal('')
   const [chalId, setChalId] = createSignal('')
   // Official way should be useLocation, but I don't think we need it if we only uses the origin
-  const basePath = location.origin  // === `${location.protocol}//${location.host}`
+  const basePath = location.origin // === `${location.protocol}//${location.host}`
   const redirectTarget = `${basePath}/oidc-redirected.html`
   const channel = new BroadcastChannel('oauth-test')
 
@@ -41,7 +35,7 @@ export default function NdnTestbedOidc(props: {
     channel.close()
   })
 
-  channel.addEventListener("message", (event) => {
+  channel.addEventListener('message', (event) => {
     const data = event.data
     if (data.state === requestId()) {
       console.log(`Access code: ${data.code}`)
@@ -55,7 +49,7 @@ export default function NdnTestbedOidc(props: {
     try {
       const fchRes = await fchQuery({
         transport: 'wss',
-        network: "ndn",
+        network: 'ndn',
       })
       if (fchRes.routers.length > 0) {
         const url = new URL(fchRes.routers[0].connect)
@@ -107,13 +101,19 @@ export default function NdnTestbedOidc(props: {
           retx: {
             limit: 4,
             interval: 5000,
-          }
+          },
         }),
         profile: caProfile,
         privateKey: prvKey,
         publicKey: pubKey,
         validity: keychain.ValidityPeriod.daysFromNow(maximalValidityDays),
-        challenges: [new ClientOidcChallenge(challengeId, { oidcId, accessCode, redirectUri })],
+        challenges: [
+          new ClientOidcChallenge(challengeId, {
+            oidcId,
+            accessCode,
+            redirectUri,
+          }),
+        ],
       })
 
       // Finish
@@ -153,7 +153,7 @@ export default function NdnTestbedOidc(props: {
     setOidcId(GoogleOAuthClientId)
     setChalId(GoogleOIDCChallengeId)
     const url = 'https://accounts.google.com/o/oauth2/v2/auth?' + queryStr
-    window.open(url)  // TODO: not working on Safari
+    window.open(url) // TODO: not working on Safari
   }
 
   const onClickGithub = () => {
@@ -167,35 +167,33 @@ export default function NdnTestbedOidc(props: {
     setOidcId(GitHubOAuthClientId)
     setChalId(GitHubOIDCChallengeId)
     const url = 'https://github.com/login/oauth/authorize?' + queryStr
-    window.open(url)  // TODO: not working on Safari
+    window.open(url) // TODO: not working on Safari
   }
 
-  return <Card>
-    <CardHeader
-      sx={{ textAlign: 'left' }}
-      title="NDN Testbed with OIDC"
-      subheader="The URI will be result from FCH to the testbed"
-    />
-    <Divider />
-    <CardContent>
-      <Stack direction="column" spacing={2}>
-        <Button onClick={onClickGoogle} variant="outlined" color="secondary" disabled={requestId() !== ''}>
-          Google
+  return (
+    <Card>
+      <CardHeader
+        sx={{ textAlign: 'left' }}
+        title="NDN Testbed with OIDC"
+        subheader="The URI will be result from FCH to the testbed"
+      />
+      <Divider />
+      <CardContent>
+        <Stack direction="column" spacing={2}>
+          <Button onClick={onClickGoogle} variant="outlined" color="secondary" disabled={requestId() !== ''}>
+            Google
+          </Button>
+          <Button onClick={onClickGithub} variant="outlined" color="secondary" disabled={requestId() !== ''}>
+            GitHub
+          </Button>
+        </Stack>
+      </CardContent>
+      <Divider />
+      <CardActions sx={{ justifyContent: 'flex-end' }}>
+        <Button variant="text" color="primary" disabled>
+          AUTO SAVE WHEN DONE
         </Button>
-        <Button onClick={onClickGithub} variant="outlined" color="secondary" disabled={requestId() !== ''}>
-          GitHub
-        </Button>
-      </Stack>
-    </CardContent>
-    <Divider />
-    <CardActions sx={{ justifyContent: 'flex-end' }}>
-      <Button
-        variant="text"
-        color="primary"
-        disabled
-      >
-        AUTO SAVE WHEN DONE
-      </Button>
-    </CardActions>
-  </Card>
+      </CardActions>
+    </Card>
+  )
 }

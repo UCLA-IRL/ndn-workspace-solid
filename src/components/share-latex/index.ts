@@ -1,2 +1,2 @@
-import ShareLatex from "./share-latex"
+import ShareLatex from './share-latex'
 export default ShareLatex

@@ -1,31 +1,31 @@
 // This file is the main file gluing all components and maintain a global context.
 // Should be changed to something better if refactor.
-import { Endpoint, Producer } from "@ndn/endpoint"
+import { Endpoint, Producer } from '@ndn/endpoint'
 import { Data, Name, Signer, digestSigning } from '@ndn/packet'
-import * as nfdmgmt from "@ndn/nfdmgmt"
-import { FwFace } from "@ndn/fw"
-import { WsTransport } from "@ndn/ws-transport"
+import * as nfdmgmt from '@ndn/nfdmgmt'
+import { FwFace } from '@ndn/fw'
+import { WsTransport } from '@ndn/ws-transport'
 import { getYjsDoc } from '@syncedstore/core'
 import * as Y from 'yjs'
-import { NdnSvsAdaptor } from "../adaptors/yjs-ndn-adaptor"
+import { NdnSvsAdaptor } from '../adaptors/yjs-ndn-adaptor'
 import { PeerJsListener } from '../adaptors/peerjs-transport'
 import { CertStorage } from './security/cert-storage'
 import { RootDocStore, initRootDoc, project, profiles, connections } from './models'
-import { FsStorage, InMemoryStorage, type Storage } from "./storage"
+import { FsStorage, InMemoryStorage, type Storage } from './storage'
 import { SyncAgent } from './sync-agent'
-import { Certificate, ECDSA, createSigner } from "@ndn/keychain"
-import { v4 as uuidv4 } from "uuid"
-import { base64ToBytes, encodeKey as encodePath, Signal as BackendSignal, openRoot } from "../utils"
-import { Decoder } from "@ndn/tlv"
-import { YjsStateManager } from "../adaptors/yjs-state-manager"
-import { encodeSyncState, parseSyncState } from "./sync-agent/deliveries"
+import { Certificate, ECDSA, createSigner } from '@ndn/keychain'
+import { v4 as uuidv4 } from 'uuid'
+import { base64ToBytes, encodeKey as encodePath, Signal as BackendSignal, openRoot } from '../utils'
+import { Decoder } from '@ndn/tlv'
+import { YjsStateManager } from '../adaptors/yjs-state-manager'
+import { encodeSyncState, parseSyncState } from './sync-agent/deliveries'
 
 export const UseAutoAnnouncement = false
 
 export const endpoint: Endpoint = new Endpoint()
 export type ConnState = 'CONNECTED' | 'DISCONNECTED' | 'CONNECTING' | 'DISCONNECTING'
 
-export let bootstrapping = false  // To prevent double click
+export let bootstrapping = false // To prevent double click
 export let bootstrapped = false
 export let persistStore: Storage | undefined
 export let certStorage: CertStorage | undefined
@@ -121,7 +121,6 @@ export async function connect(config: connections.Config) {
   connState.value = 'CONNECTING'
 
   if (config.kind === 'nfdWs') {
-
     // Decode command signer
     if (config.prvKeyB64 === '') {
       nfdCmdSigner = digestSigning
@@ -130,13 +129,17 @@ export async function connect(config: connections.Config) {
         const prvKeyBits = base64ToBytes(config.prvKeyB64)
         const certBytes = base64ToBytes(config.ownCertificateB64)
         nfdCertificate = Certificate.fromData(Decoder.decode(certBytes, Data))
-        const keyPair = await ECDSA.cryptoGenerate({
-          importPkcs8: [prvKeyBits, nfdCertificate.publicKeySpki]
-        }, true)
+        const keyPair = await ECDSA.cryptoGenerate(
+          {
+            importPkcs8: [prvKeyBits, nfdCertificate.publicKeySpki],
+          },
+          true,
+        )
         nfdCmdSigner = createSigner(
           nfdCertificate.name.getPrefix(nfdCertificate.name.length - 2),
           ECDSA,
-          keyPair).withKeyLocator(nfdCertificate.name)
+          keyPair,
+        ).withKeyLocator(nfdCertificate.name)
       } catch (e) {
         console.error('Unable to parse credentials:', e)
         listener?.closeAll()
@@ -179,11 +182,11 @@ export async function connect(config: connections.Config) {
 // ============= Bootstrapping =============
 
 export async function bootstrapWorkspace(opts: {
-  trustAnchor: Certificate,
-  prvKey: Uint8Array,
-  ownCertificate: Certificate,
-  createNew: boolean,
-  inMemory?: boolean,
+  trustAnchor: Certificate
+  prvKey: Uint8Array
+  ownCertificate: Certificate
+  createNew: boolean
+  inMemory?: boolean
 }) {
   if (bootstrapping) {
     console.error('Bootstrapping in progress or done')
@@ -202,7 +205,7 @@ export async function bootstrapWorkspace(opts: {
   appPrefix = opts.trustAnchor.name.getPrefix(opts.trustAnchor.name.length - 4)
   nodeId = opts.ownCertificate.name.getPrefix(opts.ownCertificate.name.length - 4)
 
-  if (!opts.inMemory && opts.createNew && await isProfileExisting(nodeId.toString())) {
+  if (!opts.inMemory && opts.createNew && (await isProfileExisting(nodeId.toString()))) {
     console.error('Cannot create an existing profile. Will try to join it instead.')
     opts.createNew = false
   }
@@ -215,27 +218,19 @@ export async function bootstrapWorkspace(opts: {
     persistStore = new FsStorage(subFolder)
   }
 
-
   // NOTE: CertStorage does not have a producer to serve certificates. This reuses the SyncAgent's responder.
   // certStore = new InMemoryStorage()
   certStorage = new CertStorage(opts.trustAnchor, opts.ownCertificate, persistStore, endpoint, opts.prvKey)
   await certStorage.readyEvent
 
   // Sync Agents
-  syncAgent = await SyncAgent.create(
-    nodeId, persistStore, endpoint, certStorage.signer!, certStorage.verifier,
-    () => {
-      disconnect()
-    }
-  )
+  syncAgent = await SyncAgent.create(nodeId, persistStore, endpoint, certStorage.signer!, certStorage.verifier, () => {
+    disconnect()
+  })
 
   // Root doc using CRDT and Sync
   rootDoc = initRootDoc()
-  yjsAdaptor = new NdnSvsAdaptor(
-    syncAgent,
-    getYjsDoc(rootDoc),
-    'doc'
-  )
+  yjsAdaptor = new NdnSvsAdaptor(syncAgent, getYjsDoc(rootDoc), 'doc')
   yjsSnapshotMgr = new YjsStateManager(
     () => encodeSyncState(syncAgent!.getUpdateSyncSV()),
     getYjsDoc(rootDoc),
@@ -253,7 +248,7 @@ export async function bootstrapWorkspace(opts: {
       name: '',
       parentId: undefined,
       kind: 'folder',
-      items: []
+      items: [],
     }
     rootDoc.latex[mainUuid] = {
       id: mainUuid,
@@ -265,7 +260,7 @@ export async function bootstrapWorkspace(opts: {
     }
     rootDoc.latex[project.RootId].items.push(mainUuid)
   } else {
-    const state = await yjsSnapshotMgr.loadLocalSnapshot(update => yjsAdaptor!.handleSyncUpdate(update))
+    const state = await yjsSnapshotMgr.loadLocalSnapshot((update) => yjsAdaptor!.handleSyncUpdate(update))
     await syncAgent.replayUpdates('doc', state ? parseSyncState(state) : undefined)
   }
 
@@ -319,22 +314,30 @@ async function checkPrefixRegistration(cancel: boolean) {
   if (cancel && nfdWsFace !== undefined) {
     if (!UseAutoAnnouncement) {
       // Unregister prefixes
-      await nfdmgmt.invoke("rib/unregister", {
-        name: nodeId!,
-        origin: 65,  // client
-      }, {
-        endpoint: endpoint,
-        prefix: commandPrefix,
-        signer: nfdCmdSigner,
-      })
-      await nfdmgmt.invoke("rib/unregister", {
-        name: appPrefix!,
-        origin: 65,  // client
-      }, {
-        endpoint: endpoint,
-        prefix: commandPrefix,
-        signer: nfdCmdSigner,
-      })
+      await nfdmgmt.invoke(
+        'rib/unregister',
+        {
+          name: nodeId!,
+          origin: 65, // client
+        },
+        {
+          endpoint: endpoint,
+          prefix: commandPrefix,
+          signer: nfdCmdSigner,
+        },
+      )
+      await nfdmgmt.invoke(
+        'rib/unregister',
+        {
+          name: appPrefix!,
+          origin: 65, // client
+        },
+        {
+          endpoint: endpoint,
+          prefix: commandPrefix,
+          signer: nfdCmdSigner,
+        },
+      )
 
       // Stop serving certificate
       nfdCertProducer?.close()
@@ -357,31 +360,39 @@ async function checkPrefixRegistration(cancel: boolean) {
       }
 
       // Register prefixes
-      const cr = await nfdmgmt.invoke("rib/register", {
-        name: appPrefix!,
-        origin: 65,  // client
-        cost: 0,
-        flags: 0x02,  // CAPTURE
-      }, {
-        endpoint: endpoint,
-        prefix: commandPrefix,
-        signer: nfdCmdSigner,
-      })
+      const cr = await nfdmgmt.invoke(
+        'rib/register',
+        {
+          name: appPrefix!,
+          origin: 65, // client
+          cost: 0,
+          flags: 0x02, // CAPTURE
+        },
+        {
+          endpoint: endpoint,
+          prefix: commandPrefix,
+          signer: nfdCmdSigner,
+        },
+      )
       if (cr.statusCode !== 200) {
         window.alert(`Unable to register route: ${cr.statusCode} ${cr.statusText}`)
         // Cut connection
         return await disconnect()
       }
-      const cr2 = await nfdmgmt.invoke("rib/register", {
-        name: nodeId!,
-        origin: 65,  // client
-        cost: 0,
-        flags: 0x02,  // CAPTURE
-      }, {
-        endpoint: endpoint,
-        prefix: commandPrefix,
-        signer: nfdCmdSigner,
-      })
+      const cr2 = await nfdmgmt.invoke(
+        'rib/register',
+        {
+          name: nodeId!,
+          origin: 65, // client
+          cost: 0,
+          flags: 0x02, // CAPTURE
+        },
+        {
+          endpoint: endpoint,
+          prefix: commandPrefix,
+          signer: nfdCmdSigner,
+        },
+      )
       if (cr2.statusCode !== 200) {
         window.alert(`Unable to register route: ${cr2.statusCode} ${cr2.statusText}`)
         // Cut connection
