@@ -29,6 +29,7 @@ import {
 import { H1Icon, H2Icon, H3Icon, H4Icon } from './icons'
 import CmdIcon from './cmd-icon'
 import ColorList from './color-list'
+import styles from './styles.module.css'
 
 export default function RichDoc(props: {
   doc: Y.XmlFragment
@@ -53,7 +54,7 @@ export default function RichDoc(props: {
 
   // TODO: Should use ToggleButton for better appearance. Or at least some CSS.
   return <Card sx={{ width: '100%', height: '100%', overflow: 'auto' }}>
-    <CardContent sx={{ position: 'sticky', top: 0, zIndex: 10, background: 'white', borderBottom: '1px solid #ddd' }}>
+    <CardContent sx={{ position: 'sticky', top: 0, zIndex: 10, borderBottom: '1px solid #ddd' }}>
       <Stack
         spacing={0}
         direction="row"
@@ -199,7 +200,7 @@ export default function RichDoc(props: {
     </CardContent>
     <Divider />
     <CardContent>
-      <div id="editor" ref={setContainer} />
+      <div id="editor" class={styles.editor} ref={setContainer} />
     </CardContent>
   </Card>
 }

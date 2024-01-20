@@ -1,5 +1,6 @@
 import { usePDFSlick } from "@pdfslick/solid"
 import { createEffect } from "solid-js"
+import styles from './styles.module.css'
 
 export default function PdfViewer(props: {
   pdfUrl: string
@@ -21,7 +22,7 @@ export default function PdfViewer(props: {
     }
   });
 
-  return <div class="inset-0 pdfSlick h-full" >
+  return <div class={`inset-0 ${styles.pdfSlick} h-full`} >
       <PDFSlickViewer {...{ store, viewerRef }} class="h-full" />
   </div >
 }

@@ -7,7 +7,8 @@ import { project } from '../../../backend/models'
 import { Accessor, Match, Setter, Show, Switch } from 'solid-js'
 import RichDoc from '../rich-doc'
 import { ViewValues } from '../types'
-import PdfViewer from '../pdf-viewer'
+import PdfViewer from '../pdf-viewer/pdf-viewer'
+import styles from "./styles.module.css"
 
 export default function ShareLatexComponent(
   props: {
@@ -55,9 +56,9 @@ export default function ShareLatexComponent(
         { name: 'Map to a folder', onClick: props.onMapFolder },
       ]} />
 
-    <div class="sl-outer">
+    <div class={styles['sl-outer']}>
       <Show when={props.view() === 'Editor' || props.view() === 'Both'}>
-        <div class="sl-panel" classList={{
+        <div class={styles['sl-panel']} classList={{
           'w-half': props.view() === 'Both'
         }}>
           <Switch fallback={<></>}>
@@ -86,14 +87,14 @@ export default function ShareLatexComponent(
         </div>
       </Show>
       <Show when={props.view() === 'PDF' || props.view() === 'Both'}>
-        <div class="sl-panel" classList={{
+        <div class={styles['sl-panel']} classList={{
           'w-half': props.view() === 'Both'
         }}>
-          { props.pdfUrl ? <PdfViewer pdfUrl={props.pdfUrl} /> : <div></div> }
+          { props.pdfUrl ? <PdfViewer pdfUrl={props.pdfUrl} /> : <div /> }
         </div>
       </Show>
       <Show when={props.view() === 'Log'}>
-        <div class="sl-panel">
+        <div class={styles['sl-panel']}>
           <TextField
             fullWidth
             multiline

@@ -13,6 +13,17 @@ function App() {
 
   initTestbed()
 
+  const configToDescription = () => {
+    const config = currentConnConfig();
+    if(!config) {
+      return 'Finding closest NDN forwarder';
+    } else if(config.kind === 'peerJs') {
+      return `PeerJS: ${config.host}`
+    } else {
+      return `NDN forwarder: ${config.uri}`;
+    }
+  }
+
   return (
     <Paper elevation={0} sx={{
       px: 3, py: 2, mx: 'auto',
@@ -28,7 +39,7 @@ function App() {
       </Typography>
 
       <Typography variant='body1'>
-        {!currentConnConfig() ? 'Finding closest NDN forwarder' : `NDN forwarder: ${(currentConnConfig() as any)?.uri}`}
+        {configToDescription()}
       </Typography>
 
       <Typography variant='body1'>
