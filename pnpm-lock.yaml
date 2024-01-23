@@ -116,8 +116,8 @@ dependencies:
     specifier: ^2.1.16
     version: 2.1.16(@tiptap/pm@2.1.16)
   '@ucla-irl/ndnts-aux':
-    specifier: ^1.0.7
-    version: 1.0.7(@ndn/endpoint@0.0.20240122-nightly-4ebab5b)(@ndn/fw@0.0.20240122-nightly-4ebab5b)(@ndn/keychain@0.0.20240122-nightly-4ebab5b)(@ndn/naming-convention2@0.0.20240122-nightly-4ebab5b)(@ndn/ndncert@0.0.20240122-nightly-4ebab5b)(@ndn/ndnsec@0.0.20240122-nightly-4ebab5b)(@ndn/nfdmgmt@0.0.20240122-nightly-4ebab5b)(@ndn/node-transport@0.0.20240113)(@ndn/packet@0.0.20240122-nightly-4ebab5b)(@ndn/segmented-object@0.0.20240122-nightly-4ebab5b)(@ndn/sync@0.0.20240122-nightly-4ebab5b)(@ndn/tlv@0.0.20240122-nightly-4ebab5b)(@ndn/util@0.0.20240122-nightly-4ebab5b)(@ndn/ws-transport@0.0.20240122-nightly-4ebab5b)
+    specifier: ^1.0.8
+    version: 1.0.8(@ndn/endpoint@0.0.20240122-nightly-4ebab5b)(@ndn/fw@0.0.20240122-nightly-4ebab5b)(@ndn/keychain@0.0.20240122-nightly-4ebab5b)(@ndn/naming-convention2@0.0.20240122-nightly-4ebab5b)(@ndn/ndncert@0.0.20240122-nightly-4ebab5b)(@ndn/ndnsec@0.0.20240122-nightly-4ebab5b)(@ndn/nfdmgmt@0.0.20240122-nightly-4ebab5b)(@ndn/node-transport@0.0.20240113)(@ndn/packet@0.0.20240122-nightly-4ebab5b)(@ndn/segmented-object@0.0.20240122-nightly-4ebab5b)(@ndn/sync@0.0.20240122-nightly-4ebab5b)(@ndn/tlv@0.0.20240122-nightly-4ebab5b)(@ndn/util@0.0.20240122-nightly-4ebab5b)(@ndn/ws-transport@0.0.20240122-nightly-4ebab5b)
   codemirror:
     specifier: ^6.0.1
     version: 6.0.1(@lezer/common@1.2.1)
@@ -3468,8 +3468,8 @@ packages:
       eslint-visitor-keys: 3.4.3
     dev: true
 
-  /@ucla-irl/ndnts-aux@1.0.7(@ndn/endpoint@0.0.20240122-nightly-4ebab5b)(@ndn/fw@0.0.20240122-nightly-4ebab5b)(@ndn/keychain@0.0.20240122-nightly-4ebab5b)(@ndn/naming-convention2@0.0.20240122-nightly-4ebab5b)(@ndn/ndncert@0.0.20240122-nightly-4ebab5b)(@ndn/ndnsec@0.0.20240122-nightly-4ebab5b)(@ndn/nfdmgmt@0.0.20240122-nightly-4ebab5b)(@ndn/node-transport@0.0.20240113)(@ndn/packet@0.0.20240122-nightly-4ebab5b)(@ndn/segmented-object@0.0.20240122-nightly-4ebab5b)(@ndn/sync@0.0.20240122-nightly-4ebab5b)(@ndn/tlv@0.0.20240122-nightly-4ebab5b)(@ndn/util@0.0.20240122-nightly-4ebab5b)(@ndn/ws-transport@0.0.20240122-nightly-4ebab5b):
-    resolution: {integrity: sha512-qykFVmiCQKda2IHVlnXeg3tclK99bAxNOkANgms4ArGYB/8GBOStdD9POMPOU43oZwosUT52KyxCrwra+2+q8w==, tarball: https://npm.pkg.github.com/download/@ucla-irl/ndnts-aux/1.0.7/649e4cb44a1e0f2d1283d51b88c9edcb8b85b654}
+  /@ucla-irl/ndnts-aux@1.0.8(@ndn/endpoint@0.0.20240122-nightly-4ebab5b)(@ndn/fw@0.0.20240122-nightly-4ebab5b)(@ndn/keychain@0.0.20240122-nightly-4ebab5b)(@ndn/naming-convention2@0.0.20240122-nightly-4ebab5b)(@ndn/ndncert@0.0.20240122-nightly-4ebab5b)(@ndn/ndnsec@0.0.20240122-nightly-4ebab5b)(@ndn/nfdmgmt@0.0.20240122-nightly-4ebab5b)(@ndn/node-transport@0.0.20240113)(@ndn/packet@0.0.20240122-nightly-4ebab5b)(@ndn/segmented-object@0.0.20240122-nightly-4ebab5b)(@ndn/sync@0.0.20240122-nightly-4ebab5b)(@ndn/tlv@0.0.20240122-nightly-4ebab5b)(@ndn/util@0.0.20240122-nightly-4ebab5b)(@ndn/ws-transport@0.0.20240122-nightly-4ebab5b):
+    resolution: {integrity: sha512-yQlbEQqEVVQiUdYDQXX998nXrGy9CryeNiT4avIACexPFUHBp6dBBdK7EalTdBcsWCfutmjjwqRvEctJjKYcig==, tarball: https://npm.pkg.github.com/download/@ucla-irl/ndnts-aux/1.0.8/f2050d70a50d1c289f9f463679fbc3c6f2611c32}
     peerDependencies:
       '@ndn/endpoint': '>=0.0.0'
       '@ndn/fw': '>=0.0.0'
