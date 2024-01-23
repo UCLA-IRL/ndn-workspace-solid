@@ -48,7 +48,7 @@
     "@tiptap/extension-text-style": "^2.1.16",
     "@tiptap/pm": "^2.1.16",
     "@tiptap/starter-kit": "^2.1.16",
-    "@ucla-irl/ndnts-aux": "^1.0.7",
+    "@ucla-irl/ndnts-aux": "^1.0.8",
     "codemirror": "^6.0.1",
     "diff": "^5.1.0",
     "event-iterator": "^2.0.0",

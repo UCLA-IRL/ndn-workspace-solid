@@ -71,6 +71,7 @@ async function disconnectNfdWs() {
     console.error('Try to disconnect from a non-existing WebSocket face')
     return
   }
+  await checkPrefixRegistration(true)
   nfdWsFace.close()
   nfdWsFace = undefined
 }
@@ -332,7 +333,6 @@ async function checkPrefixRegistration(cancel: boolean) {
     if (!UseAutoAnnouncement) {
       // Serve the certificate back to the forwarder
       if (nfdCertProducer) {
-        console.error(`[FATAL] There should only be one transport running.`)
         nfdCertProducer?.close()
       }
       if (nfdCertificate) {
