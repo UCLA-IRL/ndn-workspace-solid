@@ -7,18 +7,15 @@ import { FwFace } from '@ndn/fw'
 import { WsTransport } from '@ndn/ws-transport'
 import { getYjsDoc } from '@syncedstore/core'
 import * as Y from 'yjs'
-import { NdnSvsAdaptor } from '../adaptors/yjs-ndn-adaptor'
 import { PeerJsListener } from '../adaptors/peerjs-transport'
-import { CertStorage } from './security/cert-storage'
+import { CertStorage } from '@ucla-irl/ndnts-aux/security'
 import { RootDocStore, initRootDoc, project, profiles, connections } from './models'
-import { FsStorage, InMemoryStorage, type Storage } from './storage'
-import { SyncAgent } from './sync-agent'
+import { FsStorage, InMemoryStorage, type Storage } from '@ucla-irl/ndnts-aux/storage'
 import { Certificate, ECDSA, createSigner } from '@ndn/keychain'
 import { v4 as uuidv4 } from 'uuid'
 import { base64ToBytes, encodeKey as encodePath, Signal as BackendSignal, openRoot } from '../utils'
 import { Decoder } from '@ndn/tlv'
-import { YjsStateManager } from '../adaptors/yjs-state-manager'
-import { encodeSyncState, parseSyncState } from './sync-agent/deliveries'
+import { Workspace } from '@ucla-irl/ndnts-aux/workspace'
 
 export const UseAutoAnnouncement = false
 
@@ -26,10 +23,10 @@ export const endpoint: Endpoint = new Endpoint()
 export type ConnState = 'CONNECTED' | 'DISCONNECTED' | 'CONNECTING' | 'DISCONNECTING'
 
 export let bootstrapping = false // To prevent double click
-export let bootstrapped = false
+// export let bootstrapped = false   // !!workspace
 export let persistStore: Storage | undefined
 export let certStorage: CertStorage | undefined
-export let syncAgent: SyncAgent | undefined
+export let workspace: Workspace | undefined
 export let appPrefix: Name | undefined
 export let nodeId: Name | undefined
 
@@ -37,8 +34,6 @@ export let trustAnchor: Certificate | undefined
 export let ownCertificate: Certificate | undefined
 
 export let rootDoc: RootDocStore | undefined
-export let yjsAdaptor: NdnSvsAdaptor | undefined
-export let yjsSnapshotMgr: YjsStateManager | undefined
 
 export let listener: PeerJsListener | undefined = undefined
 export let nfdWsFace: FwFace | undefined = undefined
@@ -175,7 +170,7 @@ export async function connect(config: connections.Config) {
     }
   }
 
-  syncAgent?.fire()
+  workspace?.fireUpdate()
   connState.value = 'CONNECTED'
 }
 
@@ -223,83 +218,68 @@ export async function bootstrapWorkspace(opts: {
   certStorage = new CertStorage(opts.trustAnchor, opts.ownCertificate, persistStore, endpoint, opts.prvKey)
   await certStorage.readyEvent
 
-  // Sync Agents
-  syncAgent = await SyncAgent.create(nodeId, persistStore, endpoint, certStorage.signer!, certStorage.verifier, () => {
-    disconnect()
-  })
-
   // Root doc using CRDT and Sync
   rootDoc = initRootDoc()
-  yjsAdaptor = new NdnSvsAdaptor(syncAgent, getYjsDoc(rootDoc), 'doc')
-  yjsSnapshotMgr = new YjsStateManager(
-    () => encodeSyncState(syncAgent!.getUpdateSyncSV()),
-    getYjsDoc(rootDoc),
-    // No key conflict in this case. If we are worried, use anothe sub-folder.
-    persistStore,
-  )
 
   // Load or create
+  let createNewDoc: (() => Promise<void>) | undefined
   if (opts.createNew) {
-    console.log(`Created document`)
-    const mainUuid = uuidv4()
-    rootDoc.latex[project.RootId] = {
-      id: project.RootId,
-      // fullPath: '/',
-      name: '',
-      parentId: undefined,
-      kind: 'folder',
-      items: [],
+    createNewDoc = async () => {
+      if (!rootDoc) return
+      console.log(`Created document`)
+      const mainUuid = uuidv4()
+      rootDoc.latex[project.RootId] = {
+        id: project.RootId,
+        // fullPath: '/',
+        name: '',
+        parentId: undefined,
+        kind: 'folder',
+        items: [],
+      }
+      rootDoc.latex[mainUuid] = {
+        id: mainUuid,
+        // fullPath: '/',
+        name: 'main.tex',
+        parentId: project.RootId,
+        kind: 'text',
+        text: new Y.Text(),
+      }
+      rootDoc.latex[project.RootId].items.push(mainUuid)
     }
-    rootDoc.latex[mainUuid] = {
-      id: mainUuid,
-      // fullPath: '/',
-      name: 'main.tex',
-      parentId: project.RootId,
-      kind: 'text',
-      text: new Y.Text(),
-    }
-    rootDoc.latex[project.RootId].items.push(mainUuid)
-  } else {
-    const state = await yjsSnapshotMgr.loadLocalSnapshot((update) => yjsAdaptor!.handleSyncUpdate(update))
-    await syncAgent.replayUpdates('doc', state ? parseSyncState(state) : undefined)
   }
+
+  workspace = await Workspace.create({
+    nodeId,
+    persistStore,
+    endpoint,
+    rootDoc: getYjsDoc(rootDoc),
+    signer: certStorage.signer,
+    verifier: certStorage.verifier,
+    onReset: disconnect,
+    createNewDoc,
+  })
 
   if (!opts.inMemory) {
     // We need to save profile for both create and join
     await saveProfile(profiles.fromBootParams(opts))
   }
 
-  // Start Sync
-  syncAgent.ready = true
-
-  // Mark success
-  bootstrapped = true
-
   // Register prefix if the connection is already there
   await checkPrefixRegistration(false)
 }
 
 export async function stopWorkspace() {
-  if (!bootstrapped) {
+  if (!workspace) {
     console.error('No workspace is bootstrapped yet')
     return
   }
-  bootstrapped = false
 
   await checkPrefixRegistration(true)
+  workspace.destroy()
+  workspace = undefined
+
   nodeId = undefined
   appPrefix = undefined
-
-  syncAgent!.ready = false
-
-  yjsSnapshotMgr!.destroy()
-  yjsSnapshotMgr = undefined
-
-  yjsAdaptor!.destroy()
-  yjsAdaptor = undefined
-
-  syncAgent!.destroy()
-  syncAgent = undefined
 
   rootDoc = undefined
   certStorage = undefined
@@ -343,7 +323,7 @@ async function checkPrefixRegistration(cancel: boolean) {
       nfdCertProducer?.close()
       nfdCertProducer = undefined
     }
-  } else if (!cancel && nfdWsFace !== undefined && bootstrapped) {
+  } else if (!cancel && nfdWsFace !== undefined && workspace) {
     // Note: UseAutoAnnouncement works, the following code is kept for test.
     // Differences:
     // - UseAutoAnnouncement does not cut the connection and notify the user when he uses

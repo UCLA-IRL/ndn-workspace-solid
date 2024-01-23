@@ -5,7 +5,7 @@ import {
   QrCodeScanner as QRIcon,
 } from '@suid/icons-material'
 import { Show, createEffect, createSignal } from 'solid-js'
-import { base64ToBytes, bytesToBase64 } from '../../utils/base64'
+import { base64ToBytes, bytesToBase64 } from '../../utils'
 import { Decoder, Encoder } from '@ndn/tlv'
 import { Data } from '@ndn/packet'
 import { Certificate } from '@ndn/keychain'

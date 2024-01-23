@@ -1,7 +1,7 @@
 // Ref: https://github.com/motifland/yfs
 import { getDeltaOperations } from './diff'
 import * as project from '../models/project'
-import { SyncAgent } from '../sync-agent'
+import { SyncAgent } from '@ucla-irl/ndnts-aux/sync-agent'
 import { Name } from '@ndn/packet'
 import { RootDocStore } from '../models'
 

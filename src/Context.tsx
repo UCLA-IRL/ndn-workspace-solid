@@ -10,7 +10,7 @@ import {
   Setter,
 } from 'solid-js'
 import { RootDocStore, connections } from './backend/models'
-import { SyncAgent } from './backend/sync-agent'
+import { SyncAgent } from '@ucla-irl/ndnts-aux/sync-agent'
 import * as main from './backend/main'
 import { type Certificate } from '@ndn/keychain'
 import { type Theme, type Breakpoint } from '@suid/material/styles'
@@ -82,7 +82,7 @@ export function NdnWorkspaceProvider(props: ParentProps<unknown>) {
   const bootstrapWorkspace: ContextType['bootstrapWorkspace'] = async (opts) => {
     await main.bootstrapWorkspace(opts)
     setRootDocSig(main.rootDoc)
-    setSyncAgentSig(main.syncAgent)
+    setSyncAgentSig(main.workspace?.syncAgent)
     setBooted(true)
   }
 
