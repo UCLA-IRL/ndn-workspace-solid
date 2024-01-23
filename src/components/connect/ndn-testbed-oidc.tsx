@@ -16,7 +16,7 @@ import { Encoder } from '@ndn/tlv'
 import { WsTransport } from '@ndn/ws-transport'
 import { Endpoint } from '@ndn/endpoint'
 import { fchQuery } from '@ndn/autoconfig'
-import { ClientOidcChallenge } from '../../adaptors/oidc-challenge'
+import { ClientOidcChallenge } from '@ucla-irl/ndnts-aux/adaptors'
 import { Name } from '@ndn/packet'
 
 export default function NdnTestbedOidc(props: { onAdd: (config: Conn) => void }) {
