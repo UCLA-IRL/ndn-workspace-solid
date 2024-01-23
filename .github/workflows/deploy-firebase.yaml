@@ -14,6 +14,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  packages: read
 
 # Allow one concurrent deployment
 concurrency:
@@ -39,6 +40,9 @@ jobs:
         with:
           node-version: 21
           cache: "pnpm"
+      - name: Login
+        run: |
+          pnpm set "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}"
       - name: Install dependencies
         run: pnpm install
       - name: Build

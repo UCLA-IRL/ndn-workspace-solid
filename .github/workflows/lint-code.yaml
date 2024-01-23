@@ -13,6 +13,7 @@ on:
 permissions:
   checks: write
   contents: read
+  packages: read
 
 jobs:
   run-linters:
@@ -30,6 +31,9 @@ jobs:
         with:
           node-version: 21
           cache: "pnpm"
+      - name: Login
+        run: |
+          pnpm set "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}"
       - name: Install dependencies
         run: pnpm install
       - name: Run linters
