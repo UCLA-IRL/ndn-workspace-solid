@@ -25,7 +25,7 @@
   width: 50%;
 }
 
-/** Patching MUI components */
+/** Patches to 3rdparty components */
 .MuiSelect-root {
   height: 40px;
 }
