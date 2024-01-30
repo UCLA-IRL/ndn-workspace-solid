@@ -1,9 +1,11 @@
 /** ShareLatex Component */
 .sl-outer {
   flex: 1;
-  overflow: visible;
+  overflow: hidden;
   display: flex;
   flex-direction: row;
+  height: 100%;
+  padding: 4px;
 }
 
 .sl-panel {
