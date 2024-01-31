@@ -102,21 +102,10 @@ export default function ShareLatexComponent(props: {
         </Show>
         <Show when={props.view() === 'Log'}>
           <div class={styles['sl-panel']}>
-            <TextField
-              fullWidth
-              multiline
-              rows={props.compilationLog.split('\n').length}
-              label="Compilation Log"
-              name="compilation-log"
-              type="text"
-              inputProps={{
-                style: {
-                  'font-family': '"Roboto Mono", ui-monospace, monospace',
-                  'white-space': 'pre',
-                },
-              }}
-              value={props.compilationLog}
-            />
+            <pre class={styles['log']}>
+              <u><b>Compilation Log</b></u><br />
+              {props.compilationLog}
+            </pre>
           </div>
         </Show>
       </div>
