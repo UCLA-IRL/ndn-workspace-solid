@@ -2,7 +2,7 @@ import AppTools from '../app-tools'
 import FileList from '../file-list'
 import LatexDoc from '../latex-doc'
 import NewItemModal, { ModalState } from '../new-item-modal'
-import { Button, Paper, TextField } from '@suid/material'
+import { Button, Paper } from '@suid/material'
 import { project } from '../../../backend/models'
 import { Accessor, Match, Setter, Show, Switch } from 'solid-js'
 import RichDoc from '../rich-doc'
@@ -102,21 +102,13 @@ export default function ShareLatexComponent(props: {
         </Show>
         <Show when={props.view() === 'Log'}>
           <div class={styles['sl-panel']}>
-            <TextField
-              fullWidth
-              multiline
-              rows={props.compilationLog.split('\n').length}
-              label="Compilation Log"
-              name="compilation-log"
-              type="text"
-              inputProps={{
-                style: {
-                  'font-family': '"Roboto Mono", ui-monospace, monospace',
-                  'white-space': 'pre',
-                },
-              }}
-              value={props.compilationLog}
-            />
+            <pre class={styles['log']}>
+              <u>
+                <b>Compilation Log</b>
+              </u>
+              <br />
+              {props.compilationLog}
+            </pre>
           </div>
         </Show>
       </div>
