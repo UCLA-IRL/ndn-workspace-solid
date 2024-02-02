@@ -11,12 +11,14 @@ import {
 } from 'solid-js'
 import { RootDocStore, connections } from './backend/models'
 import { SyncAgent } from '@ucla-irl/ndnts-aux/sync-agent'
+import { NdnSvsAdaptor } from '@ucla-irl/ndnts-aux/adaptors'
 import * as main from './backend/main'
 import { type Certificate } from '@ndn/keychain'
 import { type Theme, type Breakpoint } from '@suid/material/styles'
 import { Endpoint } from '@ndn/endpoint'
 import { doFch } from './testbed'
 import { loadAll } from './backend/models/connections'
+import { Workspace } from '@ucla-irl/ndnts-aux/workspace'
 
 type ContextType = {
   rootDoc: Accessor<RootDocStore | undefined>
@@ -42,13 +44,14 @@ type ContextType = {
   theme: Accessor<Theme<Breakpoint> | undefined>
   setTheme: Setter<Theme<Breakpoint> | undefined>
   endpoint: Endpoint
+  yjsProvider: Accessor<NdnSvsAdaptor | undefined>
 }
 
 const NdnWorkspaceContext = createContext<ContextType>()
 
 export function NdnWorkspaceProvider(props: ParentProps<unknown>) {
   const [rootDocSig, setRootDocSig] = createSignal<RootDocStore>()
-  const [syncAgentSig, setSyncAgentSig] = createSignal<SyncAgent>()
+  const [workspaceSig, setWorkspaceSig] = createSignal<Workspace>()
   const [booted, setBooted] = createSignal(false)
   const [theme, setTheme] = createSignal<Theme<Breakpoint>>()
 
@@ -82,12 +85,12 @@ export function NdnWorkspaceProvider(props: ParentProps<unknown>) {
   const bootstrapWorkspace: ContextType['bootstrapWorkspace'] = async (opts) => {
     await main.bootstrapWorkspace(opts)
     setRootDocSig(main.rootDoc)
-    setSyncAgentSig(main.workspace?.syncAgent)
+    setWorkspaceSig(main.workspace)
     setBooted(true)
   }
 
   const stopWorkspace = async () => {
-    setSyncAgentSig(undefined)
+    setWorkspaceSig(undefined)
     setRootDocSig(undefined)
     await main.stopWorkspace()
     setBooted(false)
@@ -95,7 +98,7 @@ export function NdnWorkspaceProvider(props: ParentProps<unknown>) {
 
   const value: ContextType = {
     rootDoc: rootDocSig,
-    syncAgent: syncAgentSig,
+    syncAgent: () => workspaceSig()?.syncAgent,
     booted: booted,
     connectionStatus: connStatus,
     currentConnConfig: connConfig,
@@ -110,6 +113,7 @@ export function NdnWorkspaceProvider(props: ParentProps<unknown>) {
     theme,
     setTheme,
     endpoint: main.endpoint,
+    yjsProvider: () => workspaceSig()?.yjsAdaptor,
   }
 
   return <NdnWorkspaceContext.Provider value={value}>{props.children}</NdnWorkspaceContext.Provider>

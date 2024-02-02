@@ -17,7 +17,7 @@ import { LatexEnginePath } from '../../../constants'
 import { ViewValues } from '../types'
 
 export default function ShareLatex(props: { rootUri: string }) {
-  const { rootDoc, syncAgent, booted, endpoint } = useNdnWorkspace()!
+  const { rootDoc, syncAgent, booted, endpoint, yjsProvider } = useNdnWorkspace()!
   const navigate = useNavigate()
   const params = useParams<{ itemId: string }>()
   const itemId = () => params.itemId
@@ -25,6 +25,15 @@ export default function ShareLatex(props: { rootUri: string }) {
   const [mapper, setMapper] = createSignal<FileMapper>()
   // const [previewUrl, setPreviewUrl] = createSignal<string>()
   const { fileSystemSupported } = useNdnWorkspace()!
+
+  const username = () => {
+    const nodeId = syncAgent()?.nodeId
+    if (nodeId) {
+      return nodeId.at(nodeId.length - 1).text
+    } else {
+      return ''
+    }
+  }
 
   const pathIds = (): string[] => {
     const curItem = item()
@@ -338,6 +347,8 @@ export default function ShareLatex(props: { rootUri: string }) {
       setView={setView}
       compilationLog={compilationLog()}
       pdfUrl={pdfUrl()}
+      username={username()}
+      yjsProvider={yjsProvider}
     />
   )
 }

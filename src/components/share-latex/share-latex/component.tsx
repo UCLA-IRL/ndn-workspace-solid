@@ -9,6 +9,7 @@ import RichDoc from '../rich-doc'
 import { ViewValues } from '../types'
 import PdfViewer from '../pdf-viewer/pdf-viewer'
 import styles from './styles.module.css'
+import { NdnSvsAdaptor } from '@ucla-irl/ndnts-aux/adaptors'
 
 export default function ShareLatexComponent(props: {
   rootUri: string
@@ -28,6 +29,8 @@ export default function ShareLatexComponent(props: {
   setView: Setter<ViewValues>
   compilationLog: string
   pdfUrl: string | undefined
+  username: string
+  yjsProvider: Accessor<NdnSvsAdaptor | undefined>
 }) {
   return (
     <>
@@ -79,10 +82,20 @@ export default function ShareLatexComponent(props: {
                 </Paper>
               </Match>
               <Match when={props.item?.kind === 'text'}>
-                <LatexDoc doc={(props.item as project.TextDoc).text} />
+                <LatexDoc
+                  doc={(props.item as project.TextDoc).text}
+                  subDocId={props.item!.id}
+                  provider={props.yjsProvider()!}
+                  username={props.username}
+                />
               </Match>
               <Match when={props.item?.kind === 'xmldoc'}>
-                <RichDoc doc={(props.item as project.XmlDoc).text} />
+                <RichDoc
+                  doc={(props.item as project.XmlDoc).text}
+                  subDocId={props.item!.id}
+                  provider={props.yjsProvider()!}
+                  username={props.username}
+                />
               </Match>
               <Match when={props.item?.kind === 'blob'}>
                 <Button onClick={props.onDownloadBlob}>Download</Button>
