@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 patchedDependencies:
+  '@pdfslick/solid@1.2.7':
+    hash: apbgewp7d2cflrtjxlu6jirmky
+    path: patches/@pdfslick__solid@1.2.7.patch
   pdfjs-dist@3.11.174:
     hash: nfrzzc54owtwxa3k4hkcfowqpu
     path: patches/pdfjs-dist@3.11.174.patch
@@ -75,7 +78,7 @@ dependencies:
     version: '@ndnts-nightly.ndn.today/ws-transport.tgz'
   '@pdfslick/solid':
     specifier: ^1.2.7
-    version: 1.2.7(react@18.2.0)(solid-js@1.8.12)
+    version: 1.2.7(patch_hash=apbgewp7d2cflrtjxlu6jirmky)(react@18.2.0)(solid-js@1.8.12)
   '@reactivedata/reactive':
     specifier: ^0.2.2
     version: 0.2.2
@@ -2266,7 +2269,7 @@ packages:
       - supports-color
     dev: false
 
-  /@pdfslick/solid@1.2.7(react@18.2.0)(solid-js@1.8.12):
+  /@pdfslick/solid@1.2.7(patch_hash=apbgewp7d2cflrtjxlu6jirmky)(react@18.2.0)(solid-js@1.8.12):
     resolution: {integrity: sha512-cYyMFyhQe+1LxnQjsGIhUZmWpt+lsW9MsQDDqFkrr8yd9Qqaa0m7fIhXuCUjZXIc5gHFsHKqdlmtRoajYKIkkQ==}
     peerDependencies:
       solid-js: '>=1.5.0'
@@ -2282,6 +2285,7 @@ packages:
       - react
       - supports-color
     dev: false
+    patched: true
 
   /@pkgr/core@0.1.1:
     resolution: {integrity: sha512-cq8o4cWH0ibXh9VGi5P20Tu9XF/0fFXl9EUinr9QfTM7a7p0oTA4iJRCQWppXR1Pg8dSM0UCItCkPwsk9qWWYA==}

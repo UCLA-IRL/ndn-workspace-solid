@@ -1,9 +1,33 @@
 /** Rich editor */
 .editor {
-  padding: 0 16px;
+  padding: 0 4px;
   max-height: 10px; /* This is a hack, don't even know why it works */
-  :global .ProseMirror {
-    outline: none !important;
+}
+
+:global .ProseMirror {
+  outline: none !important;
+
+  h1 {
+    margin: 0.4em 0;
+  }
+
+  h2, p {
+    margin: 0.3em 0;
+  }
+
+  h3, h4, h5 {
+    margin: 0.2em 0;
+  }
+
+  ul {
+    margin: 0.1em 0;
+  }
+
+  /** Temporary typography */
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+  h1, h2, h3, h4, h5 {
+    font-weight: 500;
   }
 
   /* Give a remote user a caret */
