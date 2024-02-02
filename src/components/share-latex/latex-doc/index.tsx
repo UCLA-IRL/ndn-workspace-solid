@@ -11,7 +11,7 @@ import * as Y from 'yjs'
 import { Paper, useMediaQuery } from '@suid/material'
 import EditorTheme from './theme'
 import { NdnSvsAdaptor } from '@ucla-irl/ndnts-aux/adaptors'
-import { onCleanup, onMount } from 'solid-js'
+import { onCleanup } from 'solid-js'
 
 export default function LatexDoc(props: { doc: Y.Text; provider: NdnSvsAdaptor; username: string; subDocId: string }) {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
