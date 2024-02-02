@@ -6,7 +6,7 @@ import { FwFace } from '@ndn/fw'
 /** PeerJS transport over WebRTC for browser. */
 // TODO: (IMPORTANT) Current NDNts Forwarder cannot handle Interest surpression
 export class PeerJsTransport extends Transport {
-  public override readonly rx: Transport.Rx
+  public override readonly rx: Transport.RxIterable
   private readonly highWaterMark: number
   private readonly lowWaterMark: number
 

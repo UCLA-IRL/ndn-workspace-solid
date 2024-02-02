@@ -1,11 +1,12 @@
 import { createTiptapEditor } from 'solid-tiptap'
 import StarterKit from '@tiptap/starter-kit'
 import Collaboration from '@tiptap/extension-collaboration'
+import CollaborationCursor from '@tiptap/extension-collaboration-cursor'
 import Highlight from '@tiptap/extension-highlight'
 import { Color } from '@tiptap/extension-color'
 import TextStyle from '@tiptap/extension-text-style'
 import * as Y from 'yjs'
-import { createSignal } from 'solid-js'
+import { createSignal, onCleanup, onMount } from 'solid-js'
 import { Card, CardContent, Divider, IconButton, Stack } from '@suid/material'
 import {
   FormatBold as FormatBoldIcon,
@@ -28,9 +29,26 @@ import { H1Icon, H2Icon, H3Icon, H4Icon } from './icons'
 import CmdIcon from './cmd-icon'
 import ColorList from './color-list'
 import styles from './styles.module.css'
+import { NdnSvsAdaptor } from '@ucla-irl/ndnts-aux/adaptors'
 
-export default function RichDoc(props: { doc: Y.XmlFragment }) {
+export default function RichDoc(props: {
+  doc: Y.XmlFragment
+  provider: NdnSvsAdaptor
+  username: string
+  subDocId: string
+}) {
   const [container, setContainer] = createSignal<HTMLDivElement>()
+
+  onMount(() => {
+    props.provider.bindAwareness(props.doc.doc!, props.subDocId)
+  })
+
+  onCleanup(() => {
+    props.provider.cancelAwareness()
+  })
+
+  const getRandomColor = () =>
+    '#' + Array.from({ length: 6 }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('')
 
   const editor = createTiptapEditor(() => ({
     element: container()!,
@@ -45,6 +63,13 @@ export default function RichDoc(props: { doc: Y.XmlFragment }) {
       Highlight,
       TextStyle,
       Color,
+      CollaborationCursor.configure({
+        provider: props.provider,
+        user: {
+          name: props.username,
+          color: getRandomColor(),
+        },
+      }),
     ],
   }))
 
