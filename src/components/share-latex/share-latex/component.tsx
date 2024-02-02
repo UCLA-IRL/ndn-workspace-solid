@@ -82,7 +82,12 @@ export default function ShareLatexComponent(props: {
                 </Paper>
               </Match>
               <Match when={props.item?.kind === 'text'}>
-                <LatexDoc doc={(props.item as project.TextDoc).text} />
+                <LatexDoc
+                  doc={(props.item as project.TextDoc).text}
+                  subDocId={props.item!.id}
+                  provider={props.yjsProvider()!}
+                  username={props.username}
+                />
               </Match>
               <Match when={props.item?.kind === 'xmldoc'}>
                 <RichDoc
