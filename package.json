@@ -97,7 +97,8 @@
   },
   "pnpm": {
     "patchedDependencies": {
-      "pdfjs-dist@3.11.174": "patches/pdfjs-dist@3.11.174.patch"
+      "pdfjs-dist@3.11.174": "patches/pdfjs-dist@3.11.174.patch",
+      "@pdfslick/solid@1.2.7": "patches/@pdfslick__solid@1.2.7.patch"
     }
   }
 }

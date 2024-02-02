@@ -1,0 +1,16 @@
+diff --git a/dist/pdf_viewer.css b/dist/pdf_viewer.css
+index a285f167bcb80fb25afb652060504bd6f3ff9140..f1f3e1b337714a3db922bfd27f3eb1e5dfa64dca 100644
+--- a/dist/pdf_viewer.css
++++ b/dist/pdf_viewer.css
+@@ -1298,11 +1298,6 @@
+   }
+ }
+ 
+-* {
+-  padding: 0;
+-  margin: 0;
+-}
+-
+ /*
+ html,
+ body {

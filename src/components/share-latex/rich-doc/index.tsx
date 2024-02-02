@@ -71,6 +71,11 @@ export default function RichDoc(props: {
         },
       }),
     ],
+    editorProps: {
+      attributes: {
+        class: 'p-1 prose max-w-full',
+      },
+    },
   }))
 
   // TODO: Should use ToggleButton for better appearance. Or at least some CSS.
