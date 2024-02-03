@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && ./fix-sw.bash",
+    "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "peer-server": "peerjs --port 8000 --key peerjs --path /aincraft --allow_discovery true",
@@ -98,7 +98,8 @@
   "pnpm": {
     "patchedDependencies": {
       "pdfjs-dist@3.11.174": "patches/pdfjs-dist@3.11.174.patch",
-      "@pdfslick/solid@1.2.7": "patches/@pdfslick__solid@1.2.7.patch"
+      "@pdfslick/solid@1.2.7": "patches/@pdfslick__solid@1.2.7.patch",
+      "file-system-access@1.0.4": "patches/file-system-access@1.0.4.patch"
     }
   }
 }
