@@ -1,0 +1,19 @@
+diff --git a/lib/FileSystemFileHandle.js b/lib/FileSystemFileHandle.js
+index fc8de6559d0bbbcd815d3406fd07c8821836d5b8..f27095915602f72f20bf725a03fa793ba55d5723 100644
+--- a/lib/FileSystemFileHandle.js
++++ b/lib/FileSystemFileHandle.js
+@@ -1,4 +1,5 @@
+ import { FileSystemHandle } from './FileSystemHandle.js';
++import { FileSystemWritableFileStream } from './FileSystemWritableFileStream.js';
+ const kAdapter = Symbol('adapter');
+ export class FileSystemFileHandle extends FileSystemHandle {
+     constructor(adapter) {
+@@ -7,7 +8,7 @@ export class FileSystemFileHandle extends FileSystemHandle {
+         this[kAdapter] = adapter;
+     }
+     async createWritable(options = {}) {
+-        const { FileSystemWritableFileStream } = await import('./FileSystemWritableFileStream.js');
++        // const { FileSystemWritableFileStream } = await import('./FileSystemWritableFileStream.js');
+         return new FileSystemWritableFileStream(await this[kAdapter].createWritable(options));
+     }
+     async getFile() {

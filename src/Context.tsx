@@ -147,7 +147,8 @@ export async function initTestbed() {
     // TODO: prefer local forwarders if any configured
     ctx.connectFuncs.connect({
       ...config,
-      uri: url.toString(),
+      // NOTE: No guarantee that this uri is testbed. Need explicit specification.
+      // uri: url.toString(),
     })
 
     // TODO: break on success only

@@ -292,39 +292,46 @@ export async function stopWorkspace() {
 }
 
 async function checkPrefixRegistration(cancel: boolean) {
-  if (cancel && nfdWsFace !== undefined) {
+  if (!nfdWsFace || !workspace) {
+    return
+  }
+  if (cancel) {
     if (!UseAutoAnnouncement) {
       // Unregister prefixes
-      await nfdmgmt.invoke(
-        'rib/unregister',
-        {
-          name: nodeId!,
-          origin: 65, // client
-        },
-        {
-          endpoint: endpoint,
-          prefix: commandPrefix,
-          signer: nfdCmdSigner,
-        },
-      )
-      await nfdmgmt.invoke(
-        'rib/unregister',
-        {
-          name: appPrefix!,
-          origin: 65, // client
-        },
-        {
-          endpoint: endpoint,
-          prefix: commandPrefix,
-          signer: nfdCmdSigner,
-        },
-      )
+      try {
+        await nfdmgmt.invoke(
+          'rib/unregister',
+          {
+            name: nodeId!,
+            origin: 65, // client
+          },
+          {
+            endpoint: endpoint,
+            prefix: commandPrefix,
+            signer: nfdCmdSigner,
+          },
+        )
+        await nfdmgmt.invoke(
+          'rib/unregister',
+          {
+            name: appPrefix!,
+            origin: 65, // client
+          },
+          {
+            endpoint: endpoint,
+            prefix: commandPrefix,
+            signer: nfdCmdSigner,
+          },
+        )
+      } catch {
+        // Ignore errors
+      }
 
       // Stop serving certificate
       nfdCertProducer?.close()
       nfdCertProducer = undefined
     }
-  } else if (!cancel && nfdWsFace !== undefined && workspace) {
+  } else {
     // Note: UseAutoAnnouncement works, the following code is kept for test.
     // Differences:
     // - UseAutoAnnouncement does not cut the connection and notify the user when he uses
@@ -340,41 +347,50 @@ async function checkPrefixRegistration(cancel: boolean) {
       }
 
       // Register prefixes
-      const cr = await nfdmgmt.invoke(
-        'rib/register',
-        {
-          name: appPrefix!,
-          origin: 65, // client
-          cost: 0,
-          flags: 0x02, // CAPTURE
-        },
-        {
-          endpoint: endpoint,
-          prefix: commandPrefix,
-          signer: nfdCmdSigner,
-        },
-      )
-      if (cr.statusCode !== 200) {
-        window.alert(`Unable to register route: ${cr.statusCode} ${cr.statusText}`)
-        // Cut connection
-        return await disconnect()
-      }
-      const cr2 = await nfdmgmt.invoke(
-        'rib/register',
-        {
-          name: nodeId!,
-          origin: 65, // client
-          cost: 0,
-          flags: 0x02, // CAPTURE
-        },
-        {
-          endpoint: endpoint,
-          prefix: commandPrefix,
-          signer: nfdCmdSigner,
-        },
-      )
-      if (cr2.statusCode !== 200) {
-        window.alert(`Unable to register route: ${cr2.statusCode} ${cr2.statusText}`)
+      try {
+        const cr = await nfdmgmt.invoke(
+          'rib/register',
+          {
+            name: appPrefix!,
+            origin: 65, // client
+            cost: 0,
+            flags: 0x02, // CAPTURE
+          },
+          {
+            endpoint: endpoint,
+            prefix: commandPrefix,
+            signer: nfdCmdSigner,
+          },
+        )
+        if (cr.statusCode !== 200) {
+          window.alert(`Unable to register route: ${cr.statusCode} ${cr.statusText}`)
+          // Cut connection
+          return await disconnect()
+        }
+        const cr2 = await nfdmgmt.invoke(
+          'rib/register',
+          {
+            name: nodeId!,
+            origin: 65, // client
+            cost: 0,
+            flags: 0x02, // CAPTURE
+          },
+          {
+            endpoint: endpoint,
+            prefix: commandPrefix,
+            signer: nfdCmdSigner,
+          },
+        )
+        if (cr2.statusCode !== 200) {
+          window.alert(`Unable to register route: ${cr2.statusCode} ${cr2.statusText}`)
+          // Cut connection
+          return await disconnect()
+        }
+      } catch {
+        window.alert(
+          'Unable to register route with no response.' +
+            "Most likey because your certificate is not allowed to register this workspace's prefix",
+        )
         // Cut connection
         return await disconnect()
       }
