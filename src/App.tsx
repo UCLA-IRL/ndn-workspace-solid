@@ -1,5 +1,4 @@
 import { Paper, Typography } from '@suid/material'
-import '@pdfslick/solid/dist/pdf_viewer.css'
 import { useNdnWorkspace, initTestbed } from './Context'
 
 function isSafari() {
