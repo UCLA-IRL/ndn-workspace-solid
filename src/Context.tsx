@@ -19,6 +19,7 @@ import { Endpoint } from '@ndn/endpoint'
 import { doFch } from './testbed'
 import { loadAll } from './backend/models/connections'
 import { Workspace } from '@ucla-irl/ndnts-aux/workspace'
+import toast from 'solid-toast'
 
 type ContextType = {
   rootDoc: Accessor<RootDocStore | undefined>
@@ -133,9 +134,10 @@ export async function initTestbed() {
 
   const url = await doFch()
   if (url === null) {
-    alert('Failed to connect to the NDN testbed. Please try again later.')
+    toast.error('Failed to connect to the NDN testbed. Please try again later.')
     throw new Error('Failed to connect to testbed.')
   }
+  toast.success('Located closest forwarder')
 
   // Attempt to get a config for nfdWs
   const configs = await loadAll()

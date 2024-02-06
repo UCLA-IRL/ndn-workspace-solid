@@ -15,6 +15,7 @@ import * as segObj from '@ndn/segmented-object'
 import { PdfTeXEngine } from '../../../vendor/swiftlatex/PdfTeXEngine'
 import { LatexEnginePath } from '../../../constants'
 import { ViewValues } from '../types'
+import toast from 'solid-toast'
 
 export default function ShareLatex(props: { rootUri: string }) {
   const { rootDoc, syncAgent, booted, endpoint, yjsProvider } = useNdnWorkspace()!
@@ -176,7 +177,23 @@ export default function ShareLatex(props: { rootUri: string }) {
   }
 
   const [texEngine, setTexEngine] = createSignal<PdfTeXEngine>()
+
   const onCompile = async () => {
+    await toast.promise(
+      compile(),
+      {
+        loading: 'Compiling PDF...',
+        success: 'Compiled PDF successfully!',
+        error: 'Failed to compile PDF',
+      },
+      {
+        duration: 3000,
+        position: 'bottom-right',
+      },
+    )
+  }
+
+  const compile = async () => {
     let engine = texEngine()
     if (!engine) {
       engine = new PdfTeXEngine()
@@ -211,8 +228,7 @@ export default function ShareLatex(props: { rootUri: string }) {
 
     // Check if PDF is generated
     if (!res.pdf) {
-      alert('Failed to compile PDF file')
-      return
+      throw new Error('Failed to compile')
     }
 
     const data: Uint8Array = res.pdf
@@ -323,6 +339,7 @@ export default function ShareLatex(props: { rootUri: string }) {
           }
         } catch (e) {
           console.error(`Unable to fetch blob file: `, e)
+          toast.error('Failed to fetch blob file, see console for details')
         }
       }
     })()

@@ -18,6 +18,7 @@ import { NdnWorkspaceProvider } from './Context'
 import { Connect, StoredConns } from './components/connect'
 import { Workspace, Profile, ConvertTestbed } from './components/workspace'
 import { project } from './backend/models'
+import { Toaster } from 'solid-toast'
 
 const root = document.getElementById('root')
 
@@ -56,6 +57,8 @@ render(
         <Route path="/convert-testbed" component={ConvertTestbed} />
         <Route path="/oauth-test" component={OauthTest} />
       </Router>
+
+      <Toaster />
     </NdnWorkspaceProvider>
   ),
   root!,

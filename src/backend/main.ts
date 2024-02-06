@@ -16,6 +16,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { base64ToBytes, encodeKey as encodePath, Signal as BackendSignal, openRoot } from '../utils'
 import { Decoder } from '@ndn/tlv'
 import { Workspace } from '@ucla-irl/ndnts-aux/workspace'
+import toast from 'solid-toast'
 
 export const UseAutoAnnouncement = false
 
@@ -47,7 +48,8 @@ let commandPrefix = nfdmgmt.localhopPrefix
 
 async function connectNfdWs(uri: string, isLocal: boolean) {
   if (nfdWsFace !== undefined) {
-    console.error('Try to connect to an already connected WebSocket face')
+    console.error('Trying to connect to an already connected WebSocket face')
+    toast.error('Trying to connect to an already connected WebSocket face')
     return
   }
   // Force ndnts to register the prefix correctly using localhost
@@ -68,7 +70,8 @@ async function connectNfdWs(uri: string, isLocal: boolean) {
 
 async function disconnectNfdWs() {
   if (nfdWsFace === undefined) {
-    console.error('Try to disconnect from a non-existing WebSocket face')
+    console.error('Trying to disconnect from a non-existing WebSocket face')
+    toast.error('Trying to disconnect from a non-existing WebSocket face')
     return
   }
   await checkPrefixRegistration(true)
@@ -83,7 +86,8 @@ async function connectPeerJs(opts: PeerJsListener.Options, discovery: boolean) {
       await listener.connectToKnownPeers()
     }
   } else {
-    console.error('Try to reconnect to an existing PeerJs listener')
+    console.error('Trying to reconnect to an existing PeerJs listener')
+    toast.error('Trying to reconnect to an existing PeerJs listener')
   }
 }
 
@@ -99,6 +103,7 @@ export async function disconnect() {
   if (connState.value !== 'CONNECTED') {
     return
   }
+
   connState.value = 'DISCONNECTING'
   if (listener !== undefined) {
     await disconnectPeerJs()
@@ -107,11 +112,14 @@ export async function disconnect() {
     await disconnectNfdWs()
   }
   connState.value = 'DISCONNECTED'
+
+  toast.error('Disconnected from forwarder')
 }
 
 export async function connect(config: connections.Config) {
   if (connState.value !== 'DISCONNECTED') {
     console.error('Dual-homing is not supported. Please start local NFD.')
+    toast.error('Dual-homing is not supported. Please start local NFD.')
     return
   }
   connState.value = 'CONNECTING'
@@ -138,6 +146,7 @@ export async function connect(config: connections.Config) {
         ).withKeyLocator(nfdCertificate.name)
       } catch (e) {
         console.error('Unable to parse credentials:', e)
+        toast.error('Unable to parse credentials')
         listener?.closeAll()
         listener = undefined
         connState.value = 'DISCONNECTED'
@@ -153,6 +162,7 @@ export async function connect(config: connections.Config) {
       }
     } catch (err) {
       console.error('Failed to connect:', err)
+      toast.error('Failed to connect, see console for details')
       nfdWsFace?.close()
       nfdWsFace = undefined
       connState.value = 'DISCONNECTED'
@@ -166,6 +176,7 @@ export async function connect(config: connections.Config) {
       await connectPeerJs(config, true)
     } catch (err) {
       console.error('Failed to connect:', err)
+      toast.error('Failed to connect, see console for details')
       connState.value = 'DISCONNECTED'
       return
     }
@@ -173,6 +184,8 @@ export async function connect(config: connections.Config) {
 
   workspace?.fireUpdate()
   connState.value = 'CONNECTED'
+
+  toast.success('Connected to forwarder successfully!')
 }
 
 // ============= Bootstrapping =============
@@ -186,6 +199,7 @@ export async function bootstrapWorkspace(opts: {
 }) {
   if (bootstrapping) {
     console.error('Bootstrapping in progress or done')
+    toast.error('Bootstrapping in progress or done')
     return
   }
   bootstrapping = true
@@ -203,6 +217,7 @@ export async function bootstrapWorkspace(opts: {
 
   if (!opts.inMemory && opts.createNew && (await isProfileExisting(nodeId.toString()))) {
     console.error('Cannot create an existing profile. Will try to join it instead.')
+    toast.error('Cannot create an existing profile. Will try to join it instead.')
     opts.createNew = false
   }
 
@@ -272,6 +287,7 @@ export async function bootstrapWorkspace(opts: {
 export async function stopWorkspace() {
   if (!workspace) {
     console.error('No workspace is bootstrapped yet')
+    toast.error('No workspace is bootstrapped yet')
     return
   }
 
@@ -330,6 +346,8 @@ async function checkPrefixRegistration(cancel: boolean) {
       // Stop serving certificate
       nfdCertProducer?.close()
       nfdCertProducer = undefined
+
+      toast.success('Unregistered routes successfully!')
     }
   } else {
     // Note: UseAutoAnnouncement works, the following code is kept for test.
@@ -348,7 +366,7 @@ async function checkPrefixRegistration(cancel: boolean) {
 
       // Register prefixes
       try {
-        const cr = await nfdmgmt.invoke(
+        let cr = await nfdmgmt.invoke(
           'rib/register',
           {
             name: appPrefix!,
@@ -363,11 +381,13 @@ async function checkPrefixRegistration(cancel: boolean) {
           },
         )
         if (cr.statusCode !== 200) {
-          window.alert(`Unable to register route: ${cr.statusCode} ${cr.statusText}`)
+          console.error(`Unable to register route: ${cr.statusCode} ${cr.statusText}`)
+          toast.error(`Unable to register route: ${cr.statusCode} ${cr.statusText}`)
           // Cut connection
           return await disconnect()
         }
-        const cr2 = await nfdmgmt.invoke(
+
+        cr = await nfdmgmt.invoke(
           'rib/register',
           {
             name: nodeId!,
@@ -381,13 +401,16 @@ async function checkPrefixRegistration(cancel: boolean) {
             signer: nfdCmdSigner,
           },
         )
-        if (cr2.statusCode !== 200) {
-          window.alert(`Unable to register route: ${cr2.statusCode} ${cr2.statusText}`)
+        if (cr.statusCode !== 200) {
+          console.error(`Unable to register route: ${cr.statusCode} ${cr.statusText}`)
+          toast.error(`Unable to register route: ${cr.statusCode} ${cr.statusText}`)
           // Cut connection
           return await disconnect()
         }
+
+        toast.success('Registered routes successfully!')
       } catch {
-        window.alert(
+        toast.error(
           'Unable to register route with no response.' +
             "Most likey because your certificate is not allowed to register this workspace's prefix",
         )

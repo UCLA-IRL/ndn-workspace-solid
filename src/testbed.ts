@@ -1,4 +1,5 @@
 import { fchQuery } from '@ndn/autoconfig'
+import toast from 'solid-toast'
 
 export const doFch = async () => {
   try {
@@ -11,7 +12,8 @@ export const doFch = async () => {
       return new URL(fchRes.routers[0].connect)
     }
   } catch {
-    console.error('FCH server is down.')
+    console.error('FCH server is down')
+    toast.error('FCH server is down')
   }
 
   return null
