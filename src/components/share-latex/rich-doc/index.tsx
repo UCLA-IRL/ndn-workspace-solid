@@ -80,7 +80,15 @@ export default function RichDoc(props: {
 
   // TODO: Should use ToggleButton for better appearance. Or at least some CSS.
   return (
-    <Card sx={{ width: '100%', height: '100%', overflow: 'auto' }}>
+    <Card
+      sx={{
+        width: '100%',
+        height: '100%',
+        overflowY: 'scroll',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
       <CardContent
         sx={{
           position: 'sticky',
@@ -187,7 +195,7 @@ export default function RichDoc(props: {
         </Stack>
       </CardContent>
       <Divider />
-      <CardContent>
+      <CardContent sx={{ flex: 1 }}>
         <div id="editor" class={styles.editor} ref={setContainer} />
       </CardContent>
     </Card>
