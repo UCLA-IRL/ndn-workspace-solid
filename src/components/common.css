@@ -31,11 +31,7 @@
   height: 40px;
 }
 
-.pdfViewer {
-  /** Originally defined on :root */
-  --page-border: 1px solid #e0e0e0;
-  --page-margin: 0 auto 10px auto;
-}
-.pdfViewer .page:last-of-type {
-  margin-bottom: 0;
-}
+/**
+ * This file is for global styles only. Please use CSS Modules for single-component styles:
+ * https://github.com/css-modules/css-modules
+ */
