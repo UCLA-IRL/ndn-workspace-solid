@@ -28,7 +28,7 @@ import {
 import { H1Icon, H2Icon, H3Icon, H4Icon } from './icons'
 import CmdIcon from './cmd-icon'
 import ColorList from './color-list'
-import styles from './styles.module.css'
+import styles from './styles.module.scss'
 import { NdnSvsAdaptor } from '@ucla-irl/ndnts-aux/adaptors'
 
 export default function RichDoc(props: {

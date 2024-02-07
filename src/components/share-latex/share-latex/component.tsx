@@ -8,7 +8,7 @@ import { Accessor, Match, Setter, Show, Switch } from 'solid-js'
 import RichDoc from '../rich-doc'
 import { ViewValues } from '../types'
 import PdfViewer from '../pdf-viewer/pdf-viewer'
-import styles from './styles.module.css'
+import styles from './styles.module.scss'
 import { NdnSvsAdaptor } from '@ucla-irl/ndnts-aux/adaptors'
 
 export default function ShareLatexComponent(props: {
@@ -62,10 +62,10 @@ export default function ShareLatexComponent(props: {
         ]}
       />
 
-      <div class={styles['sl-outer']}>
+      <div class={styles.outer}>
         <Show when={props.view() === 'Editor' || props.view() === 'Both'}>
           <div
-            class={styles['sl-panel']}
+            class={styles.panel}
             classList={{
               'w-half': props.view() === 'Both',
             }}
@@ -105,7 +105,7 @@ export default function ShareLatexComponent(props: {
         </Show>
         <Show when={props.view() === 'PDF' || props.view() === 'Both'}>
           <div
-            class={styles['sl-panel']}
+            class={styles.panel}
             classList={{
               'w-half': props.view() === 'Both',
             }}
@@ -114,8 +114,8 @@ export default function ShareLatexComponent(props: {
           </div>
         </Show>
         <Show when={props.view() === 'Log'}>
-          <div class={styles['sl-panel']}>
-            <pre class={styles['log']}>
+          <div class={styles.panel}>
+            <pre class={styles.log}>
               <u>
                 <b>Compilation Log</b>
               </u>
