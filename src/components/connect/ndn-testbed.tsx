@@ -21,6 +21,7 @@ import { Encoder } from '@ndn/tlv'
 import { WsTransport } from '@ndn/ws-transport'
 import { Endpoint } from '@ndn/endpoint'
 import { doFch } from '../../testbed'
+import toast from 'solid-toast'
 
 type Resolver = { resolve: (pin: string | PromiseLike<string>) => void }
 
@@ -34,7 +35,13 @@ export default function NdnTestbed(props: { onAdd: (config: Conn) => void }) {
   const [pinResolver, setPinResolver] = createSignal<Resolver>()
   const [isRequesting, setIsRequesting] = createSignal(false)
 
-  const onFch = async () => setHost((await doFch())?.host ?? '')
+  const onFch = async () => {
+    const host = (await doFch())?.host ?? ''
+    if (host) {
+      setHost(host)
+      toast.success('Located closest testbed node')
+    }
+  }
 
   const onInputPin = () => {
     const resolve = pinResolver()?.resolve
@@ -70,6 +77,7 @@ export default function NdnTestbed(props: { onAdd: (config: Conn) => void }) {
         })
         if (probeRes.entries.length <= 0) {
           console.error('No available name to register')
+          toast.error('No available name to register')
           return
         }
         if (probeRes.redirects.length > 0) {
@@ -105,6 +113,7 @@ export default function NdnTestbed(props: { onAdd: (config: Conn) => void }) {
             return new Promise((resolve) => {
               setIsRequesting(false)
               setPinResolver({ resolve })
+              toast.success('Security PIN has been sent to your email, please input it to continue.')
             })
           }),
         ],
@@ -123,8 +132,11 @@ export default function NdnTestbed(props: { onAdd: (config: Conn) => void }) {
         ownCertificateB64: certB64,
         prvKeyB64: prvKeyB64,
       })
+
+      toast.success('Testbed certificate issued successfully!')
     } catch (e) {
       console.error('Failed to request certificate:', e)
+      toast.error('Failed to request certificate, see console for details')
     }
   }
 

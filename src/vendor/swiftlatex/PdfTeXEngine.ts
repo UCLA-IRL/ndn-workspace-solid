@@ -14,7 +14,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 // This is a modified version.
-// TODO: Patch this file and `pre.js` to replace `console.log`.
 
 export enum EngineStatus {
   Init = 1,

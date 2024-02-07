@@ -30,3 +30,8 @@
 .MuiSelect-root {
   height: 40px;
 }
+
+/**
+ * This file is for global styles only. Please use CSS Modules for single-component styles:
+ * https://github.com/css-modules/css-modules
+ */

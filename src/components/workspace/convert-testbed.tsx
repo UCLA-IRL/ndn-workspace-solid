@@ -7,6 +7,7 @@ import * as keychain from '@ndn/keychain'
 import { useNavigate } from '@solidjs/router'
 import { useNdnWorkspace } from '../../Context'
 import { AltUri } from '@ndn/naming-convention2'
+import toast from 'solid-toast'
 
 export default function ConvertTestbed() {
   const [disabled, setDisabled] = createSignal(false)
@@ -18,6 +19,7 @@ export default function ConvertTestbed() {
     setDisabled(true)
     if (main.nfdWsFace === undefined) {
       console.error('Not connected to the testbed.')
+      toast.error('Not connected to the testbed.')
       return
     }
     const pofp = main.nfdCertificate
@@ -25,6 +27,7 @@ export default function ConvertTestbed() {
     if (pofp === undefined || signer === digestSigning) {
       console.debug(pofp?.name?.toString())
       console.error('Please make sure you are using a valid certificate.')
+      toast.error('Testbed certificate is not being used now. Please make sure you are using a valid certificate.')
       return
     }
     const workspaceAnchorName = AltUri.parseName(anchorNameStr())
@@ -68,9 +71,11 @@ export default function ConvertTestbed() {
         prvKey: new Uint8Array(prvKeyBits),
       })
       console.log('Successfully bootstrapped.')
+      toast.success('Successfully bootstrapped.')
       navigate('/profile', { replace: true })
     } catch (error) {
       console.log(`Unable to bootstrap workspace: ${error}`)
+      toast.error(`Unable to bootstrap workspace: ${error}`)
     }
   }
 

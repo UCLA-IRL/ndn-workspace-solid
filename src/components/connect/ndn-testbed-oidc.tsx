@@ -18,6 +18,7 @@ import { Endpoint } from '@ndn/endpoint'
 import { fchQuery } from '@ndn/autoconfig'
 import { ClientOidcChallenge } from '@ucla-irl/ndnts-aux/adaptors'
 import { Name } from '@ndn/packet'
+import toast from 'solid-toast'
 
 export default function NdnTestbedOidc(props: { onAdd: (config: Conn) => void }) {
   // const { endpoint } = useNdnWorkspace()!
@@ -38,7 +39,7 @@ export default function NdnTestbedOidc(props: { onAdd: (config: Conn) => void })
   channel.addEventListener('message', (event) => {
     const data = event.data
     if (data.state === requestId()) {
-      console.log(`Access code: ${data.code}`)
+      console.debug(`Access code: ${data.code}`)
       onRequest(data.code, chalId(), oidcId())
     } else {
       console.error(`Unknown redirection: ${data.state}`)
@@ -130,6 +131,7 @@ export default function NdnTestbedOidc(props: { onAdd: (config: Conn) => void })
       })
     } catch (e) {
       console.error('Failed to request certificate:', e)
+      toast.error(`Failed to request certificate: ${e}`)
     }
   }
 
