@@ -285,10 +285,12 @@ export default function ShareLatex(props: { rootUri: string }) {
   const onMapFolder = async () => {
     if (mapper() !== undefined) {
       console.error('Already mapped')
+      toast.error('Already mapped to a folder.')
       return
     }
     if (!fileSystemSupported()) {
       console.error('Browser does not support File System Access API. Please use Chrome or Edge 119+.')
+      toast.error('Browser does not support File System Access API. Please use Chrome or Edge 119+.')
       return
     }
     let rootHandle
@@ -296,6 +298,7 @@ export default function ShareLatex(props: { rootUri: string }) {
       rootHandle = await window.showDirectoryPicker({ mode: 'readwrite' })
     } catch (err) {
       console.log('Failed to open target folder: ', err)
+      toast.error(`Failed to open target folder: ${err}`)
       return
     }
     const newMapper = new FileMapper(syncAgent()!, rootDoc()!, rootHandle)
