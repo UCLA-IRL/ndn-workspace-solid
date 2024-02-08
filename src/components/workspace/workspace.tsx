@@ -35,7 +35,7 @@ export default function Workspace() {
     }
   })
 
-  const onBootrstap = (init: boolean) => {
+  const onBootrstap = () => {
     setInProgress(true)
     const prvKeyBits = prvKeyBytes()
     const cert = certificate()!
@@ -62,7 +62,7 @@ export default function Workspace() {
 
       try {
         await bootstrapWorkspace({
-          createNew: init,
+          // createNew: init,
           trustAnchor: anchor,
           ownCertificate: cert,
           prvKey: prvKeyBits,
@@ -92,19 +92,10 @@ export default function Workspace() {
           <Stack direction="row" spacing={2} justifyContent="flex-end">
             <Button
               variant="contained"
-              color="secondary"
-              sx={{ borderRadius: 9999, minWidth: 100, minHeight: 45 }}
-              disabled={!readyToStart() || inProgress()}
-              onClick={() => onBootrstap(true)}
-            >
-              CREATE
-            </Button>
-            <Button
-              variant="contained"
               color="primary"
               sx={{ borderRadius: 9999, minWidth: 100, minHeight: 45 }}
               disabled={!readyToStart() || inProgress()}
-              onClick={() => onBootrstap(false)}
+              onClick={() => onBootrstap()}
             >
               JOIN
             </Button>

@@ -37,7 +37,7 @@ export default function Profiles() {
     const item = profiles()[id]
     if (item !== undefined) {
       const params = profileToBootParams(item)
-      bootstrapWorkspace({ ...params, createNew: false }).then(() => {
+      bootstrapWorkspace({ ...params }).then(() => {
         navigate('/workspace', { replace: true })
       })
     }

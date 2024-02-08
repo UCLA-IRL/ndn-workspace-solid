@@ -62,6 +62,7 @@ export type Item = Folder | TextDoc | XmlDoc | BlobFile
 export type Items = { [docId: string]: Item }
 
 export const RootId = '00000000-0000-0000-0000-000000000000'
+export const WorkspaceDocId = '00000000-0000-0000-0000-000000000001'
 
 export type PartItems = Partial<Items>
 
@@ -194,4 +195,31 @@ export async function walk(
     }
   }
   await examine('', baseId)
+}
+
+export async function exportFlatZip(resolveBlob: (name: Name) => Promise<Uint8Array | undefined>, items: PartItems) {
+  const zip = new JSZip()
+  for (const [curId, curItem] of Object.entries(items)) {
+    if (curItem === undefined) {
+      continue
+    } else if (curItem.kind === 'folder') {
+      const value = JSON.stringify(curItem)
+      zip.file(`${curId}.folder.json`, value)
+    } else if (curItem.kind === 'text') {
+      zip.file(`${curId}.tex`, curItem.text.toString())
+    } else if (curItem.kind === 'xmldoc') {
+      zip.file(`${curId}.xml`, curItem.text.toString())
+    } else if (curItem.kind === 'blob') {
+      try {
+        const blobName = new Name(curItem.blobName)
+        const blob = await resolveBlob(blobName)
+        if (blob) {
+          zip.file(curId, blob)
+        }
+      } catch (e) {
+        console.error(`[project.exportFlatZip] Unable to pack blob file ${curId}: `, e)
+      }
+    }
+  }
+  return zip
 }

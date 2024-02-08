@@ -22,6 +22,7 @@ export default function ShareLatexComponent(props: {
   deleteItem: (index: number) => void
   createItem: (name: string, state: ModalState, blob?: Uint8Array) => void
   onExportZip: () => void
+  onExportFlatZip: () => void
   onCompile: () => Promise<void>
   onMapFolder: () => Promise<void>
   onDownloadBlob: () => void
@@ -58,6 +59,7 @@ export default function ShareLatexComponent(props: {
           { name: 'Upload blob', onClick: () => props.setModalState('upload') },
           { name: 'divider' },
           { name: 'Download as zip', onClick: props.onExportZip },
+          { name: 'Download as flat zip', onClick: props.onExportFlatZip },
           { name: 'Map to a folder', onClick: props.onMapFolder },
         ]}
       />

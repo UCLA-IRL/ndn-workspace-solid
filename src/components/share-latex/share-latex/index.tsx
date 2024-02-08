@@ -176,6 +176,14 @@ export default function ShareLatex(props: { rootUri: string }) {
     window.open(fileUrl) // TODO: not working on Safari
   }
 
+  const onExportFlatZip = async () => {
+    const zip = await project.exportFlatZip(async (name) => await syncAgent()?.getBlob(name), rootDoc()!.latex)
+    const content = await zip.generateAsync({ type: 'uint8array' })
+    const file = new Blob([content], { type: 'application/zip;base64' })
+    const fileUrl = URL.createObjectURL(file)
+    window.open(fileUrl) // TODO: not working on Safari
+  }
+
   const [texEngine, setTexEngine] = createSignal<PdfTeXEngine>()
 
   const onCompile = async () => {
@@ -360,6 +368,7 @@ export default function ShareLatex(props: { rootUri: string }) {
       deleteItem={deleteItem}
       createItem={createItem}
       onExportZip={onExportZip}
+      onExportFlatZip={onExportFlatZip}
       onCompile={onCompile}
       onMapFolder={onMapFolder}
       onDownloadBlob={onDownloadBlob}

@@ -15,7 +15,7 @@ export default function ConvertTestbed() {
   const navigate = useNavigate()
   const { bootstrapWorkspace } = useNdnWorkspace()!
 
-  const run = async (init: boolean) => {
+  const run = async () => {
     setDisabled(true)
     if (main.nfdWsFace === undefined) {
       console.error('Not connected to the testbed.')
@@ -65,7 +65,7 @@ export default function ConvertTestbed() {
 
     try {
       await bootstrapWorkspace({
-        createNew: init,
+        // createNew: init,
         trustAnchor: caProfile.cert,
         ownCertificate: cert,
         prvKey: new Uint8Array(prvKeyBits),
@@ -111,15 +111,7 @@ export default function ConvertTestbed() {
         <Stack direction="row" spacing={2} justifyContent="flex-end">
           <Button
             variant="outlined"
-            onClick={() => run(true)}
-            color="secondary"
-            disabled={disabled() || anchorNameStr() === ''}
-          >
-            CREATE
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={() => run(false)}
+            onClick={() => run()}
             color="primary"
             disabled={disabled() || anchorNameStr() === ''}
           >

@@ -6,13 +6,11 @@ import * as nfdmgmt from '@ndn/nfdmgmt'
 import { FwFace } from '@ndn/fw'
 import { WsTransport } from '@ndn/ws-transport'
 import { getYjsDoc } from '@syncedstore/core'
-import * as Y from 'yjs'
 import { PeerJsListener } from '../adaptors/peerjs-transport'
 import { CertStorage } from '@ucla-irl/ndnts-aux/security'
 import { RootDocStore, initRootDoc, project, profiles, connections } from './models'
 import { FsStorage, InMemoryStorage, type Storage } from '@ucla-irl/ndnts-aux/storage'
 import { Certificate, ECDSA, createSigner } from '@ndn/keychain'
-import { v4 as uuidv4 } from 'uuid'
 import { base64ToBytes, encodeKey as encodePath, Signal as BackendSignal, openRoot } from '../utils'
 import { Decoder } from '@ndn/tlv'
 import { Workspace } from '@ucla-irl/ndnts-aux/workspace'
@@ -194,7 +192,6 @@ export async function bootstrapWorkspace(opts: {
   trustAnchor: Certificate
   prvKey: Uint8Array
   ownCertificate: Certificate
-  createNew: boolean
   inMemory?: boolean
 }) {
   if (bootstrapping) {
@@ -215,12 +212,6 @@ export async function bootstrapWorkspace(opts: {
   appPrefix = opts.trustAnchor.name.getPrefix(opts.trustAnchor.name.length - 4)
   nodeId = opts.ownCertificate.name.getPrefix(opts.ownCertificate.name.length - 4)
 
-  if (!opts.inMemory && opts.createNew && (await isProfileExisting(nodeId.toString()))) {
-    console.error('Cannot create an existing profile. Will try to join it instead.')
-    toast.error('Cannot create an existing profile. Will try to join it instead.')
-    opts.createNew = false
-  }
-
   if (opts.inMemory) {
     persistStore = new InMemoryStorage()
   } else {
@@ -235,33 +226,28 @@ export async function bootstrapWorkspace(opts: {
   await certStorage.readyEvent
 
   // Root doc using CRDT and Sync
-  rootDoc = initRootDoc()
+  rootDoc = initRootDoc(project.WorkspaceDocId)
 
   // Load or create
-  let createNewDoc: (() => Promise<void>) | undefined
-  if (opts.createNew) {
-    createNewDoc = async () => {
-      if (!rootDoc) return
-      console.log(`Created document`)
-      const mainUuid = uuidv4()
-      rootDoc.latex[project.RootId] = {
-        id: project.RootId,
-        // fullPath: '/',
-        name: '',
-        parentId: undefined,
-        kind: 'folder',
-        items: [],
-      }
-      rootDoc.latex[mainUuid] = {
-        id: mainUuid,
-        // fullPath: '/',
-        name: 'main.tex',
-        parentId: project.RootId,
-        kind: 'text',
-        text: new Y.Text(),
-      }
-      rootDoc.latex[project.RootId].items.push(mainUuid)
+  const createNewDoc: (() => Promise<void>) | undefined = async () => {
+    if (!rootDoc) return
+    // Note: in Yjs a nested object (`new Y.Array()`) is fundamentally different from
+    // a nested subdoc (`new Y.Doc({guid}) -> ydoc.getArray()`)
+    // Because a non-top-level object is fundamentally from a top-level object.
+    // syncedstore uses nested object, where non-top objects do not support "smart" initialization.
+    // If we go to use a nested document, we need to rewrite the provider to support it.
+    // I think eventually we may go this way. But for now, let's take the easiest solution.
+    const yDoc = getYjsDoc(rootDoc)
+    const clientID = yDoc.clientID
+    yDoc.clientID = 1 // Set the client Id to be a common one to make the change common
+    rootDoc.latex[project.RootId] = {
+      id: project.RootId,
+      name: '',
+      parentId: undefined,
+      kind: 'folder',
+      items: [],
     }
+    yDoc.clientID = clientID
   }
 
   workspace = await Workspace.create({
