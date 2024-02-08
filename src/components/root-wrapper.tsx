@@ -18,7 +18,7 @@ import { For, JSX, ParentProps } from 'solid-js'
 import { useNdnWorkspace } from '../Context'
 import { Portal } from 'solid-js/web'
 
-import './common.css'
+import './common.scss'
 
 const drawerWidth = 200
 const navBarHeight = 56

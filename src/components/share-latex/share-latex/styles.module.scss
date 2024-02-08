@@ -1,0 +1,23 @@
+/** ShareLatex Component */
+.outer {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  padding: 4px;
+
+  > .panel {
+    height: 100%;
+    max-width: 100%;
+    flex: 1;
+  }
+
+  .log {
+    height: 100%;
+    overflow: auto;
+    border: 1px solid #c0c0c0;
+    border-radius: 4px;
+    padding: 8px;
+  }
+}
