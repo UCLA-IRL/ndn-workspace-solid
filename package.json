@@ -49,7 +49,7 @@
     "@tiptap/extension-text-style": "^2.2.2",
     "@tiptap/pm": "^2.2.2",
     "@tiptap/starter-kit": "^2.2.2",
-    "@ucla-irl/ndnts-aux": "^1.0.12",
+    "@ucla-irl/ndnts-aux": "^1.1.0",
     "codemirror": "^6.0.1",
     "diff": "^5.1.0",
     "event-iterator": "^2.0.0",
