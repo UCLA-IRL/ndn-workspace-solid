@@ -259,6 +259,7 @@ export async function bootstrapWorkspace(opts: {
     verifier: certStorage.verifier,
     onReset: disconnect,
     createNewDoc,
+    useBundler: true,
   })
 
   if (!opts.inMemory) {
