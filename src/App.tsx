@@ -79,8 +79,7 @@ function App() {
 
           {isSafari() && (
             <div>
-              {' '}
-              <hr /> Safari is currently not well-supported. Please prefer using Chrome, Firefox, or Edge.{' '}
+              <hr /> Safari is currently not well-supported. Please prefer using Chrome, Firefox, or Edge.
             </div>
           )}
         </Typography>
@@ -137,33 +136,100 @@ function App() {
         <Typography variant="body1" sx={{ my: 2 }}>
           To start using Workspace, you need to create or join a workspace. Each workspace is a decentralized virtual
           folder where you can collaborate with others.
-          <Typography variant="h5" sx={{ my: 2, fontWeight: 100 }}>
-            Connecting to the NDN Testbed
-          </Typography>
-          The NDN testbed provides the packet forwarding infrastructure for Workspace. You can connect to the testbed by
-          obtaining a testbed certificate using your email address.
-          <ol>
-            <li>Open the connection tab in Workspace</li>
-            <li>Click on "Add" button</li>
-            <li>Click the "Reach Testbed" button to find the closest NDN node</li>
-            <li>Enter your email address and click on "Request" to receive a verification code</li>
-            <li>Email verification code and click "Get Cert" to obtain a testbed certificate</li>
-          </ol>
-          You can now connect to the testbed node using the connections page. Opening Workspace will also automatically
-          connect to the closest testbed node by default.
-          <Typography variant="h5" sx={{ my: 2, fontWeight: 100 }}>
-            Bootstrapping a Workspace
-          </Typography>
-          To join an existing Workspace, perform the following steps after ensuring you are connected to the NDN
-          testbed.
-          <ol>
-            <li>Open the "Workspace" tab</li>
-            <li>Click on the "Convert" button</li>
-            <li>Enter the full trust anchor name of the workspace</li>
-            <li>Click on the "Join" button</li>
-          </ol>
-          You can now join the workspace any time from the "Workspace" tab, and start collaborating on documents in the
-          "Editor" tab.
+          <>
+            <Typography variant="h5" sx={{ mb: 1, mt: 3, fontWeight: 100 }}>
+              Connecting to the NDN Testbed
+            </Typography>
+            The NDN testbed provides the packet forwarding infrastructure for Workspace. You can connect to the testbed
+            by obtaining a testbed certificate using your email address.
+            <ol>
+              <li>Open the connection tab in Workspace</li>
+              <li>Click on "Add" button</li>
+              <li>Click the "Reach Testbed" button to find the closest NDN node</li>
+              <li>Enter your email address and click on "Request" to receive a verification code</li>
+              <li>Email verification code and click "Get Cert" to obtain a testbed certificate</li>
+            </ol>
+            You can now connect to the testbed node using the connections page. Opening Workspace will also
+            automatically connect to the closest testbed node by default.
+          </>
+          <>
+            <Typography variant="h5" sx={{ mb: 1, mt: 3, fontWeight: 100 }}>
+              Join a Workspace
+            </Typography>
+            To join an existing Workspace, perform the following steps after ensuring you are connected to the NDN
+            testbed.
+            <ol>
+              <li>Open the "Workspace" tab</li>
+              <li>Click on the "Convert" button</li>
+              <li>Enter the full trust anchor name of the workspace</li>
+              <li>Click on the "Join" button</li>
+            </ol>
+            You can now join the workspace any time from the "Workspace" tab, and start collaborating on documents in
+            the "Editor" tab.
+          </>
+          <>
+            <Typography variant="h5" sx={{ mb: 1, mt: 3, fontWeight: 100 }}>
+              Create a Workspace
+            </Typography>
+            To create a new Workspace, you need to generate a trust anchor that identifies the Workspace and the user
+            certificates.
+            <ol>
+              <li>
+                Install the ndn-cxx library (see instructions
+                <a href="https://docs.named-data.net/ndn-cxx/current/INSTALL.html">here</a>)
+              </li>
+              <li>
+                Pick a workspace name you would like to have, say <code>/my-workspace</code>
+              </li>
+              <li>
+                Generate a self-signed certificate for the workspace
+                <code style={{ 'padding-left': '15px', display: 'block' }}>ndnsec key-gen /my-workspace</code>
+                This self-signed certificate will be the trust anchor for this workspace. All user certificates must be
+                signed by this one. Now with the trust anchor in your hands, you can start signing user certificates for
+                your users. Note that yourself also need a user certificate signed by trust anchor.
+              </li>
+
+              <li>
+                For example, generate a key and certificate for <code>/my-workspace/alice</code>
+                <br />
+                <code style={{ 'padding-left': '15px', display: 'block' }}>
+                  ndnsec key-gen /my-workspace/alice <br />
+                  ndnsec sign-req /my-workspace/alice | ndnsec cert-gen -s <br />
+                  /my-workspace -i my-workspace | ndnsec cert-install -
+                </code>
+              </li>
+              <li>
+                Some notes for naming conventions:
+                <ul>
+                  <li>
+                    You should not name users by random strings, but rather you will have some rules in mind to name
+                    users, and that is naming convention.
+                  </li>
+                  <li>Current workspace requires every user to be named under your workspace prefix.</li>
+                  <li>
+                    You should ensure every user uses a different name. If two users are using the same name, undefined
+                    behaviors may happen.
+                  </li>
+                </ul>
+              </li>
+
+              <li>
+                Open the app, goto the workspace tab, click add profile (icon in the top right corner), the app will ask
+                you to configure trust anchor and safebag, which is the combination of certificate and encrypted private
+                key.
+                <div style={{ 'padding-left': '15px' }}>
+                  Display trust anchor: <code>ndnsec cert-dump -i /my-workspace</code> <br />
+                  Generate safebag: <code>ndnsec export -i /my-workspace/alice</code>
+                </div>
+                <small>
+                  The terminal will ask you for a passphrase for encrypting your private key. Make sure you input the
+                  same passphrase when configuring your safebag in the app.
+                </small>
+              </li>
+
+              <li>Click on the "Join" button to create the workspace.</li>
+            </ol>
+          </>
         </Typography>
       </>
 
