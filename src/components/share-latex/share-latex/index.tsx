@@ -315,6 +315,15 @@ export default function ShareLatex(props: { rootUri: string }) {
     await newMapper.SyncAll()
   }
 
+  const onMapDetach = async () => {
+    if (mapper() === undefined) {
+      console.error('Not mapped')
+      toast.error('Not mapped to a folder.')
+      return
+    }
+    setMapper(undefined)
+  }
+
   createInterval(
     () => {
       if (mapper() === undefined) {
@@ -371,6 +380,7 @@ export default function ShareLatex(props: { rootUri: string }) {
       onExportFlatZip={onExportFlatZip}
       onCompile={onCompile}
       onMapFolder={onMapFolder}
+      onMapDetach={onMapDetach}
       onDownloadBlob={onDownloadBlob}
       view={view}
       setView={setView}
