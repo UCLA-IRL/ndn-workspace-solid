@@ -418,3 +418,9 @@ export const isProfileExisting = profiles.profiles.isExisting.bind(profiles.prof
 // ============= Connections (init) =============
 
 connections.initDefault()
+
+
+// ============= New features =============
+export function setRootDoc(doc: RootDocStore) {
+  rootDoc = doc
+}
