@@ -239,8 +239,7 @@ export default function ShareLatex(props: { rootUri: string }) {
   }
 
   const onRestore = async () => {
-    // This function restores the rootdoc according to the version
-    
+    // This function restores the document according to the version
     const rootDocVal = rootDoc()
     const itemVal = item() as project.TextDoc
     if (rootDocVal === undefined) {
@@ -249,7 +248,6 @@ export default function ShareLatex(props: { rootUri: string }) {
     let itemValTextString = itemVal.text.toString()
     // console.log(itemValTextString)
     // Read oldContent from cache, if not just return
-    // const oldContent = contentCache.get(itemVal.id)
     const oldContent = getContent(itemVal.id, version())
     console.log("Restoring: "+itemVal.id +" ")
     console.log("Version: "+version())
@@ -264,9 +262,6 @@ export default function ShareLatex(props: { rootUri: string }) {
     catch (e) {
       console.error("Failed to restore: ", e)
     }
-    
-    // setVersion(newVersion)
-    // console.warn("Version restore to: ", version())
   }
 
   const compile = async () => {
