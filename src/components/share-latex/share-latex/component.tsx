@@ -33,6 +33,7 @@ export default function ShareLatexComponent(props: {
   onRestore: () => Promise<void>
   version: Accessor<number>
   setVersion: Setter<number>
+  totalVersion: Accessor<number>
   compilationLog: string
   pdfUrl: string | undefined
   username: string
@@ -58,6 +59,7 @@ export default function ShareLatexComponent(props: {
         onRestore={props.onRestore}
         version={props.version}
         setVersion={props.setVersion}
+        totalVersion={props.totalVersion}
         menuItems={[
           { name: 'New folder', onClick: () => props.setModalState('folder') },
           { name: 'New tex', onClick: () => props.setModalState('doc') },

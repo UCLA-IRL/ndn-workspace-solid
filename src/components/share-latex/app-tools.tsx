@@ -17,6 +17,7 @@ export default function AppTools(props: {
   onRestore: () => Promise<void>
   version: Accessor<number>
   setVersion: Setter<number>
+  totalVersion: Accessor<number>
 }) {
   const [menuAnchor, setMenuAnchor] = createSignal<HTMLElement>()
   const menuOpen = () => menuAnchor() !== undefined
@@ -52,11 +53,19 @@ export default function AppTools(props: {
         <Select
           id="version-select"
           value={props.version()}
-          onChange={(event: SelectChangeEvent) => props.setVersion(event.target.value as unknown as number)}
+          onChange={(event: SelectChangeEvent) => 
+            {
+              const version = parseInt(event.target.value.split(" ")[1]);
+              console.log("Version: ", version)
+              props.setVersion(version);
+            }
+          }
         >
-          <MenuItem value={1}>Version 1</MenuItem>
-          <MenuItem value={2}>Version 2</MenuItem>
-          <MenuItem value={3}>Version 3</MenuItem>
+        {/* <MenuItem value="Version 0">Select Version</MenuItem> */}
+        {
+
+          Array.from({length: props.totalVersion()}, (_, i) => i+1).map((i) => <MenuItem value={`Version ${i}`}>Version {i}</MenuItem>)
+        }
         </Select>
       </Toolbar>
 
