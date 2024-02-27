@@ -175,7 +175,7 @@ function App() {
             certificates.
             <ol>
               <li>
-                Install the ndn-cxx library (see instructions
+                Install the ndn-cxx library (see instructions&nbsp;
                 <a href="https://docs.named-data.net/ndn-cxx/current/INSTALL.html">here</a>)
               </li>
               <li>
