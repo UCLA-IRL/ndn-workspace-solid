@@ -1,5 +1,5 @@
 diff --git a/dist/pdf_viewer.css b/dist/pdf_viewer.css
-index a285f167bcb80fb25afb652060504bd6f3ff9140..f1f3e1b337714a3db922bfd27f3eb1e5dfa64dca 100644
+index 9de22e335ffdbfdf36f3fbaf9c2b888a9e7a64a0..0c4e2586630cc715e89e3915fba738a064436074 100644
 --- a/dist/pdf_viewer.css
 +++ b/dist/pdf_viewer.css
 @@ -1298,11 +1298,6 @@
