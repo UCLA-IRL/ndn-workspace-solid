@@ -62,7 +62,7 @@ export default function ShareLatexComponent(props: {
           { name: 'Download as zip', onClick: props.onExportZip },
           { name: 'Download as flat zip', onClick: props.onExportFlatZip },
           { name: 'Map to a folder', onClick: props.onMapFolder },
-          { name: 'Map folder detach', onClick: () => props.onMapDetach()}
+          { name: 'Map folder detach', onClick: () => props.onMapDetach() },
         ]}
       />
 
