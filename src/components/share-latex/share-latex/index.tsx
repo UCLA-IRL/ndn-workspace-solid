@@ -17,7 +17,6 @@ import { LatexEnginePath } from '../../../constants'
 import { ViewValues } from '../types'
 import toast from 'solid-toast'
 
-import * as main from '../../../backend/main'
 import { getDeltaOperations } from '../../../backend/file-mapper/diff'
 
 export default function ShareLatex(props: { rootUri: string }) {
@@ -206,34 +205,32 @@ export default function ShareLatex(props: { rootUri: string }) {
     )
   }
 
-  function storeContent(key: String, version: number, content: String) {
+  function storeContent(key: string, version: number, content: string) {
     if (!contentCache.has(key)) {
-        contentCache.set(key, {});
+      contentCache.set(key, {})
     }
-    contentCache.get(key)[version] = content;
+    contentCache.get(key)[version] = content
   }
 
-  function getContent(key: String, version:number) {
+  function getContent(key: string, version: number) {
     if (contentCache.has(key)) {
-        return contentCache.get(key)[version];
+      return contentCache.get(key)[version]
     }
-    return null;
+    return null
   }
   const [totalVersion, setTotalVersion] = createSignal<number>(0)
 
   const onArchive = async () => {
     // This function archives the current doc according to the version
-    try
-    {
+    try {
       const itemVal = item() as project.TextDoc
-      let content = itemVal.text.toString()
+      const content = itemVal.text.toString()
       // console.log("Archiving: " + itemVal.id + " " + totalVersion())
       storeContent(itemVal.id, totalVersion() + 1, content)
       setTotalVersion(totalVersion() + 1)
       setVersion(totalVersion())
-      console.log("total Version set to: ", totalVersion())
-    }
-    catch (e) {
+      console.log('total Version set to: ', totalVersion())
+    } catch (e) {
       //pass
     }
   }
@@ -245,22 +242,21 @@ export default function ShareLatex(props: { rootUri: string }) {
     if (rootDocVal === undefined) {
       return
     }
-    let itemValTextString = itemVal.text.toString()
+    const itemValTextString = itemVal.text.toString()
     // console.log(itemValTextString)
     // Read oldContent from cache, if not just return
     const oldContent = getContent(itemVal.id, version())
-    console.log("Restoring: "+itemVal.id +" ")
-    console.log("Version: "+version())
+    console.log('Restoring: ' + itemVal.id + ' ')
+    console.log('Version: ' + version())
     if (oldContent === undefined) {
-      console.log("No old content found")
+      console.log('No old content found')
       return
     }
     try {
       const deltas = getDeltaOperations(itemValTextString, oldContent)
       itemVal.text.applyDelta(deltas)
-    }
-    catch (e) {
-      console.error("Failed to restore: ", e)
+    } catch (e) {
+      console.error('Failed to restore: ', e)
     }
   }
 
