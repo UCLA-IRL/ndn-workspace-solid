@@ -1,0 +1,95 @@
+.App {
+  max-width: 500px;
+  margin: 0 auto;
+  height: 100vh;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+}
+
+/* Message input section styling */
+
+.App__input {
+  width: 90%;
+  height: 200px;
+  margin-top: auto;
+  position: relative;
+  align-self: center;
+}
+
+.App__input textarea {
+  width: 100%;
+  height: inherit;
+  padding: 15px;
+  border-radius: 15px;
+  border: none;
+  outline: none;
+  resize: none;
+  background: #f1f1f1;
+}
+
+.App__input textarea:active {
+  outline: none;
+}
+
+/* Send Message button Styling */
+
+.App__button {
+  background: #000;
+  padding: 10px 30px;
+  border: none;
+  color: #fff;
+  border-radius: 6px;
+  font-size: 16px;
+  position: absolute;
+  bottom: 0;
+  right: 30px;
+}
+
+.App__button:hover {
+  background: rgba(0, 0, 0, 0.753);
+}
+
+/* All Messages Styling */
+.App__messages {
+  height: 50vh;
+  width: 100%;
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
+.App__messages div {
+  margin: 5px;
+  padding: 10px;
+  width: max-content;
+  max-width: 70%;
+}
+
+.App__messageForeign {
+  border-radius: 10px 10px 10px 0;
+  background-color: #f2f2f2;
+}
+
+.App__messageLocal {
+  align-self: flex-end;
+  border-radius: 10px 10px 0 10px;
+  background-color: #f9e4cb;
+}
+
+/* Webkit browsers */
+.App__messages::-webkit-scrollbar {
+  width: 5px;
+  background-color: transparent;
+}
+
+/* Webkit browsers */
+.App__messages::-webkit-scrollbar-thumb {
+  background-color: #555;
+  border-radius: 10px;
+}
+
+/* Webkit browsers */
+.App__messages::-webkit-scrollbar-thumb:hover {
+  background-color: #777;
+}
