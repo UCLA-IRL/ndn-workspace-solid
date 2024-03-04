@@ -1,22 +1,17 @@
 // This file is the main file gluing all components and maintain a global context.
 // Should be changed to something better if refactor.
 import { Endpoint, Producer } from '@ndn/endpoint'
-import { Data, Name, Signer, digestSigning } from '@ndn/packet'
+import { Name, Signer, digestSigning } from '@ndn/packet'
 import * as nfdmgmt from '@ndn/nfdmgmt'
-import { FwFace } from '@ndn/fw'
-import { WsTransport } from '@ndn/ws-transport'
 import { getYjsDoc } from '@syncedstore/core'
-import { PeerJsListener } from '../adaptors/peerjs-transport'
 import { CertStorage } from '@ucla-irl/ndnts-aux/security'
 import { RootDocStore, initRootDoc, project, profiles, connections } from './models'
 import { FsStorage, InMemoryStorage, type Storage } from '@ucla-irl/ndnts-aux/storage'
-import { Certificate, ECDSA, createSigner } from '@ndn/keychain'
-import { base64ToBytes, encodeKey as encodePath, Signal as BackendSignal, openRoot } from '../utils'
-import { Decoder } from '@ndn/tlv'
+import { Certificate } from '@ndn/keychain'
+import { encodeKey as encodePath, Signal as BackendSignal, openRoot } from '../utils'
 import { Workspace } from '@ucla-irl/ndnts-aux/workspace'
 import toast from 'solid-toast'
-
-export const UseAutoAnnouncement = false
+import { Connection, NfdWsConn, PeerJsConn, BleConn, TestbedConn, UseAutoAnnouncement } from './connection/mod.ts'
 
 export const endpoint: Endpoint = new Endpoint()
 export type ConnState = 'CONNECTED' | 'DISCONNECTED' | 'CONNECTING' | 'DISCONNECTING'
@@ -34,81 +29,29 @@ export let ownCertificate: Certificate | undefined
 
 export let rootDoc: RootDocStore | undefined
 
-export let listener: PeerJsListener | undefined = undefined
-export let nfdWsFace: FwFace | undefined = undefined
 const connState = new BackendSignal<ConnState>('DISCONNECTED')
-export let nfdCmdSigner: Signer = digestSigning
+export let connection: Connection | undefined = undefined
+export const nfdCmdSigner: Signer = digestSigning
 export let nfdCertificate: Certificate | undefined
 let nfdCertProducer: Producer | undefined
-let commandPrefix = nfdmgmt.localhopPrefix
+const commandPrefix = nfdmgmt.localhopPrefix
 
 // ============= Connectivity =============
-
-async function connectNfdWs(uri: string, isLocal: boolean) {
-  if (nfdWsFace !== undefined) {
-    console.error('Trying to connect to an already connected WebSocket face')
-    toast.error('Trying to connect to an already connected WebSocket face')
-    return
-  }
-  // Force ndnts to register the prefix correctly using localhost
-  // SA: https://redmine.named-data.net/projects/nfd/wiki/ScopeControl#local-face
-  nfdWsFace = await WsTransport.createFace({ l3: { local: isLocal } }, uri)
-  // The automatic announcement is turned off by default to gain a finer control.
-  // See checkPrefixRegistration for details.
-  if (UseAutoAnnouncement) {
-    nfdmgmt.enableNfdPrefixReg(nfdWsFace, {
-      signer: nfdCmdSigner,
-      // TODO: Do I need to set `preloadCertName`?
-    })
-  }
-  commandPrefix = nfdmgmt.getPrefix(isLocal)
-  await checkPrefixRegistration(false)
-  return nfdWsFace
-}
-
-async function disconnectNfdWs() {
-  if (nfdWsFace === undefined) {
-    console.error('Trying to disconnect from a non-existing WebSocket face')
-    toast.error('Trying to disconnect from a non-existing WebSocket face')
-    return
-  }
-  await checkPrefixRegistration(true)
-  nfdWsFace.close()
-  nfdWsFace = undefined
-}
-
-async function connectPeerJs(opts: PeerJsListener.Options, discovery: boolean) {
-  if (listener === undefined) {
-    listener = await PeerJsListener.listen(opts)
-    if (discovery) {
-      await listener.connectToKnownPeers()
-    }
-  } else {
-    console.error('Trying to reconnect to an existing PeerJs listener')
-    toast.error('Trying to reconnect to an existing PeerJs listener')
-  }
-}
-
-async function disconnectPeerJs() {
-  listener?.closeAll()
-  listener = undefined
-}
 
 export const connectionStatus = () => connState.value
 export const connectionStatusSig = () => connState
 
 export async function disconnect() {
-  if (connState.value !== 'CONNECTED') {
+  if (connState.value !== 'CONNECTED' || !connection) {
     return
   }
 
   connState.value = 'DISCONNECTING'
-  if (listener !== undefined) {
-    await disconnectPeerJs()
+  if (connection.config.kind !== 'testbed') {
+    await checkPrefixRegistration(true)
   }
-  if (nfdWsFace !== undefined) {
-    await disconnectNfdWs()
-  }
+  await connection.disconnect()
+  connection = undefined
   connState.value = 'DISCONNECTED'
 
   toast.error('Disconnected from forwarder')
@@ -122,63 +65,33 @@ export async function connect(config: connections.Config) {
   }
   connState.value = 'CONNECTING'
 
-  if (config.kind === 'nfdWs') {
-    // Decode command signer
-    if (config.prvKeyB64 === '') {
-      nfdCmdSigner = digestSigning
+  try {
+    if (config.kind === 'nfdWs') {
+      connection = new NfdWsConn(config)
+    } else if (config.kind === 'peerJs') {
+      connection = new PeerJsConn(config)
+    } else if (config.kind === 'ble') {
+      connection = new BleConn(config)
+    } else if (config.kind === 'testbed') {
+      connection = new TestbedConn(config)
     } else {
-      try {
-        const prvKeyBits = base64ToBytes(config.prvKeyB64)
-        const certBytes = base64ToBytes(config.ownCertificateB64)
-        nfdCertificate = Certificate.fromData(Decoder.decode(certBytes, Data))
-        const keyPair = await ECDSA.cryptoGenerate(
-          {
-            importPkcs8: [prvKeyBits, nfdCertificate.publicKeySpki],
-          },
-          true,
-        )
-        nfdCmdSigner = createSigner(
-          nfdCertificate.name.getPrefix(nfdCertificate.name.length - 2),
-          ECDSA,
-          keyPair,
-        ).withKeyLocator(nfdCertificate.name)
-      } catch (e) {
-        console.error('Unable to parse credentials:', e)
-        toast.error('Unable to parse credentials')
-        listener?.closeAll()
-        listener = undefined
-        connState.value = 'DISCONNECTED'
-        return
-      }
+      throw new Error(`Unrecognized connection: ${config}`)
     }
-
-    let face
-    try {
-      face = await connectNfdWs(config.uri, config.isLocal)
-      if (face === undefined) {
-        throw new Error('Face is nil')
-      }
-    } catch (err) {
-      console.error('Failed to connect:', err)
-      toast.error('Failed to connect, see console for details')
-      nfdWsFace?.close()
-      nfdWsFace = undefined
-      connState.value = 'DISCONNECTED'
-      return
+    await connection.connect()
+    if (config.kind !== 'testbed') {
+      await checkPrefixRegistration(false)
     }
-    face!.addEventListener('down', () => {
-      disconnectNfdWs()
-    })
-  } else if (config.kind === 'peerJs') {
-    try {
-      await connectPeerJs(config, true)
-    } catch (err) {
-      console.error('Failed to connect:', err)
-      toast.error('Failed to connect, see console for details')
-      connState.value = 'DISCONNECTED'
-      return
-    }
+  } catch (err) {
+    console.error('Failed to connect:', err)
+    toast.error('Failed to connect, see console for details')
+    connection?.disconnect()
+    connection = undefined
+    connState.value = 'DISCONNECTED'
+    return
   }
+  connection.face!.addEventListener('down', () => {
+    disconnect()
+  })
 
   workspace?.fireUpdate()
   connState.value = 'CONNECTED'
@@ -295,7 +208,7 @@ export async function stopWorkspace() {
 }
 
 async function checkPrefixRegistration(cancel: boolean) {
-  if (!nfdWsFace || !workspace) {
+  if (!connection || !workspace) {
     return
   }
   if (cancel) {

@@ -15,7 +15,7 @@ function App() {
   const configToDescription = () => {
     const config = currentConnConfig()
     if (!config) {
-      return <div>Finding closest NDN forwarder</div>
+      return <div>Not connected yet</div>
     } else if (config.kind === 'peerJs') {
       return (
         <div>
@@ -23,11 +23,23 @@ function App() {
           <div style={{ 'font-weight': 300 }}>{config.host}</div>
         </div>
       )
-    } else {
+    } else if (config.kind === 'nfdWs') {
       return (
         <div>
           <div>Connected to NDN forwarder</div>
           <div style={{ 'font-weight': 300 }}>{config.uri}</div>
+        </div>
+      )
+    } else if (config.kind === 'ble') {
+      return (
+        <div>
+          <div>Connected to YaNFD via BLE (Web Bluetooth)</div>
+        </div>
+      )
+    } else if (config.kind === 'testbed') {
+      return (
+        <div>
+          <div>Connected to NDN Testbed</div>
         </div>
       )
     }

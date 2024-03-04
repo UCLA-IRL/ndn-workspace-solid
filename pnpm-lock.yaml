@@ -79,6 +79,9 @@ dependencies:
   '@ndn/util':
     specifier: https://ndnts-nightly.ndn.today/util.tgz
     version: '@ndnts-nightly.ndn.today/util.tgz'
+  '@ndn/web-bluetooth-transport':
+    specifier: https://ndnts-nightly.ndn.today/web-bluetooth-transport.tgz
+    version: '@ndnts-nightly.ndn.today/web-bluetooth-transport.tgz'
   '@ndn/ws-transport':
     specifier: https://ndnts-nightly.ndn.today/ws-transport.tgz
     version: '@ndnts-nightly.ndn.today/ws-transport.tgz'
@@ -195,6 +198,9 @@ devDependencies:
   '@types/uuid':
     specifier: ^9.0.8
     version: 9.0.8
+  '@types/web-bluetooth':
+    specifier: ^0.0.20
+    version: 0.0.20
   '@types/wicg-file-system-access':
     specifier: ^2023.10.4
     version: 2023.10.4
@@ -2190,7 +2196,7 @@ packages:
       retry: 0.13.1
       streaming-iterables: 8.0.1
       tslib: 2.6.2
-      type-fest: 4.10.3
+      type-fest: 4.11.0
       typescript-event-target: 1.1.0
     dev: false
 
@@ -2210,7 +2216,7 @@ packages:
       '@ndn/l3face': 0.0.20240113
       event-iterator: 2.0.0
       tslib: 2.6.2
-      type-fest: 4.10.3
+      type-fest: 4.11.0
       url-format-lax: 2.0.0
       url-parse-lax: 5.0.0
     dev: false
@@ -2223,7 +2229,7 @@ packages:
       buffer-compare: 1.1.1
       mnemonist: 0.39.8
       tslib: 2.6.2
-      type-fest: 4.10.3
+      type-fest: 4.11.0
     dev: false
 
   /@ndn/tlv@0.0.20240113:
@@ -2232,7 +2238,7 @@ packages:
       '@ndn/util': 0.0.20240113
       mnemonist: 0.39.8
       tslib: 2.6.2
-      type-fest: 4.10.3
+      type-fest: 4.11.0
     dev: false
 
   /@ndn/util@0.0.20240113:
@@ -3282,6 +3288,9 @@ packages:
     resolution: {integrity: sha512-jg+97EGIcY9AGHJJRaaPVgetKDsrTgbRjQ5Msgjh/DQKEFl0DtyRr/VCOyD1T2R1MNeWPK/u7JoGhlDZnKBAfA==}
     dev: true
 
+  /@types/web-bluetooth@0.0.20:
+    resolution: {integrity: sha512-g9gZnnXVq7gM7v3tJCWV/qw7w+KeOlSHAhgF9RytFyifW6AF61hdT2ucrYhPq9hLs5JIryeupHV3qGk95dH9ow==}
+
   /@types/wicg-file-system-access@2020.9.8:
     resolution: {integrity: sha512-ggMz8nOygG7d/stpH40WVaNvBwuyYLnrg5Mbyf6bmsj/8+gb6Ei4ZZ9/4PNpcPNTT8th9Q8sM8wYmWGjMWLX/A==}
     dev: false
@@ -3466,7 +3475,7 @@ packages:
       eventemitter3: 5.0.1
       jose: 5.2.2
       tslib: 2.6.2
-      type-fest: 4.10.3
+      type-fest: 4.11.0
       wait-your-turn: 1.0.1
       y-protocols: 1.0.6(yjs@13.6.14)
       yjs: 13.6.14
@@ -3810,7 +3819,7 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
     dependencies:
-      caniuse-lite: 1.0.30001591
+      caniuse-lite: 1.0.30001593
       electron-to-chromium: 1.4.690
       node-releases: 2.0.14
       update-browserslist-db: 1.0.13(browserslist@4.23.0)
@@ -3870,8 +3879,8 @@ packages:
     engines: {node: '>=6'}
     dev: false
 
-  /caniuse-lite@1.0.30001591:
-    resolution: {integrity: sha512-PCzRMei/vXjJyL5mJtzNiUCKP59dm8Apqc3PH8gJkMnMXZGox93RbE76jHsmLwmIo6/3nsYIpJtx0O7u5PqFuQ==}
+  /caniuse-lite@1.0.30001593:
+    resolution: {integrity: sha512-UWM1zlo3cZfkpBysd7AS+z+v007q9G1+fLTUU42rQnY6t2axoogPW/xol6T7juU5EUoOhML4WgBIdG+9yYqAjQ==}
     dev: true
 
   /canvas@2.11.2:
@@ -7681,8 +7690,8 @@ packages:
     engines: {node: '>=12.20'}
     dev: false
 
-  /type-fest@4.10.3:
-    resolution: {integrity: sha512-JLXyjizi072smKGGcZiAJDCNweT8J+AuRxmPZ1aG7TERg4ijx9REl8CNhbr36RV4qXqL1gO1FF9HL8OkVmmrsA==}
+  /type-fest@4.11.0:
+    resolution: {integrity: sha512-DPsoHKtnCUqqoB5Y4OPyat7ObSLz1XOkhHTmz+gOkz2p1xs+BBneTvHWriTwc313eozfBWh8b45EpaV3ZrrPPQ==}
     engines: {node: '>=16'}
     dev: false
 
@@ -8447,7 +8456,7 @@ packages:
       mnemonist: 0.39.8
       throat: 6.0.2
       tslib: 2.6.2
-      type-fest: 4.10.3
+      type-fest: 4.11.0
       wait-your-turn: 1.0.1
     dev: false
 
@@ -8467,7 +8476,7 @@ packages:
       retry: 0.13.1
       streaming-iterables: 8.0.1
       tslib: 2.6.2
-      type-fest: 4.10.3
+      type-fest: 4.11.0
       typescript-event-target: 1.1.0
     dev: false
 
@@ -8514,7 +8523,7 @@ packages:
       nodemailer: 6.9.11
       p-timeout: 6.1.2
       tslib: 2.6.2
-      type-fest: 4.10.3
+      type-fest: 4.11.0
       typescript-event-target: 1.1.0
     dev: false
 
@@ -8558,7 +8567,7 @@ packages:
       event-iterator: 2.0.0
       p-event: 6.0.1
       tslib: 2.6.2
-      type-fest: 4.10.3
+      type-fest: 4.11.0
       url-format-lax: 2.0.0
       url-parse-lax: 5.0.0
     dev: false
@@ -8573,7 +8582,7 @@ packages:
       buffer-compare: 1.1.1
       mnemonist: 0.39.8
       tslib: 2.6.2
-      type-fest: 4.10.3
+      type-fest: 4.11.0
     dev: false
 
   '@ndnts-nightly.ndn.today/psync.tgz':
@@ -8679,7 +8688,7 @@ packages:
       '@ndn/util': '@ndnts-nightly.ndn.today/util.tgz'
       streaming-iterables: 8.0.1
       tslib: 2.6.2
-      type-fest: 4.10.3
+      type-fest: 4.11.0
       typescript-event-target: 1.1.0
     dev: false
 
@@ -8729,7 +8738,7 @@ packages:
       '@ndn/util': '@ndnts-nightly.ndn.today/util.tgz'
       mnemonist: 0.39.8
       tslib: 2.6.2
-      type-fest: 4.10.3
+      type-fest: 4.11.0
     dev: false
 
   '@ndnts-nightly.ndn.today/util.tgz':
@@ -8744,8 +8753,20 @@ packages:
       minimalistic-assert: 1.0.1
       streaming-iterables: 8.0.1
       tslib: 2.6.2
-      type-fest: 4.10.3
+      type-fest: 4.11.0
       wait-your-turn: 1.0.1
+    dev: false
+
+  '@ndnts-nightly.ndn.today/web-bluetooth-transport.tgz':
+    resolution: {tarball: https://ndnts-nightly.ndn.today/web-bluetooth-transport.tgz}
+    name: '@ndn/web-bluetooth-transport'
+    version: 0.0.20240304-nightly-e67d2ba
+    dependencies:
+      '@ndn/l3face': '@ndnts-nightly.ndn.today/l3face.tgz'
+      '@ndn/util': '@ndnts-nightly.ndn.today/util.tgz'
+      '@types/web-bluetooth': 0.0.20
+      event-iterator: 2.0.0
+      tslib: 2.6.2
     dev: false
 
   '@ndnts-nightly.ndn.today/ws-transport.tgz':

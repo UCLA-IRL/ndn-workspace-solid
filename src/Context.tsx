@@ -16,10 +16,8 @@ import * as main from './backend/main'
 import { type Certificate } from '@ndn/keychain'
 import { type Theme, type Breakpoint } from '@suid/material/styles'
 import { Endpoint } from '@ndn/endpoint'
-import { doFch } from './testbed'
 import { loadAll } from './backend/models/connections'
 import { Workspace } from '@ucla-irl/ndnts-aux/workspace'
-import toast from 'solid-toast'
 
 type ContextType = {
   rootDoc: Accessor<RootDocStore | undefined>
@@ -131,29 +129,14 @@ export async function initTestbed() {
     return // already connected or connecting
   }
 
-  const url = await doFch()
-  if (url === null) {
-    toast.error('Failed to connect to the NDN testbed. Please try again later.')
-    throw new Error('Failed to connect to testbed.')
-  }
-  toast.success('Located closest forwarder')
-
-  // Attempt to get a config for nfdWs
+  // Attempt to connect
   const configs = await loadAll()
   for (const config of configs) {
-    if (config.kind !== 'nfdWs') continue
-
-    // Found a config, connect to it
-    // TODO: make sure this is a testbed forwarder
-    // TODO: prefer local forwarders if any configured
-    ctx.connectFuncs.connect({
-      ...config,
-      // NOTE: No guarantee that this uri is testbed. Need explicit specification.
-      // uri: url.toString(),
-    })
-
-    // TODO: break on success only
-    // TODO: remove config if connection fails?
-    break
+    if (config.kind !== 'testbed') continue
+    ctx.connectFuncs.connect(config)
+    return
   }
+  // for (const config of configs) {
+  //   if (config.kind !== 'nfdWs') continue
+  // }
 }

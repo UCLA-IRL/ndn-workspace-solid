@@ -32,7 +32,17 @@ export type PeerJs = ConfigBase & {
   peerId?: string
 }
 
-export type Config = NfdWs | PeerJs
+export type Ble = ConfigBase & {
+  kind: 'ble'
+}
+
+export type Testbed = ConfigBase & {
+  kind: 'testbed'
+  prvKeyB64: string
+  ownCertificateB64: string
+}
+
+export type Config = NfdWs | PeerJs | Ble | Testbed
 
 export function getName(conn?: Config): string {
   if (conn === undefined) {
@@ -43,6 +53,10 @@ export function getName(conn?: Config): string {
       return conn.uri
     case 'peerJs':
       return `peerjs://${conn.host}:${conn.port}${conn.path}`
+    case 'ble':
+      return `ble`
+    case 'testbed':
+      return `testbed`
   }
 }
 
@@ -62,13 +76,6 @@ export async function initDefault() {
       isLocal: true,
       prvKeyB64: '',
       ownCertificateB64: '',
-    })
-    connections.save({
-      kind: 'peerJs',
-      host: 'localhost',
-      port: 8000,
-      path: '/aincraft',
-      key: 'peerjs',
     })
   }
 }

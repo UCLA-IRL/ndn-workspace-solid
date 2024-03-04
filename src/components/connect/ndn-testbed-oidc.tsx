@@ -123,9 +123,7 @@ export default function NdnTestbedOidc(props: { onAdd: (config: Conn) => void })
       // So we have to compromise and save the key bits
       const prvKeyB64 = bytesToBase64(new Uint8Array(prvKeyBits))
       props.onAdd({
-        kind: 'nfdWs',
-        uri: fchUri,
-        isLocal: false,
+        kind: 'testbed',
         ownCertificateB64: certB64,
         prvKeyB64: prvKeyB64,
       })
