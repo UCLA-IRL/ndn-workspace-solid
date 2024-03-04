@@ -17,14 +17,14 @@ export default function ConvertTestbed() {
 
   const run = async () => {
     setDisabled(true)
-    if (main.nfdWsFace === undefined) {
+    if (main.connection === undefined) {
       console.error('Not connected to the testbed.')
       toast.error('Not connected to the testbed.')
       return
     }
-    const pofp = main.nfdCertificate
-    const signer = main.nfdCmdSigner
-    if (pofp === undefined || signer === digestSigning) {
+    const pofp = main.connection.nfdCert
+    const signer = main.connection.cmdSigner
+    if (pofp === undefined || signer === undefined || signer === digestSigning) {
       console.debug(pofp?.name?.toString())
       console.error('Please make sure you are using a valid certificate.')
       toast.error('Testbed certificate is not being used now. Please make sure you are using a valid certificate.')

@@ -1,7 +1,7 @@
 // This file is the main file gluing all components and maintain a global context.
 // Should be changed to something better if refactor.
 import { Endpoint, Producer } from '@ndn/endpoint'
-import { Name, Signer, digestSigning } from '@ndn/packet'
+import { Name } from '@ndn/packet'
 import * as nfdmgmt from '@ndn/nfdmgmt'
 import { getYjsDoc } from '@syncedstore/core'
 import { CertStorage } from '@ucla-irl/ndnts-aux/security'
@@ -31,8 +31,6 @@ export let rootDoc: RootDocStore | undefined
 
 const connState = new BackendSignal<ConnState>('DISCONNECTED')
 export let connection: Connection | undefined = undefined
-export const nfdCmdSigner: Signer = digestSigning
-export let nfdCertificate: Certificate | undefined
 let nfdCertProducer: Producer | undefined
 const commandPrefix = nfdmgmt.localhopPrefix
 
@@ -224,7 +222,7 @@ async function checkPrefixRegistration(cancel: boolean) {
           {
             endpoint: endpoint,
             prefix: commandPrefix,
-            signer: nfdCmdSigner,
+            signer: connection.cmdSigner,
           },
         )
         await nfdmgmt.invoke(
@@ -236,7 +234,7 @@ async function checkPrefixRegistration(cancel: boolean) {
           {
             endpoint: endpoint,
             prefix: commandPrefix,
-            signer: nfdCmdSigner,
+            signer: connection.cmdSigner,
           },
         )
       } catch {
@@ -260,8 +258,8 @@ async function checkPrefixRegistration(cancel: boolean) {
       if (nfdCertProducer) {
         nfdCertProducer?.close()
       }
-      if (nfdCertificate) {
-        nfdCertProducer = endpoint.produce(nfdCertificate.name, async () => nfdCertificate?.data)
+      if (connection.nfdCert) {
+        nfdCertProducer = endpoint.produce(connection.nfdCert.name, async () => connection?.nfdCert?.data)
       }
 
       // Register prefixes
@@ -277,7 +275,7 @@ async function checkPrefixRegistration(cancel: boolean) {
           {
             endpoint: endpoint,
             prefix: commandPrefix,
-            signer: nfdCmdSigner,
+            signer: connection.cmdSigner,
           },
         )
         if (cr.statusCode !== 200) {
@@ -298,7 +296,7 @@ async function checkPrefixRegistration(cancel: boolean) {
           {
             endpoint: endpoint,
             prefix: commandPrefix,
-            signer: nfdCmdSigner,
+            signer: connection.cmdSigner,
           },
         )
         if (cr.statusCode !== 200) {

@@ -7,6 +7,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 export default defineConfig({
   build: {
     target: ['es2022', 'chrome111', 'edge111', 'firefox111', 'safari16'],
+    chunkSizeWarningLimit: 10240,
   },
   plugins: [
     suidPlugin(),
@@ -52,7 +53,7 @@ export default defineConfig({
         orientation: 'portrait',
       },
       injectManifest: {
-        maximumFileSizeToCacheInBytes: 10000000, // increasing the file size to cached 10mb
+        maximumFileSizeToCacheInBytes: 10485760, // increasing the file size to cached 10mb
       },
     }),
   ],
