@@ -7,7 +7,7 @@ module.exports = {
     "plugin:solid/recommended",
     "plugin:prettier/recommended",
   ],
-  ignorePatterns: ["dist/*", ".eslintrc.cjs", "public/*"],
+  ignorePatterns: ["dist/*", ".eslintrc.cjs", "public/*", "src/build-meta.ts"],
   parser: "@typescript-eslint/parser",
   plugins: ["@typescript-eslint", "solid"],
   rules: {
