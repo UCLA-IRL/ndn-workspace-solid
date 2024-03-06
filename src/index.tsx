@@ -21,6 +21,7 @@ import { Workspace, Profile, ConvertTestbed } from './components/workspace'
 import { project } from './backend/models'
 import { Toaster } from 'solid-toast'
 import { Chat } from './components/chat/chat'
+import ConfigPage from './components/config'
 
 const root = document.getElementById('root')
 
@@ -44,7 +45,7 @@ const rootComponent = (props: RouteSectionProps) => (
         href: '/connection',
         title: 'Connection',
       },
-      { icon: <SettingsIcon />, href: '/', title: 'Settings' },
+      { icon: <SettingsIcon />, href: '/config-page', title: 'Settings' },
     ]}
   >
     {props.children}
@@ -64,6 +65,7 @@ render(
         <Route path="/profile" component={Profile} />
         <Route path="/convert-testbed" component={ConvertTestbed} />
         <Route path="/oauth-test" component={OauthTest} />
+        <Route path="/config-page" component={ConfigPage} />
       </Router>
 
       <Toaster />
