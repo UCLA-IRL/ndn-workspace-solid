@@ -7,6 +7,7 @@ import {
   Apps as AppsIcon,
   SettingsEthernet as SettingsEthernetIcon,
   Home as HomeIcon,
+  Chat as ChatIcon,
   Settings as SettingsIcon,
 } from '@suid/icons-material'
 
@@ -19,6 +20,7 @@ import { Connect, StoredConns } from './components/connect'
 import { Workspace, Profile, ConvertTestbed } from './components/workspace'
 import { project } from './backend/models'
 import { Toaster } from 'solid-toast'
+import { Chat } from './components/chat/chat'
 
 const root = document.getElementById('root')
 
@@ -31,6 +33,11 @@ const rootComponent = (props: RouteSectionProps) => (
         icon: <DescriptionIcon />,
         href: `/latex/${project.RootId}`,
         title: 'Editor',
+      },
+      {
+        icon: <ChatIcon />,
+        href: '/chat',
+        title: 'Chat',
       },
       {
         icon: <SettingsEthernetIcon />,
@@ -53,6 +60,7 @@ render(
         <Route path="/connection/add" component={Connect} />
         <Route path="/connection" component={StoredConns} />
         <Route path="/workspace" component={Workspace} />
+        <Route path="/chat" component={Chat} />
         <Route path="/profile" component={Profile} />
         <Route path="/convert-testbed" component={ConvertTestbed} />
         <Route path="/oauth-test" component={OauthTest} />
