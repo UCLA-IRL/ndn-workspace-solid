@@ -32,7 +32,6 @@ export let rootDoc: RootDocStore | undefined
 const connState = new BackendSignal<ConnState>('DISCONNECTED')
 export let connection: Connection | undefined = undefined
 let nfdCertProducer: Producer | undefined
-const commandPrefix = nfdmgmt.localhopPrefix
 
 // ============= Connectivity =============
 
@@ -221,7 +220,7 @@ async function checkPrefixRegistration(cancel: boolean) {
           },
           {
             endpoint: endpoint,
-            prefix: commandPrefix,
+            prefix: connection.commandPrefix,
             signer: connection.cmdSigner,
           },
         )
@@ -233,7 +232,7 @@ async function checkPrefixRegistration(cancel: boolean) {
           },
           {
             endpoint: endpoint,
-            prefix: commandPrefix,
+            prefix: connection.commandPrefix,
             signer: connection.cmdSigner,
           },
         )
@@ -274,7 +273,7 @@ async function checkPrefixRegistration(cancel: boolean) {
           },
           {
             endpoint: endpoint,
-            prefix: commandPrefix,
+            prefix: connection.commandPrefix,
             signer: connection.cmdSigner,
           },
         )
@@ -295,7 +294,7 @@ async function checkPrefixRegistration(cancel: boolean) {
           },
           {
             endpoint: endpoint,
-            prefix: commandPrefix,
+            prefix: connection.commandPrefix,
             signer: connection.cmdSigner,
           },
         )

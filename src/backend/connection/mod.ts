@@ -19,6 +19,7 @@ export interface Connection extends AsyncDisposable {
   get nfdCert(): Certificate | undefined
   get cmdSigner(): Signer | undefined
   get config(): connections.Config
+  get commandPrefix(): Name
   connect(): Promise<void>
   disconnect(): Promise<void>
 }
