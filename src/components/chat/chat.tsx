@@ -2,13 +2,9 @@ import { createEffect, createSignal, For, on } from 'solid-js'
 import styles from './App.module.css'
 import { useNdnWorkspace } from '../../Context'
 import { Message } from './message/message'
-import * as Y from 'yjs'
-import { getYjsDoc } from '@syncedstore/core'
 
 export function Chat() {
   const { rootDoc, syncAgent } = useNdnWorkspace()!
-  const [yDoc, setyDoc] = createSignal<Y.Doc>()
-  setyDoc(getYjsDoc(rootDoc()))
   const [data, setData] = createSignal<{ message: Message }[]>([])
 
   // const getData = (collection: string) => {
@@ -40,10 +36,9 @@ export function Chat() {
   let container: any //eslint-disable-line
 
   const addData = (collection: string, data: { message: Message }) => {
-        const chats = rootDoc()?.chats
-    const jsonData = JSON.stringify(data)
-    if (chats){
-      chats.push(data.message); // Push the Message object directly
+    const chats = rootDoc()?.chats
+    if (chats) {
+      chats.push(data.message) // Push the Message object directly
     }
     //refresh data
     // setData(chats.toArray().map((message: unknown) => JSON.parse(message as string)))
@@ -73,8 +68,8 @@ export function Chat() {
   createEffect(() => {
     setInterval(() => {
       const chats = rootDoc()?.chats
-      if (chats){
-        setData(chats.map((message: Message) => ({ message })));
+      if (chats) {
+        setData(chats.map((message: Message) => ({ message })))
         //refresh data
       }
     }, 1000)
@@ -88,13 +83,21 @@ export function Chat() {
           {(msg) => (
             // console.log("at render()", msg.message.content, username()),
             <div class={msg.message.sender == username() ? styles.App__messageForeign : styles.App__messageLocal}>
-            <div class={styles.App__message}>
-              <img src={msg.message.sender == username() ? "https://picsum.photos/200/300?random=1" : "https://cdn.drawception.com/images/avatars/647493-B9E.png"}></img>
-              <div class={styles.App__msgContent}>
-                <h4> {msg.message.sender}
-                  <span>{(new Date(msg.message.timestamp)).toDateString()}</span>
-                </h4>
-                <p>  {msg.message.content} </p>
+              <div class={styles.App__message}>
+                <img
+                  src={
+                    msg.message.sender == username()
+                      ? 'https://picsum.photos/200/300?random=1'
+                      : 'https://cdn.drawception.com/images/avatars/647493-B9E.png'
+                  }
+                />
+                <div class={styles.App__msgContent}>
+                  <h4>
+                    {' '}
+                    {msg.message.sender}
+                    <span>{new Date(msg.message.timestamp).toDateString()}</span>
+                  </h4>
+                  <p> {msg.message.content} </p>
                 </div>
               </div>
             </div>
