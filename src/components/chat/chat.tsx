@@ -2,13 +2,9 @@ import { createEffect, createSignal, For, on } from 'solid-js'
 import styles from './App.module.css'
 import { useNdnWorkspace } from '../../Context'
 import { Message } from './message/message'
-import * as Y from 'yjs'
-import { getYjsDoc } from '@syncedstore/core'
 
 export function Chat() {
   const { rootDoc, syncAgent } = useNdnWorkspace()!
-  const [yDoc, setyDoc] = createSignal<Y.Doc>()
-  setyDoc(getYjsDoc(rootDoc()))
   const [data, setData] = createSignal<{ message: Message }[]>([])
 
   // const getData = (collection: string) => {
@@ -40,23 +36,21 @@ export function Chat() {
   let container: any //eslint-disable-line
 
   const addData = (collection: string, data: { message: Message }) => {
-    if (yDoc() === undefined) {
-      setyDoc(getYjsDoc(rootDoc()))
+    const chats = rootDoc()?.chats
+    if (chats) {
+      chats.push(data.message) // Push the Message object directly
     }
-    const chats = yDoc()!.getArray('chats')
-    const jsonData = JSON.stringify(data)
-    // console.log('add data: ' + jsonData)
-    chats.push([jsonData])
     //refresh data
     // setData(chats.toArray().map((message: unknown) => JSON.parse(message as string)))
     // console.log(data)
   }
 
   const handleSubmit = () => {
+    //do shit for when the timestamp is same append the message content instead of adding it?
     const myMessage: Message = {
       sender: username(),
       content: messageTerm(),
-      timestamp: new Date(),
+      timestamp: Date.now(),
     }
     addData('chats', {
       message: myMessage,
@@ -73,21 +67,39 @@ export function Chat() {
   // query yDoc every second to obtain the updates
   createEffect(() => {
     setInterval(() => {
-      const chats = yDoc()!.getArray('chats')
-      //refresh data
-      setData(chats.toArray().map((message: any) => JSON.parse(message))) //eslint-disable-line
+      const chats = rootDoc()?.chats
+      if (chats) {
+        setData(chats.map((message: Message) => ({ message })))
+        //refresh data
+      }
     }, 1000)
   })
 
   return (
     <div class={styles.App}>
-      <h1>Message the Group</h1>
+      <div class={styles.App_header}>#Message the Group</div>
       <div class={styles.App__messages} ref={container}>
         <For each={data()}>
           {(msg) => (
             // console.log("at render()", msg.message.content, username()),
-            <div class={msg.message.sender == username() ? styles.App__messageLocal : styles.App__messageForeign}>
-              {msg.message.content}
+            <div class={msg.message.sender == username() ? styles.App__messageForeign : styles.App__messageLocal}>
+              <div class={styles.App__message}>
+                <img
+                  src={
+                    msg.message.sender == username()
+                      ? 'https://picsum.photos/200/300?random=1'
+                      : 'https://cdn.drawception.com/images/avatars/647493-B9E.png'
+                  }
+                />
+                <div class={styles.App__msgContent}>
+                  <h4>
+                    {' '}
+                    {msg.message.sender}
+                    <span>{new Date(msg.message.timestamp).toDateString()}</span>
+                  </h4>
+                  <p> {msg.message.content} </p>
+                </div>
+              </div>
             </div>
           )}
         </For>
