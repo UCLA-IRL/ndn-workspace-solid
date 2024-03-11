@@ -49,7 +49,7 @@ export function createSyncedStore<T>(syncedObject: T): Accessor<{ value: T } | u
  * // In your component:
  * const peopleSig = () => storeSig()?.people  // non-tracking
  * const people = createSyncedStore(peopleSig) // tracking
- * <div>{people()![1].name}</div>
+ * <div>{people()?.value[1].name}</div>
  *
  * @param syncedObject The subobject to sync on
  * @returns a signal tracking the subobject

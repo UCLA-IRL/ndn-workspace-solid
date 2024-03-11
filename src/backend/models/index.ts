@@ -1,21 +1,15 @@
-import { syncedStore } from '@syncedstore/core'
+import { syncedStore, Box } from '@syncedstore/core'
 import * as project from './project'
 import * as connections from './connections'
 import * as profiles from './profiles'
+import * as chats from './chats'
 import * as Y from 'yjs'
 
-export { project, connections, profiles }
-
-// create message type for chatbox
-export type Message = {
-  sender: string
-  content: string
-  timestamp: number
-}
+export { project, connections, profiles, chats }
 
 export type RootDocType = {
   latex: project.Items
-  chats: Message[]
+  chats: Box<chats.Message>[]
 }
 export type RootDocStore = ReturnType<typeof syncedStore<RootDocType>>
 
