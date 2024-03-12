@@ -1,3 +1,3 @@
-export const REVISION = '425d1d1'
+export const REVISION = 'df47dea'
 // eslint-disable-next-line @typescript-eslint/no-loss-of-precision, prettier/prettier
-export const TIMESTAMP = 1709739642.198162124
+export const TIMESTAMP = 1710234936.889542353

@@ -54,7 +54,7 @@ export default function ShareLatex(props: { rootUri: string }) {
   const [pdfUrl, setPdfUrl] = createSignal<string>()
 
   if (!booted()) {
-    navigate('/', { replace: true })
+    navigate('/profile', { replace: true })
   }
 
   // TODO: Make modal logic correct
