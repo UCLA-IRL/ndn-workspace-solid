@@ -4,19 +4,25 @@ import { useNdnWorkspace } from '../../Context'
 import { chats } from '../../backend/models'
 import { createSyncedStoreSig } from '../../adaptors/solid-synced-store'
 import styles from './styles.module.scss'
+import { useNavigate } from '@solidjs/router'
 
 // TODO: Do not load all messages at once
 // TODO: Support multiple channels
 // TODO: Support Markdown
 
 export function Chat() {
-  const { rootDoc, syncAgent } = useNdnWorkspace()!
+  const { rootDoc, syncAgent, booted } = useNdnWorkspace()!
+  const navigate = useNavigate()
   const messages = createSyncedStoreSig(() => rootDoc()?.chats)
   const data = () => messages()?.value
   const username = () => syncAgent()?.nodeId.at(-1).text ?? ''
 
   const [messageTerm, setMessageTerm] = createSignal('')
   const [container, setContainer] = createSignal<HTMLDivElement>()
+
+  if (!booted()) {
+    navigate('/profile', { replace: true })
+  }
 
   const handleSubmit = () => {
     data()?.push(

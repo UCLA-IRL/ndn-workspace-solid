@@ -3,6 +3,7 @@ import { Stack } from '@suid/material'
 import VersionTable from './version-table'
 import WorkspaceState from './workspace-state'
 import UpdateInspect from './update-inspect'
+import FileHistory from './file-history'
 
 export default function ConfigPage() {
   return (
@@ -12,6 +13,7 @@ export default function ConfigPage() {
         <VersionTable />
         <WorkspaceState />
         <UpdateInspect />
+        <FileHistory />
       </Stack>
     </>
   )
