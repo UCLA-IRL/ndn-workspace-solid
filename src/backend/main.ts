@@ -44,7 +44,7 @@ export async function disconnect() {
   }
 
   connState.value = 'DISCONNECTING'
-  if (connection.config.kind !== 'testbed') {
+  if (connection.config.kind !== 'peerJs') {
     await checkPrefixRegistration(true)
   }
   await connection.disconnect()
@@ -75,7 +75,7 @@ export async function connect(config: connections.Config) {
       throw new Error(`Unrecognized connection: ${config}`)
     }
     await connection.connect()
-    if (config.kind !== 'testbed') {
+    if (config.kind !== 'peerJs') {
       await checkPrefixRegistration(false)
     }
   } catch (err) {
