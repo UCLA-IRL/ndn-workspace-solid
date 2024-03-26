@@ -13,6 +13,11 @@ export default function AppTools(props: {
   onCompile: () => Promise<void>
   view: Accessor<ViewValues>
   setView: Setter<ViewValues>
+  onArchive: () => Promise<void>
+  onRestore: () => Promise<void>
+  version: Accessor<number>
+  setVersion: Setter<number>
+  totalVersion: Accessor<number>
 }) {
   const [menuAnchor, setMenuAnchor] = createSignal<HTMLElement>()
   const menuOpen = () => menuAnchor() !== undefined
@@ -41,6 +46,23 @@ export default function AppTools(props: {
           <MenuItem value="PDF">PDF</MenuItem>
           <MenuItem value="Both">Both</MenuItem>
           <MenuItem value="Log">Log</MenuItem>
+        </Select>
+
+        <Button onClick={props.onArchive}>Archive</Button>
+        <Button onClick={props.onRestore}>Restore</Button>
+        <Select
+          id="version-select"
+          value={props.version()}
+          onChange={(event: SelectChangeEvent) => {
+            const version = parseInt(event.target.value.split(' ')[1])
+            console.log('Version: ', version)
+            props.setVersion(version)
+          }}
+        >
+          {/* <MenuItem value="Version 0">Select Version</MenuItem> */}
+          <For each={Array.from({ length: props.totalVersion() }, (_, i) => i + 1)}>
+            {(i) => <MenuItem value={`Version ${i}`}>Version {i}</MenuItem>}
+          </For>
         </Select>
       </Toolbar>
 

@@ -17,6 +17,8 @@ import { LatexEnginePath } from '../../../constants'
 import { ViewValues } from '../types'
 import toast from 'solid-toast'
 
+import { getDeltaOperations } from '../../../backend/file-mapper/diff'
+
 export default function ShareLatex(props: { rootUri: string }) {
   const { rootDoc, syncAgent, booted, endpoint, yjsProvider } = useNdnWorkspace()!
   const navigate = useNavigate()
@@ -26,6 +28,7 @@ export default function ShareLatex(props: { rootUri: string }) {
   const [mapper, setMapper] = createSignal<FileMapper>()
   // const [previewUrl, setPreviewUrl] = createSignal<string>()
   const { fileSystemSupported } = useNdnWorkspace()!
+  const contentCache = new Map()
 
   const username = () => {
     const nodeId = syncAgent()?.nodeId
@@ -50,6 +53,7 @@ export default function ShareLatex(props: { rootUri: string }) {
   const [folderChildren, setFolderChildren] = createSignal<string[]>()
   const [modalState, setModalState] = createSignal<ModalState>('')
   const [view, setView] = createSignal<ViewValues>('Editor')
+  const [version, setVersion] = createSignal<number>(1)
   const [compilationLog, setCompilationLog] = createSignal<string>('')
   const [pdfUrl, setPdfUrl] = createSignal<string>()
 
@@ -199,6 +203,61 @@ export default function ShareLatex(props: { rootUri: string }) {
         position: 'bottom-right',
       },
     )
+  }
+
+  function storeContent(key: string, version: number, content: string) {
+    if (!contentCache.has(key)) {
+      contentCache.set(key, {})
+    }
+    contentCache.get(key)[version] = content
+  }
+
+  function getContent(key: string, version: number) {
+    if (contentCache.has(key)) {
+      return contentCache.get(key)[version]
+    }
+    return null
+  }
+  const [totalVersion, setTotalVersion] = createSignal<number>(0)
+
+  const onArchive = async () => {
+    // This function archives the current doc according to the version
+    try {
+      const itemVal = item() as project.TextDoc
+      const content = itemVal.text.toString()
+      // console.log("Archiving: " + itemVal.id + " " + totalVersion())
+      storeContent(itemVal.id, totalVersion() + 1, content)
+      setTotalVersion(totalVersion() + 1)
+      setVersion(totalVersion())
+      console.log('total Version set to: ', totalVersion())
+    } catch (e) {
+      //pass
+    }
+  }
+
+  const onRestore = async () => {
+    // This function restores the document according to the version
+    const rootDocVal = rootDoc()
+    const itemVal = item() as project.TextDoc
+    if (rootDocVal === undefined) {
+      return
+    }
+    const itemValTextString = itemVal.text.toString()
+    // console.log(itemValTextString)
+    // Read oldContent from cache, if not just return
+    const oldContent = getContent(itemVal.id, version())
+    console.log('Restoring: ' + itemVal.id + ' ')
+    console.log('Version: ' + version())
+    if (oldContent === undefined) {
+      console.log('No old content found')
+      return
+    }
+    try {
+      const deltas = getDeltaOperations(itemValTextString, oldContent)
+      itemVal.text.applyDelta(deltas)
+    } catch (e) {
+      console.error('Failed to restore: ', e)
+    }
   }
 
   const compile = async () => {
@@ -384,6 +443,11 @@ export default function ShareLatex(props: { rootUri: string }) {
       onDownloadBlob={onDownloadBlob}
       view={view}
       setView={setView}
+      onArchive={onArchive}
+      onRestore={onRestore}
+      version={version}
+      setVersion={setVersion}
+      totalVersion={totalVersion}
       compilationLog={compilationLog()}
       pdfUrl={pdfUrl()}
       username={username()}

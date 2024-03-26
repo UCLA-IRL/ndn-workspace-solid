@@ -29,6 +29,11 @@ export default function ShareLatexComponent(props: {
   onDownloadBlob: () => void
   view: Accessor<ViewValues>
   setView: Setter<ViewValues>
+  onArchive: () => Promise<void>
+  onRestore: () => Promise<void>
+  version: Accessor<number>
+  setVersion: Setter<number>
+  totalVersion: Accessor<number>
   compilationLog: string
   pdfUrl: string | undefined
   username: string
@@ -50,6 +55,11 @@ export default function ShareLatexComponent(props: {
         onCompile={props.onCompile}
         view={props.view}
         setView={props.setView}
+        onArchive={props.onArchive}
+        onRestore={props.onRestore}
+        version={props.version}
+        setVersion={props.setVersion}
+        totalVersion={props.totalVersion}
         menuItems={[
           { name: 'New folder', onClick: () => props.setModalState('folder') },
           { name: 'New tex', onClick: () => props.setModalState('doc') },
