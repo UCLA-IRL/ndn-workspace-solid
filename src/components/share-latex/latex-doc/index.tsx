@@ -25,6 +25,7 @@ export default function LatexDoc(props: { doc: Y.Text; provider: NdnSvsAdaptor; 
     '#' + Array.from({ length: 6 }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('')
 
   const { createExtension, ref } = createCodeMirror({
+    // eslint-disable-next-line solid/reactivity
     value: props.doc.toString(),
   })
 

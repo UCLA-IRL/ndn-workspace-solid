@@ -3,7 +3,7 @@ import { useNdnWorkspace } from '../../../Context'
 import { Match, Switch } from 'solid-js'
 import { StateVector } from '@ndn/svs'
 
-const reprStateVector = (sv?: StateVector): Record<string, number> => {
+export const reprStateVector = (sv?: StateVector): Record<string, number> => {
   if (!sv) return {}
   const ret = {} as Record<string, number>
   let unknownNum = 0

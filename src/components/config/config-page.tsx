@@ -4,6 +4,7 @@ import VersionTable from './version-table'
 import WorkspaceState from './workspace-state'
 import UpdateInspect from './update-inspect'
 import FileHistory from './file-history'
+import RebuildCache from './rebuild-cache'
 
 export default function ConfigPage() {
   return (
@@ -14,6 +15,7 @@ export default function ConfigPage() {
         <WorkspaceState />
         <UpdateInspect />
         <FileHistory />
+        <RebuildCache />
       </Stack>
     </>
   )
