@@ -28,6 +28,7 @@ export default function FileHistory() {
       return
     }
 
+    // TODO: Reuse the init code
     const appPrefix = agent.appPrefix
     const aloSyncPrefix = appPrefix.append(getNamespace().syncKeyword, getNamespace().atLeastOnceKeyword)
     const newDoc = initRootDoc(project.WorkspaceDocId)
