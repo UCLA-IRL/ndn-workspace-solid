@@ -12,13 +12,14 @@ import { createInterval } from '../../../utils'
 import ShareLatexComponent from './component'
 import { Encoder } from '@ndn/tlv'
 import * as segObj from '@ndn/segmented-object'
+import { consume } from '@ndn/endpoint'
 import { PdfTeXEngine } from '../../../vendor/swiftlatex/PdfTeXEngine'
 import { LatexEnginePath } from '../../../constants'
 import { ViewValues } from '../types'
 import toast from 'solid-toast'
 
 export default function ShareLatex(props: { rootUri: string }) {
-  const { rootDoc, syncAgent, booted, endpoint, yjsProvider } = useNdnWorkspace()!
+  const { rootDoc, syncAgent, booted, fw, yjsProvider } = useNdnWorkspace()!
   const navigate = useNavigate()
   const params = useParams<{ itemId: string }>()
   const itemId = () => params.itemId
@@ -272,7 +273,7 @@ export default function ShareLatex(props: { rootUri: string }) {
       reqNameEncoder.output,
     )
     await digestSigning.sign(interest)
-    const retWire = await endpoint.consume(interest)
+    const retWire = await consume(interest, { fw })
     const retText = new TextDecoder().decode(retWire.content)
     const result = JSON.parse(retText)
 
