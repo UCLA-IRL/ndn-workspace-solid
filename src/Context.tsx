@@ -15,7 +15,7 @@ import { NdnSvsAdaptor } from '@ucla-irl/ndnts-aux/adaptors'
 import * as main from './backend/main'
 import { type Certificate } from '@ndn/keychain'
 import { type Theme, type Breakpoint } from '@suid/material/styles'
-import { Endpoint } from '@ndn/endpoint'
+import type { Forwarder } from '@ndn/fw'
 import { loadAll } from './backend/models/connections'
 import { Workspace } from '@ucla-irl/ndnts-aux/workspace'
 
@@ -41,7 +41,7 @@ type ContextType = {
   fileSystemSupported: Accessor<boolean>
   theme: Accessor<Theme<Breakpoint> | undefined>
   setTheme: Setter<Theme<Breakpoint> | undefined>
-  endpoint: Endpoint
+  fw: Forwarder
   yjsProvider: Accessor<NdnSvsAdaptor | undefined>
 }
 
@@ -110,7 +110,7 @@ export function NdnWorkspaceProvider(props: ParentProps<unknown>) {
     fileSystemSupported: fileSystemSupported,
     theme,
     setTheme,
-    endpoint: main.endpoint,
+    fw: main.forwarder,
     yjsProvider: () => workspaceSig()?.yjsAdaptor,
   }
 

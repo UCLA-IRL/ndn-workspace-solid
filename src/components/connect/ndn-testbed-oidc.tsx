@@ -14,7 +14,6 @@ import {
 import { bytesToBase64 } from '../../utils'
 import { Encoder } from '@ndn/tlv'
 import { WsTransport } from '@ndn/ws-transport'
-import { Endpoint } from '@ndn/endpoint'
 import { fchQuery } from '@ndn/autoconfig'
 import { ClientOidcChallenge } from '@ucla-irl/ndnts-aux/adaptors'
 import { Name } from '@ndn/packet'
@@ -98,12 +97,12 @@ export default function NdnTestbedOidc(props: { onAdd: (config: Conn) => void })
       // New step
       const redirectUri = redirectTarget
       const cert = await ndncert.requestCertificate({
-        endpoint: new Endpoint({
+        cOpts: {
           retx: {
             limit: 4,
             interval: 5000,
           },
-        }),
+        },
         profile: caProfile,
         privateKey: prvKey,
         publicKey: pubKey,
