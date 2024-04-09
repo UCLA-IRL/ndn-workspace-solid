@@ -1,6 +1,6 @@
 // This file is the main file gluing all components and maintain a global context.
 // Should be changed to something better if refactor.
-import { Endpoint, Producer } from '@ndn/endpoint'
+import { Producer, produce } from '@ndn/endpoint'
 import { Name } from '@ndn/packet'
 import * as nfdmgmt from '@ndn/nfdmgmt'
 import { getYjsDoc } from '@syncedstore/core'
@@ -12,8 +12,9 @@ import { encodeKey as encodePath, Signal as BackendSignal, openRoot } from '../u
 import { Workspace } from '@ucla-irl/ndnts-aux/workspace'
 import toast from 'solid-toast'
 import { Connection, NfdWsConn, PeerJsConn, BleConn, TestbedConn, UseAutoAnnouncement } from './connection/mod.ts'
+import { Forwarder } from '@ndn/fw'
 
-export const endpoint: Endpoint = new Endpoint()
+export const forwarder: Forwarder = Forwarder.getDefault()
 export type ConnState = 'CONNECTED' | 'DISCONNECTED' | 'CONNECTING' | 'DISCONNECTING'
 
 export let bootstrapping = false // To prevent double click
@@ -132,7 +133,7 @@ export async function bootstrapWorkspace(opts: {
 
   // NOTE: CertStorage does not have a producer to serve certificates. This reuses the SyncAgent's responder.
   // certStore = new InMemoryStorage()
-  certStorage = new CertStorage(opts.trustAnchor, opts.ownCertificate, persistStore, endpoint, opts.prvKey)
+  certStorage = new CertStorage(opts.trustAnchor, opts.ownCertificate, persistStore, forwarder, opts.prvKey)
   await certStorage.readyEvent
 
   // Root doc using CRDT and Sync
@@ -163,7 +164,7 @@ export async function bootstrapWorkspace(opts: {
   workspace = await Workspace.create({
     nodeId,
     persistStore,
-    endpoint,
+    fw: forwarder,
     rootDoc: getYjsDoc(rootDoc),
     signer: certStorage.signer,
     verifier: certStorage.verifier,
@@ -219,7 +220,9 @@ async function checkPrefixRegistration(cancel: boolean) {
             origin: 65, // client
           },
           {
-            endpoint: endpoint,
+            cOpts: {
+              fw: forwarder,
+            },
             prefix: connection.commandPrefix,
             signer: connection.cmdSigner,
           },
@@ -231,7 +234,9 @@ async function checkPrefixRegistration(cancel: boolean) {
             origin: 65, // client
           },
           {
-            endpoint: endpoint,
+            cOpts: {
+              fw: forwarder,
+            },
             prefix: connection.commandPrefix,
             signer: connection.cmdSigner,
           },
@@ -258,7 +263,7 @@ async function checkPrefixRegistration(cancel: boolean) {
         nfdCertProducer?.close()
       }
       if (connection.nfdCert) {
-        nfdCertProducer = endpoint.produce(connection.nfdCert.name, async () => connection?.nfdCert?.data)
+        nfdCertProducer = produce(connection.nfdCert.name, async () => connection?.nfdCert?.data, { fw: forwarder })
       }
 
       // Register prefixes
@@ -272,7 +277,9 @@ async function checkPrefixRegistration(cancel: boolean) {
             flags: 0x02, // CAPTURE
           },
           {
-            endpoint: endpoint,
+            cOpts: {
+              fw: forwarder,
+            },
             prefix: connection.commandPrefix,
             signer: connection.cmdSigner,
           },
@@ -293,7 +300,9 @@ async function checkPrefixRegistration(cancel: boolean) {
             flags: 0x02, // CAPTURE
           },
           {
-            endpoint: endpoint,
+            cOpts: {
+              fw: forwarder,
+            },
             prefix: connection.commandPrefix,
             signer: connection.cmdSigner,
           },
