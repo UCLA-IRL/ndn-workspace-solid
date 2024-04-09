@@ -242,6 +242,42 @@ function App() {
               <li>Click on the "Join" button to create the workspace.</li>
             </ol>
           </>
+          <>
+            <Typography variant="h5" sx={{ mb: 1, mt: 3, fontWeight: 100 }}>
+              What You Will See After Successful Connection
+            </Typography>
+            <Typography variant="body1" sx={{ my: 2 }}>
+              <ol>
+                <li>
+                  If the user will work online, a connection to the testbed is required. After connecting to NDN Testbed
+                  from the Connections tab, a notification saying "Connected to forwarder successfully!" will appear.
+                  <div>
+                    <img
+                      src="../images/connected.png"
+                      alt="Connected to forwarder successfully screenshot"
+                      style={{ 'max-width': '30%', height: 'auto', 'margin-top': '10px' }}
+                    />
+                  </div>
+                </li>
+                <li>
+                  If the user did not choose a profile yet, the Workspace, Editor and Chat tabs will all redirect to the
+                  profile page. After choosing a profile, another notification saying "Registered routes successfully!"
+                  will appear.
+                  <div>
+                    <img
+                      src="../images/registered.png"
+                      alt="Registered routes successfully screenshot"
+                      style={{ 'max-width': '28%', height: 'auto', 'margin-top': '10px' }}
+                    />
+                  </div>
+                </li>
+                <li>
+                  After choosing a profile (weather you're connected to the NDN Tesbed or will work offline), the tabs
+                  previously redirecting to the profile page will now display their respective content.
+                </li>
+              </ol>
+            </Typography>
+          </>
         </Typography>
       </>
 
