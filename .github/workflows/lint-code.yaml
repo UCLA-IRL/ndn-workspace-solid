@@ -38,7 +38,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Run linters
-        uses: wearerequired/lint-action@v2
+        uses: zjkmxy/lint-action@v2.3.1
         with:
           # Enable your linters here
           eslint: true
