@@ -42,6 +42,6 @@ jobs:
         with:
           # Enable your linters here
           eslint: true
-          eslint_args: "--ext ts,tsx --report-unused-disable-directives --max-warnings 10"
+          eslint_args: "--max-warnings 10"
       - name: Build
         run: pnpm build
