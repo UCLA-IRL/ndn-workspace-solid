@@ -9,7 +9,6 @@ export default function PdfViewer(props: { pdfUrl: string }) {
     pdfSlickStore: store,
     PDFSlickViewer,
     // URL is only used in a createEffect scope internally.
-    // eslint-disable-next-line solid/reactivity
   } = usePDFSlick(props.pdfUrl, {})
 
   createEffect(() => {

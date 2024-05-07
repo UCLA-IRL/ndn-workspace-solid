@@ -25,16 +25,12 @@ export default function LatexDoc(props: { doc: Y.Text; provider: NdnSvsAdaptor; 
     '#' + Array.from({ length: 6 }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('')
 
   const { createExtension, ref } = createCodeMirror({
-    // eslint-disable-next-line solid/reactivity
     value: props.doc.toString(),
   })
 
-  // eslint-disable-next-line solid/reactivity
   props.provider.bindAwareness(props.doc.doc!, props.subDocId)
 
-  // eslint-disable-next-line solid/reactivity
   props.provider.awareness!.setLocalStateField('user', {
-    // eslint-disable-next-line solid/reactivity
     name: props.username,
     color: getRandomColor(),
     colorLight: getRandomColor(),
@@ -47,7 +43,6 @@ export default function LatexDoc(props: { doc: Y.Text; provider: NdnSvsAdaptor; 
   // One cannot create extension in a createEffect
   createExtension(basicSetup)
   createExtension(StreamLanguage.define(stex))
-  // eslint-disable-next-line solid/reactivity
   createExtension(yCollab(props.doc, props.provider.awareness))
 
   return <Paper ref={ref} sx={{ height: 1 }} />
