@@ -1,163 +1,149 @@
 .App {
-
   border-radius: 5px;
   height: 100vh;
   overflow-y: hidden;
   scroll-behavior: smooth;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
 }
 
 .App_header {
   background: #fafafa;
-  padding: 10px 20px;
-  margin: 10px 5px;
-
+  padding: 15px 25px;
+  margin: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Message input section styling */
-
 .App__input {
-  width: 100%;
-  height: 200px;
-  margin-top: auto;
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background: #f9f9f9;
+  border-top: 1px solid #ddd;
 }
 
 .App__input textarea {
-
-
-
-  width: 80%;
+  flex-grow: 1;
   height: 50px;
   background: #fafafa;
-  border: none;
-  outline: none;
-  /* /* padding-left: 55px; */
-  padding: 10px 55px;
-  color: #666;
-  /* display: block; */
+  border: 1px solid #ddd;
+  border-radius: 25px;
+  padding: 10px 20px;
+  color: #333;
   font-weight: 400;
-
-
-
-  /* width: 100%;
-  height: inherit;
-  padding: 15px;
-  border-radius: 15px;
-  border: none;
-  outline: none;
   resize: none;
-  background: #f1f1f1; */
 }
 
-.App__input textarea:active {
+.App__input textarea:focus {
   outline: none;
+  border-color: #aaa;
 }
 
 /* Send Message button Styling */
-
 .App__button {
-  background: #000;
-  padding: 10px 30px;
+  background: #007bff;
+  padding: 10px 20px;
   border: none;
   color: #fff;
-  border-radius: 6px;
+  border-radius: 25px;
   font-size: 16px;
-  margin: 8px 0;
-  /* position: absolute; */
-  bottom: 0;
-  float: right;
-  right: 30px;
+  margin-left: 10px;
+  cursor: pointer;
 }
 
 .App__button:hover {
-  background: rgba(0, 0, 0, 0.753);
+  background: #0056b3;
 }
 
 /* All Messages Styling */
 .App__messages {
-  height: 82vh;
+  flex-grow: 1;
   width: 100%;
-  /* padding: 20px 0; */
-  overflow: auto;
+  padding: 20px;
+  overflow-y: auto;
+  background: #f5f5f5;
 }
 
 .App__message {
   display: flex;
-
-  max-width: 100%;
-  display: flex;
-  -webkit-box-align: center;
   align-items: center;
-  /* background-color: #f9e4cb; */
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
 }
 
 .App__messageForeign {
-  background-color: #f6f1eb;
+  background-color: #e0e0e0;
 }
 
 .App__messageLocal {
-  background-color: #faeedf;
+  background-color: #d1e7dd;
 }
 
 .App__message img {
   height: 40px;
-  border-radius: 2px;
   width: 40px;
-  margin: 10px 10px 10px 20px;
-
-}
-
-.App__msgContent span{
-  color: grey;
-font-weight: 300;
-margin-left: 4px;
-font-size: 10px;
+  border-radius: 50%;
+  margin-right: 15px;
 }
 
 .App__msgContent {
-  padding-left: 13px;
-  margin: 10px;
+  flex-grow: 1;
 }
 
-.App__msgContent p {
-  padding: 1px;
-  margin: 1px;
+.App__msgContent span {
+  color: grey;
+  font-weight: 300;
+  font-size: 10px;
 }
 
-.App__msgContent h4 {
-  padding: 1px;
-  margin: 1px;
+.App__msgContent p, .App__msgContent h4 {
+  margin: 2px 0;
 }
-
-
-
 
 /* Webkit browsers */
 .App__messages::-webkit-scrollbar {
-  width: 5px;
+  width: 8px;
   background-color: transparent;
 }
 
-/* Webkit browsers */
 .App__messages::-webkit-scrollbar-thumb {
   background-color: #555;
   border-radius: 10px;
 }
 
-/* Webkit browsers */
 .App__messages::-webkit-scrollbar-thumb:hover {
   background-color: #777;
 }
 
+.ChannelButton {
+  background-color: transparent;
+  border: none;
+  color: #333;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 8px 16px;
+  margin-right: 8px;
+  transition: background-color 0.3s;
 
-
-.App_chatInputWrapper {
-  display: grid;
-  grid-row-start: 190;
-  grid-row-end: 190;
+  &:hover {
+    background-color: #f4f4f4;
+  }
 }
 
-.App_chatInputWrapper input {
-  display: grid;
-  grid-row-start: 190;
-  grid-row-end: 190;
+.ActiveChannelButton {
+  background-color: #007bff;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 8px 16px;
+  margin-right: 8px;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: #0056b3;
+  }
 }
