@@ -48,25 +48,25 @@ export function Chat() {
     }),
   )
 
-  const filteredMessages = () => data()?.filter(msg => msg.value.channel === currentChannel())
+  const filteredMessages = () => data()?.filter((msg) => msg.value.channel === currentChannel())
 
   return (
     <div class={styles.App}>
       <div class={styles.App_header}>
-      <div>
-        <For each={channels}>
-          {(channel) => (
-            <button 
-            class={currentChannel() === channel ? styles.ActiveChannelButton : styles.ChannelButton} 
-            onClick={() => setCurrentChannel(channel)}
-          >
-            {channel}
-          </button>
-          )}
-        </For>
+        <div>
+          <For each={channels}>
+            {(channel) => (
+              <button
+                class={currentChannel() === channel ? styles.ActiveChannelButton : styles.ChannelButton}
+                onClick={() => setCurrentChannel(channel)}
+              >
+                {channel}
+              </button>
+            )}
+          </For>
+        </div>
+        <h2 style={{ color: '#333' }}>#{currentChannel()} Channel</h2>
       </div>
-      <h2 style={{ color: '#333' }}>#{currentChannel()} Channel</h2>
-    </div>
       <div class={styles.App__messages} ref={setContainer}>
         <For each={filteredMessages()}>
           {(msg) => (
