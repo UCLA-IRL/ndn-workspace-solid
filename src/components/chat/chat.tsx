@@ -7,8 +7,8 @@ import styles from './styles.module.scss'
 import { useNavigate } from '@solidjs/router'
 
 // TODO: Do not load all messages at once
-// TODO: Support multiple channels
 // TODO: Support Markdown
+// TODO: Users should be able to add their own channels (currently hard-coded)
 
 export function Chat() {
   const { rootDoc, syncAgent, booted } = useNdnWorkspace()!
@@ -19,6 +19,8 @@ export function Chat() {
 
   const [messageTerm, setMessageTerm] = createSignal('')
   const [container, setContainer] = createSignal<HTMLDivElement>()
+  const [currentChannel, setCurrentChannel] = createSignal('general')
+  const channels = ['general', 'paper_writing', 'code_discussion', 'help'] // Define your channels here
 
   if (!booted()) {
     navigate('/profile', { replace: true })
@@ -30,6 +32,7 @@ export function Chat() {
         sender: username(),
         content: messageTerm(),
         timestamp: Date.now(),
+        channel: currentChannel(),
       } satisfies chats.Message),
     )
     setMessageTerm('')
@@ -45,11 +48,27 @@ export function Chat() {
     }),
   )
 
+  const filteredMessages = () => data()?.filter(msg => msg.value.channel === currentChannel())
+
   return (
     <div class={styles.App}>
-      <div class={styles.App_header}>#Message the Group</div>
+      <div class={styles.App_header}>
+      <div>
+        <For each={channels}>
+          {(channel) => (
+            <button 
+            class={currentChannel() === channel ? styles.ActiveChannelButton : styles.ChannelButton} 
+            onClick={() => setCurrentChannel(channel)}
+          >
+            {channel}
+          </button>
+          )}
+        </For>
+      </div>
+      <h2 style={{ color: '#333' }}>#{currentChannel()} Channel</h2>
+    </div>
       <div class={styles.App__messages} ref={setContainer}>
-        <For each={data()}>
+        <For each={filteredMessages()}>
           {(msg) => (
             <div class={msg.value.sender == username() ? styles.App__messageForeign : styles.App__messageLocal}>
               <div class={styles.App__message}>
@@ -76,7 +95,7 @@ export function Chat() {
       <div class={styles.App__input}>
         <textarea
           name="message"
-          placeholder="Message the group"
+          placeholder={`Message the ${currentChannel()} channel`}
           onChange={(event) => setMessageTerm(event.target.value)}
           value={messageTerm()}
         />
