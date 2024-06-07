@@ -124,7 +124,7 @@ export default function RebuildCache() {
       <Grid container spacing={1} alignItems="center">
         <Grid item xs={12}>
           <Typography>
-            Please disconnect from network and bootstrap into a workspace. Be await that you MAY LOSE ALL YOUR DATA.
+            Please disconnect from the network and bootstrap into a workspace. Be aware that YOU MAY LOSE ALL YOUR DATA.
           </Typography>
         </Grid>
         <Grid item xs={4}>
