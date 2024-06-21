@@ -73,7 +73,7 @@ export default function FileList(props: {
                   <IconButton color="error" onClick={() => props.deleteItem(i())}>
                     <DeleteIcon />
                   </IconButton>
-                  <IconButton color="default" onClick={() => void /*TODO: placeholder*/}>
+                  <IconButton color="default" onClick={() => undefined /*TODO: placeholder*/}>
                     <RenameIcon />
                   </IconButton>
                 </TableCell>
