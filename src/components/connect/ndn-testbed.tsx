@@ -15,6 +15,7 @@ import { createSignal, onCleanup } from 'solid-js'
 import { FwFace } from '@ndn/fw'
 import * as ndncert from '@ndn/ndncert'
 import * as keychain from '@ndn/keychain'
+import { ValidityPeriod } from '@ndn/packet'
 import { TestbedAnchorName } from '../../constants'
 import { bytesToBase64 } from '../../utils'
 import { Encoder } from '@ndn/tlv'
@@ -106,7 +107,7 @@ export default function NdnTestbed(props: { onAdd: (config: Conn) => void }) {
         profile: caProfile,
         privateKey: prvKey,
         publicKey: pubKey,
-        validity: keychain.ValidityPeriod.daysFromNow(maximalValidityDays),
+        validity: ValidityPeriod.daysFromNow(maximalValidityDays),
         challenges: [
           new ndncert.ClientEmailChallenge(curEmail, () => {
             return new Promise((resolve) => {
