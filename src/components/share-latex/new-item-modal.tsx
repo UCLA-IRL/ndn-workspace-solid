@@ -12,7 +12,7 @@ import {
 } from '@suid/material'
 import { Show, createSignal } from 'solid-js'
 
-export type ModalState = '' | 'folder' | 'doc' | 'upload' | 'richDoc'
+export type FileType = '' | 'folder' | 'doc' | 'upload' | 'richDoc'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -27,8 +27,8 @@ const VisuallyHiddenInput = styled('input')({
 })
 
 export default function NewItemModal(props: {
-  modalState: ModalState
-  onSubmit: (name: string, state: ModalState, blob?: Uint8Array) => void
+  modalState: FileType
+  onSubmit: (name: string, state: FileType, blob?: Uint8Array) => void
   onCancel: () => void
 }) {
   const [name, setName] = createSignal('')

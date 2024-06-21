@@ -8,11 +8,11 @@ import {
   InputAdornment,
   TextField,
 } from '@suid/material'
-import { ModalState } from './new-item-modal'
+import { FileType } from './new-item-modal'
 import { Show, createSignal } from 'solid-js'
 import { AttachFile as AttachFileIcon } from '@suid/icons-material'
 
-export default function RenameItem(props: { modalState: ModalState; onSubmit: () => void; onCancel: () => void }) {
+export default function RenameItem(props: { modalState: FileType; onSubmit: () => void; onCancel: () => void }) {
   const [name, setName] = createSignal('')
   const [newName, setNewName] = createSignal('')
   const title = () => {

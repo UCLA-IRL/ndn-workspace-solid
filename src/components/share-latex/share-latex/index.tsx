@@ -1,5 +1,5 @@
 import * as Y from 'yjs'
-import { ModalState } from '../new-item-modal'
+import { FileType } from '../new-item-modal'
 import { useParams, useNavigate } from '@solidjs/router'
 import { project } from '../../../backend/models'
 import { createEffect, createSignal, onCleanup } from 'solid-js'
@@ -49,7 +49,7 @@ export default function ShareLatex(props: { rootUri: string }) {
   }
 
   const [folderChildren, setFolderChildren] = createSignal<string[]>()
-  const [modalState, setModalState] = createSignal<ModalState>('')
+  const [modalState, setModalState] = createSignal<FileType>('')
   const [view, setView] = createSignal<ViewValues>('Editor')
   const [compilationLog, setCompilationLog] = createSignal<string>('')
   const [pdfUrl, setPdfUrl] = createSignal<string>()
@@ -98,7 +98,7 @@ export default function ShareLatex(props: { rootUri: string }) {
     ;() => undefined // TODO: placeholder
   }
 
-  const createItem = (name: string, state: ModalState, blob?: Uint8Array) => {
+  const createItem = (name: string, state: FileType, blob?: Uint8Array) => {
     const cur = item() // Convenient for TS check
     const rootDocVal = rootDoc()
     if (name !== '' && cur?.kind === 'folder') {

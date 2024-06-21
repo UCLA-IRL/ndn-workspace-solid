@@ -1,7 +1,7 @@
 import AppTools from '../app-tools'
 import FileList from '../file-list'
 import LatexDoc from '../latex-doc'
-import NewItemModal, { ModalState } from '../new-item-modal'
+import NewItemModal, { FileType } from '../new-item-modal'
 import { Button, Paper } from '@suid/material'
 import { project } from '../../../backend/models'
 import { Accessor, Match, Setter, Show, Switch } from 'solid-js'
@@ -16,13 +16,13 @@ export default function ShareLatexComponent(props: {
   rootUri: string
   item: project.Item | undefined
   folderChildren: string[] | undefined
-  modalState: Accessor<ModalState>
-  setModalState: Setter<ModalState>
+  modalState: Accessor<FileType>
+  setModalState: Setter<FileType>
   pathIds: () => string[]
   resolveItem: (id: string) => project.Item | undefined
   deleteItem: (index: number) => void
   renameItem: (id: string, newName: string) => void
-  createItem: (name: string, state: ModalState, blob?: Uint8Array) => void
+  createItem: (name: string, state: FileType, blob?: Uint8Array) => void
   onExportZip: () => void
   onExportFlatZip: () => void
   onCompile: () => Promise<void>
