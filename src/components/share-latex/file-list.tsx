@@ -18,7 +18,6 @@ import {
 } from '@suid/icons-material'
 import { project } from '../../backend/models'
 import { For, Match, Switch } from 'solid-js'
-import RenameItem from './rename-item'
 
 export default function FileList(props: {
   rootUri: string

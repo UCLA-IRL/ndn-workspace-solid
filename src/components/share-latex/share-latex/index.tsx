@@ -18,6 +18,8 @@ import { LatexEnginePath } from '../../../constants'
 import { ViewValues } from '../types'
 import toast from 'solid-toast'
 
+export type ModalState = '' | 'rename' | 'create'
+
 export default function ShareLatex(props: { rootUri: string }) {
   const { rootDoc, syncAgent, booted, fw, yjsProvider } = useNdnWorkspace()!
   const navigate = useNavigate()
@@ -50,6 +52,7 @@ export default function ShareLatex(props: { rootUri: string }) {
 
   const [folderChildren, setFolderChildren] = createSignal<string[]>()
   const [fileType, setFileType] = createSignal<FileType>('')
+  const [modalState, setModalState] = createSignal<ModalState>('')
   const [view, setView] = createSignal<ViewValues>('Editor')
   const [compilationLog, setCompilationLog] = createSignal<string>('')
   const [pdfUrl, setPdfUrl] = createSignal<string>()
@@ -377,6 +380,8 @@ export default function ShareLatex(props: { rootUri: string }) {
       folderChildren={folderChildren()}
       fileType={fileType}
       setFileType={setFileType}
+      modalState={modalState}
+      setModalState={setModalState}
       pathIds={pathIds}
       resolveItem={resolveItem}
       deleteItem={deleteItem}

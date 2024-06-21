@@ -11,6 +11,7 @@ import PdfViewer from '../pdf-viewer/pdf-viewer'
 import styles from './styles.module.scss'
 import { NdnSvsAdaptor } from '@ucla-irl/ndnts-aux/adaptors'
 import RenameItem from '../rename-item'
+import { ModalState } from '.'
 
 export default function ShareLatexComponent(props: {
   rootUri: string
@@ -18,6 +19,8 @@ export default function ShareLatexComponent(props: {
   folderChildren: string[] | undefined
   fileType: Accessor<FileType>
   setFileType: Setter<FileType>
+  modalState: Accessor<ModalState>
+  setModalState: Setter<ModalState>
   pathIds: () => string[]
   resolveItem: (id: string) => project.Item | undefined
   deleteItem: (index: number) => void
@@ -38,11 +41,13 @@ export default function ShareLatexComponent(props: {
 }) {
   return (
     <>
-      <RenameItem
-        fileType={props.fileType()}
-        onCancel={() => props.setFileType('')}
-        onSubmit={() => props.renameItem('1', '')}
-      />
+      <Show when={props.modalState() === 'rename'}>
+        <RenameItem
+          fileType={props.fileType()}
+          onCancel={() => props.setFileType('')}
+          onSubmit={() => props.renameItem('1', '')}
+        />
+      </Show>
       <Show when={props.fileType() !== ''}>
         <NewItemModal fileType={props.fileType()} onCancel={() => props.setFileType('')} onSubmit={props.createItem} />
       </Show>
