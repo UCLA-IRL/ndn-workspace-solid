@@ -18,6 +18,7 @@ import {
 } from '@suid/icons-material'
 import { project } from '../../backend/models'
 import { For, Match, Switch } from 'solid-js'
+import RenameItem from './rename-item'
 
 export default function FileList(props: {
   rootUri: string
@@ -70,11 +71,11 @@ export default function FileList(props: {
                   {getItemLink(props.resolveItem(itemId))}
                 </TableCell>
                 <TableCell align="right">
-                  <IconButton color="error" onClick={() => props.deleteItem(i())}>
-                    <DeleteIcon />
-                  </IconButton>
                   <IconButton color="default" onClick={() => undefined /*TODO: placeholder*/}>
                     <RenameIcon />
+                  </IconButton>
+                  <IconButton color="error" onClick={() => props.deleteItem(i())}>
+                    <DeleteIcon />
                   </IconButton>
                 </TableCell>
               </TableRow>

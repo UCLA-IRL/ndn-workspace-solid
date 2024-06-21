@@ -10,6 +10,7 @@ import { ViewValues } from '../types'
 import PdfViewer from '../pdf-viewer/pdf-viewer'
 import styles from './styles.module.scss'
 import { NdnSvsAdaptor } from '@ucla-irl/ndnts-aux/adaptors'
+import RenameItem from '../rename-item'
 
 export default function ShareLatexComponent(props: {
   rootUri: string
@@ -37,6 +38,11 @@ export default function ShareLatexComponent(props: {
 }) {
   return (
     <>
+      <RenameItem
+        modalState={props.modalState()}
+        onCancel={() => props.setModalState('')}
+        onSubmit={() => props.renameItem('1', '')}
+      />
       <Show when={props.modalState() !== ''}>
         <NewItemModal
           modalState={props.modalState()}
