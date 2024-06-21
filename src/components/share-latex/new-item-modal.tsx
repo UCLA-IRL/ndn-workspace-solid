@@ -27,7 +27,7 @@ const VisuallyHiddenInput = styled('input')({
 })
 
 export default function NewItemModal(props: {
-  modalState: FileType
+  fileType: FileType
   onSubmit: (name: string, state: FileType, blob?: Uint8Array) => void
   onCancel: () => void
 }) {
@@ -36,7 +36,7 @@ export default function NewItemModal(props: {
   const [fileName, setFileName] = createSignal('')
   const [blob, setBlob] = createSignal(new Uint8Array())
   const title = () => {
-    switch (props.modalState) {
+    switch (props.fileType) {
       case 'folder':
         return 'New folder'
       case 'doc':
@@ -64,7 +64,7 @@ export default function NewItemModal(props: {
   }
 
   return (
-    <Dialog open={props.modalState !== ''}>
+    <Dialog open={props.fileType !== ''}>
       <DialogTitle>{title()}</DialogTitle>
       <DialogContent>
         <TextField
@@ -75,7 +75,7 @@ export default function NewItemModal(props: {
           value={name()}
           onChange={(event) => setName(event.target.value)}
         />
-        <Show when={props.modalState === 'upload'}>
+        <Show when={props.fileType === 'upload'}>
           <TextField
             fullWidth
             label="File Attachment"
@@ -111,13 +111,13 @@ export default function NewItemModal(props: {
         <Button
           type="submit"
           onClick={() => {
-            if (props.modalState === 'upload') {
-              props.onSubmit(name(), props.modalState, blob())
+            if (props.fileType === 'upload') {
+              props.onSubmit(name(), props.fileType, blob())
             } else {
-              props.onSubmit(name(), props.modalState)
+              props.onSubmit(name(), props.fileType)
             }
           }}
-          disabled={name() === '' || (props.modalState === 'upload' && blob().length <= 0)}
+          disabled={name() === '' || (props.fileType === 'upload' && blob().length <= 0)}
           autofocus
         >
           Add

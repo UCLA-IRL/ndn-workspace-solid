@@ -49,7 +49,7 @@ export default function ShareLatex(props: { rootUri: string }) {
   }
 
   const [folderChildren, setFolderChildren] = createSignal<string[]>()
-  const [modalState, setModalState] = createSignal<FileType>('')
+  const [fileType, setFileType] = createSignal<FileType>('')
   const [view, setView] = createSignal<ViewValues>('Editor')
   const [compilationLog, setCompilationLog] = createSignal<string>('')
   const [pdfUrl, setPdfUrl] = createSignal<string>()
@@ -170,7 +170,7 @@ export default function ShareLatex(props: { rootUri: string }) {
           })
       }
     }
-    setModalState('')
+    setFileType('')
   }
 
   const onExportZip = async () => {
@@ -375,8 +375,8 @@ export default function ShareLatex(props: { rootUri: string }) {
       rootUri={props.rootUri}
       item={item()}
       folderChildren={folderChildren()}
-      modalState={modalState}
-      setModalState={setModalState}
+      fileType={fileType}
+      setFileType={setFileType}
       pathIds={pathIds}
       resolveItem={resolveItem}
       deleteItem={deleteItem}

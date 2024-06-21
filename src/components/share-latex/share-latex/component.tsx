@@ -16,8 +16,8 @@ export default function ShareLatexComponent(props: {
   rootUri: string
   item: project.Item | undefined
   folderChildren: string[] | undefined
-  modalState: Accessor<FileType>
-  setModalState: Setter<FileType>
+  fileType: Accessor<FileType>
+  setFileType: Setter<FileType>
   pathIds: () => string[]
   resolveItem: (id: string) => project.Item | undefined
   deleteItem: (index: number) => void
@@ -39,16 +39,12 @@ export default function ShareLatexComponent(props: {
   return (
     <>
       <RenameItem
-        modalState={props.modalState()}
-        onCancel={() => props.setModalState('')}
+        fileType={props.fileType()}
+        onCancel={() => props.setFileType('')}
         onSubmit={() => props.renameItem('1', '')}
       />
-      <Show when={props.modalState() !== ''}>
-        <NewItemModal
-          modalState={props.modalState()}
-          onCancel={() => props.setModalState('')}
-          onSubmit={props.createItem}
-        />
+      <Show when={props.fileType() !== ''}>
+        <NewItemModal fileType={props.fileType()} onCancel={() => props.setFileType('')} onSubmit={props.createItem} />
       </Show>
       <AppTools
         rootPath={props.rootUri}
@@ -58,13 +54,13 @@ export default function ShareLatexComponent(props: {
         view={props.view}
         setView={props.setView}
         menuItems={[
-          { name: 'New folder', onClick: () => props.setModalState('folder') },
-          { name: 'New tex', onClick: () => props.setModalState('doc') },
+          { name: 'New folder', onClick: () => props.setFileType('folder') },
+          { name: 'New tex', onClick: () => props.setFileType('doc') },
           {
             name: 'New rich doc',
-            onClick: () => props.setModalState('richDoc'),
+            onClick: () => props.setFileType('richDoc'),
           },
-          { name: 'Upload blob', onClick: () => props.setModalState('upload') },
+          { name: 'Upload blob', onClick: () => props.setFileType('upload') },
           { name: 'divider' },
           { name: 'Download as zip', onClick: props.onExportZip },
           { name: 'Download as flat zip', onClick: props.onExportFlatZip },
