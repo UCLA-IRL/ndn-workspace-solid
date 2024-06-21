@@ -20,6 +20,7 @@ export default function ShareLatexComponent(props: {
   pathIds: () => string[]
   resolveItem: (id: string) => project.Item | undefined
   deleteItem: (index: number) => void
+  renameItem: (id: string, newName: string) => void
   createItem: (name: string, state: ModalState, blob?: Uint8Array) => void
   onExportZip: () => void
   onExportFlatZip: () => void
@@ -82,6 +83,7 @@ export default function ShareLatexComponent(props: {
                     subItems={props.folderChildren!}
                     resolveItem={props.resolveItem}
                     deleteItem={props.deleteItem}
+                    renameItem={props.renameItem}
                   />
                 </Paper>
               </Match>

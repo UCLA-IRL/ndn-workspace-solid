@@ -14,6 +14,7 @@ import {
   Description as DescriptionIcon,
   FilePresent as FilePresentIcon,
   Delete as DeleteIcon,
+  DriveFileRenameOutline as RenameIcon,
 } from '@suid/icons-material'
 import { project } from '../../backend/models'
 import { For, Match, Switch } from 'solid-js'
@@ -23,6 +24,7 @@ export default function FileList(props: {
   subItems: string[]
   resolveItem: (id: string) => project.Item | undefined
   deleteItem: (index: number) => void
+  renameItem: (id: string, newName: string) => void
 }) {
   const getItemIcon = (item?: project.Item) => (
     <Switch fallback={<></>}>
@@ -70,6 +72,9 @@ export default function FileList(props: {
                 <TableCell align="right">
                   <IconButton color="error" onClick={() => props.deleteItem(i())}>
                     <DeleteIcon />
+                  </IconButton>
+                  <IconButton color="default" onClick={() => void /*TODO: placeholder*/}>
+                    <RenameIcon />
                   </IconButton>
                 </TableCell>
               </TableRow>

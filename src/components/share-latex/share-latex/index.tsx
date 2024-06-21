@@ -94,6 +94,10 @@ export default function ShareLatex(props: { rootUri: string }) {
     }
   }
 
+  const renameItem = (id: string, newName: string) => {
+    ;() => undefined // TODO: placeholder
+  }
+
   const createItem = (name: string, state: ModalState, blob?: Uint8Array) => {
     const cur = item() // Convenient for TS check
     const rootDocVal = rootDoc()
@@ -376,6 +380,7 @@ export default function ShareLatex(props: { rootUri: string }) {
       pathIds={pathIds}
       resolveItem={resolveItem}
       deleteItem={deleteItem}
+      renameItem={renameItem}
       createItem={createItem}
       onExportZip={onExportZip}
       onExportFlatZip={onExportFlatZip}
