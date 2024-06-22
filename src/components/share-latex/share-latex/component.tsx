@@ -4,7 +4,7 @@ import LatexDoc from '../latex-doc'
 import NewItemModal, { FileType } from '../new-item-modal'
 import { Button, Paper } from '@suid/material'
 import { project } from '../../../backend/models'
-import { Accessor, Match, Setter, Show, Switch } from 'solid-js'
+import { Accessor, Match, Setter, Show, Switch, createSignal } from 'solid-js'
 import RichDoc from '../rich-doc'
 import { ViewValues } from '../types'
 import PdfViewer from '../pdf-viewer/pdf-viewer'
@@ -39,13 +39,16 @@ export default function ShareLatexComponent(props: {
   username: string
   yjsProvider: Accessor<NdnSvsAdaptor | undefined>
 }) {
+  const [fileId, setFileId] = createSignal('')
+
   return (
     <>
       <Show when={props.modalState() === 'rename'}>
         <RenameItem
           fileType={props.fileType()}
+          fileId={fileId()}
           onCancel={() => props.setModalState('')}
-          onSubmit={() => props.renameItem('1', '')} // TODO: placeholder
+          onSubmit={props.renameItem} // TODO: placeholder
         />
       </Show>
       <Show when={props.fileType() !== ''}>
@@ -90,7 +93,9 @@ export default function ShareLatexComponent(props: {
                     subItems={props.folderChildren!}
                     resolveItem={props.resolveItem}
                     deleteItem={props.deleteItem}
-                    renameItem={() => {
+                    renameItem={(id: string) => {
+                      setFileId(id)
+                      props.setFileType('') // TODO: placeholder
                       props.setModalState('rename')
                     }}
                   />

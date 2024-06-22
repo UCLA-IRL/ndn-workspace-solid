@@ -12,7 +12,12 @@ import { FileType } from './new-item-modal'
 import { Show, createSignal } from 'solid-js'
 import { AttachFile as AttachFileIcon } from '@suid/icons-material'
 
-export default function RenameItem(props: { fileType: FileType; onSubmit: () => void; onCancel: () => void }) {
+export default function RenameItem(props: {
+  fileType: FileType
+  fileId: string
+  onSubmit: (id: string, newName: string) => void
+  onCancel: () => void
+}) {
   const [name, setName] = createSignal('')
   const [newName, setNewName] = createSignal('')
   const title = () => {
@@ -48,7 +53,7 @@ export default function RenameItem(props: { fileType: FileType; onSubmit: () => 
         <Button onClick={props.onCancel} color="primary">
           Cancel
         </Button>
-        <Button onClick={props.onSubmit} color="primary">
+        <Button onClick={() => props.onSubmit(props.fileId, newName())} color="primary">
           Confirm
         </Button>
       </DialogActions>
