@@ -90,7 +90,9 @@ export default function ShareLatexComponent(props: {
                     subItems={props.folderChildren!}
                     resolveItem={props.resolveItem}
                     deleteItem={props.deleteItem}
-                    renameItem={() => props.setModalState('rename')}
+                    renameItem={() => {
+                      props.setModalState('rename')
+                    }}
                   />
                 </Paper>
               </Match>

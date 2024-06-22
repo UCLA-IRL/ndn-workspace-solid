@@ -26,7 +26,7 @@ export default function RenameItem(props: { fileType: FileType; onSubmit: () => 
       case 'upload':
         return 'Rename blob file'
       default:
-        return ''
+        return 'Rename file'
     }
   }
 
@@ -39,7 +39,7 @@ export default function RenameItem(props: { fileType: FileType; onSubmit: () => 
           required
           label="New File Name"
           margin="normal"
-          value=""
+          value={newName()}
           onChange={(event) => setNewName(event.target.value)}
           autoFocus
         />
