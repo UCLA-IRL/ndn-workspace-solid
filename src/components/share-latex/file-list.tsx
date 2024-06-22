@@ -24,7 +24,7 @@ export default function FileList(props: {
   subItems: string[]
   resolveItem: (id: string) => project.Item | undefined
   deleteItem: (index: number) => void
-  renameItem: (id: string, newName: string) => void
+  renameItem: () => void
 }) {
   const getItemIcon = (item?: project.Item) => (
     <Switch fallback={<></>}>
@@ -70,7 +70,7 @@ export default function FileList(props: {
                   {getItemLink(props.resolveItem(itemId))}
                 </TableCell>
                 <TableCell align="right">
-                  <IconButton color="default" onClick={() => undefined /*TODO: placeholder*/}>
+                  <IconButton color="default" onClick={() => props.renameItem()}>
                     <RenameIcon />
                   </IconButton>
                   <IconButton color="error" onClick={() => props.deleteItem(i())}>

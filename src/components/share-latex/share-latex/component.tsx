@@ -44,8 +44,8 @@ export default function ShareLatexComponent(props: {
       <Show when={props.modalState() === 'rename'}>
         <RenameItem
           fileType={props.fileType()}
-          onCancel={() => props.setFileType('')}
-          onSubmit={() => props.renameItem('1', '')}
+          onCancel={() => props.setModalState('')}
+          onSubmit={() => props.renameItem('1', '')} // TODO: placeholder
         />
       </Show>
       <Show when={props.fileType() !== ''}>
@@ -90,7 +90,7 @@ export default function ShareLatexComponent(props: {
                     subItems={props.folderChildren!}
                     resolveItem={props.resolveItem}
                     deleteItem={props.deleteItem}
-                    renameItem={props.renameItem}
+                    renameItem={() => props.setModalState('rename')}
                   />
                 </Paper>
               </Match>
