@@ -16,7 +16,7 @@ import { Encoder } from '@ndn/tlv'
 import { WsTransport } from '@ndn/ws-transport'
 import { fchQuery } from '@ndn/autoconfig'
 import { ClientOidcChallenge } from '@ucla-irl/ndnts-aux/adaptors'
-import { Name } from '@ndn/packet'
+import { Name, ValidityPeriod } from '@ndn/packet'
 import toast from 'solid-toast'
 
 export default function NdnTestbedOidc(props: { onAdd: (config: Conn) => void }) {
@@ -106,7 +106,7 @@ export default function NdnTestbedOidc(props: { onAdd: (config: Conn) => void })
         profile: caProfile,
         privateKey: prvKey,
         publicKey: pubKey,
-        validity: keychain.ValidityPeriod.daysFromNow(maximalValidityDays),
+        validity: ValidityPeriod.daysFromNow(maximalValidityDays),
         challenges: [
           new ClientOidcChallenge(challengeId, {
             oidcId,
