@@ -1,16 +1,6 @@
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  InputAdornment,
-  TextField,
-} from '@suid/material'
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@suid/material'
 import { FileType } from './new-item-modal'
-import { Show, createSignal } from 'solid-js'
-import { AttachFile as AttachFileIcon } from '@suid/icons-material'
+import { createSignal } from 'solid-js'
 
 export default function RenameItem(props: {
   fileType: FileType
@@ -18,7 +8,6 @@ export default function RenameItem(props: {
   onSubmit: (id: string, newName: string) => void
   onCancel: () => void
 }) {
-  const [name, setName] = createSignal('')
   const [newName, setNewName] = createSignal('')
   const title = () => {
     switch (props.fileType) {

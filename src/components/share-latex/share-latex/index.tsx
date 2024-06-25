@@ -105,7 +105,7 @@ export default function ShareLatex(props: { rootUri: string }) {
     const rootDocVal = rootDoc()
     if (newName !== '' && cur?.kind === 'folder') {
       const newId = uuidv4()
-      const to = props.rootUri + '/' + newId
+      // const to = props.rootUri + '/' + newId
       const curItem = rootDocVal!.latex[id]
       const curIdx = cur.items.indexOf(id)
 
