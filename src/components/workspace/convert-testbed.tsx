@@ -7,6 +7,7 @@ import * as keychain from '@ndn/keychain'
 import { useNavigate } from '@solidjs/router'
 import { useNdnWorkspace } from '../../Context'
 import { AltUri } from '@ndn/naming-convention2'
+import { ValidityPeriod } from '@ndn/packet'
 import toast from 'solid-toast'
 
 export default function ConvertTestbed() {
@@ -59,7 +60,7 @@ export default function ConvertTestbed() {
       profile: caProfile,
       privateKey: prvKey,
       publicKey: pubKey,
-      validity: keychain.ValidityPeriod.daysFromNow(maximalValidityDays),
+      validity: ValidityPeriod.daysFromNow(maximalValidityDays),
       challenges: [new ndncert.ClientPossessionChallenge(pofp, signer)],
     })
 
