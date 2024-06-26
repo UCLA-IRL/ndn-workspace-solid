@@ -1,4 +1,4 @@
-revision=$(git rev-parse --short HEAD)
+revision=$(git describe --tags --abbrev=0)
 timestamp=$(date +%s.%N)
 echo '{"revision":"'${revision}'","timestamp":'${timestamp}'}' > ./public/build-meta.json
 echo 'export const REVISION = '"'"${revision}"'" \
