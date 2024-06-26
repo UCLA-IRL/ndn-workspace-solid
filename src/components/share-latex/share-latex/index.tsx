@@ -99,54 +99,22 @@ export default function ShareLatex(props: { rootUri: string }) {
 
   const renameItem = (id: string, newName: string) => {
     /* For renaming, we
-      1. generate a new file with a new ID
-      2. delete the older one from cur.items so that the person editting will not be affected */
+      1. change the name (not ID) of the original blob
+      2. remove and append to cur.items, so that the person editting is not affected */
     const cur = item()
     const rootDocVal = rootDoc()
     if (newName !== '' && cur?.kind === 'folder') {
-      const newId = uuidv4()
       // const to = props.rootUri + '/' + newId
       const curItem = rootDocVal!.latex[id]
       const curIdx = cur.items.indexOf(id)
 
-      // TODO: folder
-      if (curItem?.kind === 'folder') {
-        ;() => undefined
-      } else if (curItem?.kind === 'text') {
-        rootDocVal!.latex[newId] = {
-          id: newId,
-          kind: 'text',
-          // fullPath: cur.fullPath + '/' + name,
-          name: newName,
-          parentId: cur.id,
-          text: curItem.text.clone(),
-        }
-        cur.items.push(newId) // Adds new file
-        cur.items.splice(curIdx) // Removes old file
-        // navigate(to, { replace: true })
-      } else if (curItem?.kind === 'blob') {
-        rootDocVal!.latex[newId] = {
-          id: newId,
-          kind: 'blob',
-          name: newName,
-          parentId: cur.id,
-          blobName: curItem.blobName,
-        }
-        cur.items.push(newId) // Adds new file
-        cur.items.splice(curIdx) // Removes old file
-        // navigate(to, { replace: true })
-      } else if (curItem?.kind === 'xmldoc') {
-        rootDocVal!.latex[newId] = {
-          id: newId,
-          kind: 'xmldoc',
-          name: newName,
-          parentId: cur.id,
-          text: curItem.text.clone(),
-        }
-        cur.items.push(newId) // Adds new file
-        cur.items.splice(curIdx) // Removes old file
-        // navigate(to, { replace: true })
+      if (curItem !== undefined) {
+        curItem!.name = newName
+        cur.items.splice(curIdx, 1)
+        cur.items.push(id) // the root document is not modified, so the person editting this file will not be affected.
       }
+
+      // navigate(to, { replace: true })
     }
     setModalState('')
     setFileType('')
