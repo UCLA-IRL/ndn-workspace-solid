@@ -47,12 +47,22 @@ export default function ShareLatexComponent(props: {
         <RenameItem
           fileType={props.fileType()}
           fileId={fileId()}
-          onCancel={() => props.setModalState('')}
-          onSubmit={props.renameItem} // TODO: placeholder
+          onCancel={() => {
+            props.setModalState('')
+            props.setFileType('')
+          }}
+          onSubmit={props.renameItem}
         />
       </Show>
-      <Show when={props.fileType() !== ''}>
-        <NewItemModal fileType={props.fileType()} onCancel={() => props.setFileType('')} onSubmit={props.createItem} />
+      <Show when={props.modalState() === 'create'}>
+        <NewItemModal
+          fileType={props.fileType()}
+          onCancel={() => {
+            props.setModalState('')
+            props.setFileType('')
+          }}
+          onSubmit={props.createItem}
+        />
       </Show>
       <AppTools
         rootPath={props.rootUri}
@@ -62,13 +72,34 @@ export default function ShareLatexComponent(props: {
         view={props.view}
         setView={props.setView}
         menuItems={[
-          { name: 'New folder', onClick: () => props.setFileType('folder') },
-          { name: 'New tex', onClick: () => props.setFileType('doc') },
+          {
+            name: 'New folder',
+            onClick: () => {
+              props.setFileType('folder')
+              props.setModalState('create')
+            },
+          },
+          {
+            name: 'New tex',
+            onClick: () => {
+              props.setFileType('doc')
+              props.setModalState('create')
+            },
+          },
           {
             name: 'New rich doc',
-            onClick: () => props.setFileType('richDoc'),
+            onClick: () => {
+              props.setFileType('richDoc')
+              props.setModalState('create')
+            },
           },
-          { name: 'Upload blob', onClick: () => props.setFileType('upload') },
+          {
+            name: 'Upload blob',
+            onClick: () => {
+              props.setFileType('upload')
+              props.setModalState('create')
+            },
+          },
           { name: 'divider' },
           { name: 'Download as zip', onClick: props.onExportZip },
           { name: 'Download as flat zip', onClick: props.onExportFlatZip },
@@ -95,7 +126,7 @@ export default function ShareLatexComponent(props: {
                     deleteItem={props.deleteItem}
                     renameItem={(id: string) => {
                       setFileId(id)
-                      props.setFileType('') // TODO: placeholder
+                      props.setFileType('') // TODO: placeholder, could further divide rename-funcionality based on file types
                       props.setModalState('rename')
                     }}
                   />

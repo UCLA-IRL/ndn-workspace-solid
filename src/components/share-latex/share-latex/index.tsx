@@ -193,6 +193,7 @@ export default function ShareLatex(props: { rootUri: string }) {
       }
     }
     setFileType('')
+    setModalState('')
   }
 
   const onExportZip = async () => {
