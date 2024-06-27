@@ -54,7 +54,7 @@ export default function OwnCertificate(props: { certificate: Certificate | undef
       <Show when={expanded()}>
         <Divider />
         <CardContent>
-          <div style={{ display: 'flex', 'align-items': 'flex-start' }}>
+          <div style={{ display: 'flex', 'flex-direction': 'row', 'align-items': 'center' }}>
             <TextField
               fullWidth
               multiline
