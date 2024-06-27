@@ -73,7 +73,7 @@ export default function OwnCertificate(props: { certificate: Certificate | undef
               label="My Certificate"
               name="certificate"
               type="text"
-              rows={10}
+              rows={14}
               inputProps={{
                 // readOnly: true,  // readOnly does not work with multiline
                 style: {
@@ -84,7 +84,7 @@ export default function OwnCertificate(props: { certificate: Certificate | undef
               value={certText()}
             />
             <div>
-              <img src={qrCodeUrl()} alt="QR Code" style={{ 'margin-left': '20px' }} />
+              <img src={qrCodeUrl()} alt="QR Code" style={{ 'margin-left': '15px' }} />
             </div>
           </div>
         </CardContent>
