@@ -4,13 +4,12 @@ import { Show, createEffect, createSignal } from 'solid-js'
 import { bytesToBase64 } from '../../utils'
 import { Encoder } from '@ndn/tlv'
 import { Certificate } from '@ndn/keychain'
-import { toDataURL } from 'qrcode'
+import CertQrCode from './qr-gen'
 
 export default function OwnCertificate(props: { certificate: Certificate | undefined }) {
   const [expanded, setExpanded] = createSignal(true)
   const [nameStr, setNameStr] = createSignal('')
   const [certText, setCertText] = createSignal('')
-  const [qrCodeUrl, setQrCodeUrl] = createSignal('')
 
   createEffect(() => {
     const cert = props.certificate
@@ -32,17 +31,6 @@ export default function OwnCertificate(props: { certificate: Certificate | undef
       setNameStr('')
       setCertText('')
     }
-  })
-
-  // Generate QR-Code when certText change
-  createEffect(() => {
-    toDataURL(certText(), { errorCorrectionLevel: 'M' }) // TODO: hardcoded error-level
-      .then((url) => {
-        setQrCodeUrl(url)
-      })
-      .catch((e) => {
-        console.error('Error generating QR code', e)
-      })
   })
 
   return (
@@ -84,7 +72,7 @@ export default function OwnCertificate(props: { certificate: Certificate | undef
               value={certText()}
             />
             <div>
-              <img src={qrCodeUrl()} alt="QR Code" style={{ 'margin-left': '15px' }} />
+              <CertQrCode value={certText()} />
             </div>
           </div>
         </CardContent>
