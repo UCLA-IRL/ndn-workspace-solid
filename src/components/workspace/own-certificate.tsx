@@ -4,11 +4,13 @@ import { Show, createEffect, createSignal } from 'solid-js'
 import { bytesToBase64 } from '../../utils'
 import { Encoder } from '@ndn/tlv'
 import { Certificate } from '@ndn/keychain'
+import { toDataURL } from 'qrcode'
 
 export default function OwnCertificate(props: { certificate: Certificate | undefined }) {
   const [expanded, setExpanded] = createSignal(true)
   const [nameStr, setNameStr] = createSignal('')
   const [certText, setCertText] = createSignal('')
+  const [qrCodeUrl, setQrCodeUrl] = createSignal('')
 
   createEffect(() => {
     const cert = props.certificate
@@ -32,6 +34,17 @@ export default function OwnCertificate(props: { certificate: Certificate | undef
     }
   })
 
+  // Generate QR-Code when certText change
+  createEffect(() => {
+    toDataURL(certText(), { errorCorrectionLevel: 'M' }) // TODO: hardcoded error-level
+      .then((url) => {
+        setQrCodeUrl(url)
+      })
+      .catch((e) => {
+        console.error('Error generating QR code', e)
+      })
+  })
+
   return (
     <Card>
       <CardHeader
@@ -53,22 +66,27 @@ export default function OwnCertificate(props: { certificate: Certificate | undef
       <Show when={expanded()}>
         <Divider />
         <CardContent>
-          <TextField
-            fullWidth
-            multiline
-            label="My Certificate"
-            name="certificate"
-            type="text"
-            rows={10}
-            inputProps={{
-              // readOnly: true,  // readOnly does not work with multiline
-              style: {
-                'font-family': '"Roboto Mono", ui-monospace, monospace',
-                'white-space': 'pre',
-              },
-            }}
-            value={certText()}
-          />
+          <div style={{ display: 'flex', 'align-items': 'flex-start' }}>
+            <TextField
+              fullWidth
+              multiline
+              label="My Certificate"
+              name="certificate"
+              type="text"
+              rows={10}
+              inputProps={{
+                // readOnly: true,  // readOnly does not work with multiline
+                style: {
+                  'font-family': '"Roboto Mono", ui-monospace, monospace',
+                  'white-space': 'pre',
+                },
+              }}
+              value={certText()}
+            />
+            <div>
+              <img src={qrCodeUrl()} alt="QR Code" style={{ 'margin-left': '20px' }} />
+            </div>
+          </div>
         </CardContent>
       </Show>
     </Card>
