@@ -4,6 +4,7 @@ import { Show, createEffect, createSignal } from 'solid-js'
 import { bytesToBase64 } from '../../utils'
 import { Encoder } from '@ndn/tlv'
 import { Certificate } from '@ndn/keychain'
+import CertQrCode from './qr-gen'
 
 export default function OwnCertificate(props: { certificate: Certificate | undefined }) {
   const [expanded, setExpanded] = createSignal(true)
@@ -53,22 +54,27 @@ export default function OwnCertificate(props: { certificate: Certificate | undef
       <Show when={expanded()}>
         <Divider />
         <CardContent>
-          <TextField
-            fullWidth
-            multiline
-            label="My Certificate"
-            name="certificate"
-            type="text"
-            rows={10}
-            inputProps={{
-              // readOnly: true,  // readOnly does not work with multiline
-              style: {
-                'font-family': '"Roboto Mono", ui-monospace, monospace',
-                'white-space': 'pre',
-              },
-            }}
-            value={certText()}
-          />
+          <div style={{ display: 'flex', 'flex-direction': 'row', 'align-items': 'center' }}>
+            <TextField
+              fullWidth
+              multiline
+              label="My Certificate"
+              name="certificate"
+              type="text"
+              rows={14}
+              inputProps={{
+                // readOnly: true,  // readOnly does not work with multiline
+                style: {
+                  'font-family': '"Roboto Mono", ui-monospace, monospace',
+                  'white-space': 'pre',
+                },
+              }}
+              value={certText()}
+            />
+            <div>
+              <CertQrCode value={certText()} />
+            </div>
+          </div>
         </CardContent>
       </Show>
     </Card>
