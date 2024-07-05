@@ -213,7 +213,9 @@ export default function Root(
             >
               <For each={props.routes}>
                 {(item) => (
-                  <BottomNavigationAction component="a" icon={item.icon} href={item.href} label={item.title} />
+                  <Show when={item.trigger ? item.trigger() : true}>
+                    <BottomNavigationAction component="a" icon={item.icon} href={item.href} label={item.title} />
+                  </Show>
                 )}
               </For>
             </BottomNavigation>
