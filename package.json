@@ -32,7 +32,7 @@
     "@ndn/rdr": "https://ndnts-nightly.ndn.today/rdr.tgz",
     "@ndn/segmented-object": "https://ndnts-nightly.ndn.today/segmented-object.tgz",
     "@ndn/svs": "https://ndnts-nightly.ndn.today/svs.tgz",
-    "@ndn/sync": "https://ndnts-nightly.ndn.today/sync.tgz",
+    "@ndn/sync-api": "https://ndnts-nightly.ndn.today/sync-api.tgz",
     "@ndn/tlv": "https://ndnts-nightly.ndn.today/tlv.tgz",
     "@ndn/util": "https://ndnts-nightly.ndn.today/util.tgz",
     "@ndn/web-bluetooth-transport": "https://ndnts-nightly.ndn.today/web-bluetooth-transport.tgz",
