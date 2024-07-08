@@ -6,7 +6,7 @@ export default function CertQrCode(props: { value: string }) {
 
   createEffect(() => {
     if (props.value) {
-      qrcode.toDataURL(props.value, { errorCorrectionLevel: 'L' }, (error, dataUrl) => {
+      qrcode.toDataURL(props.value, { errorCorrectionLevel: 'M' }, (error, dataUrl) => {
         if (error) {
           console.error('Unable to generate QRCode:', error)
         } else {

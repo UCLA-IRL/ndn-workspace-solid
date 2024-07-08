@@ -15,7 +15,7 @@ import Root from './components/root-wrapper'
 import App from './App'
 import ShareLatex from './components/share-latex'
 import OauthTest from './components/oauth-test'
-import { NdnWorkspaceProvider } from './Context'
+import { NdnWorkspaceProvider, useNdnWorkspace } from './Context'
 import { Connect, StoredConns } from './components/connect'
 import { Workspace, Profile, ConvertTestbed } from './components/workspace'
 import { project } from './backend/models'
@@ -34,11 +34,21 @@ const rootComponent = (props: RouteSectionProps) => (
         icon: <DescriptionIcon />,
         href: `/latex/${project.RootId}`,
         title: 'Editor',
+        level: 1, // not displayed by default
+        trigger: () => {
+          const { booted } = useNdnWorkspace()!
+          return booted()
+        },
       },
       {
         icon: <ChatIcon />,
         href: '/chat',
         title: 'Chat',
+        level: 1, // not displayed by default
+        trigger: () => {
+          const { booted } = useNdnWorkspace()!
+          return booted()
+        },
       },
       {
         icon: <SettingsEthernetIcon />,

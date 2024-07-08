@@ -10,6 +10,7 @@ import { Decoder, Encoder } from '@ndn/tlv'
 import { Data } from '@ndn/packet'
 import { Certificate } from '@ndn/keychain'
 import QrReader from './qr-read'
+import CertQrCode from './qr-gen'
 
 export default function AppNamespace(props: {
   trustAnchor: Certificate | undefined
@@ -135,26 +136,31 @@ export default function AppNamespace(props: {
       <Show when={expanded()}>
         <Divider />
         <CardContent>
-          <TextField
-            fullWidth
-            required
-            multiline
-            label="Trust Anchor"
-            name="trust-anchor"
-            type="text"
-            rows={10}
-            inputProps={{
-              style: {
-                'font-family': '"Roboto Mono", ui-monospace, monospace',
-                'white-space': 'pre',
-              },
-            }}
-            // disabled={readOnly()}  // disabled not working with multiline
-            helperText={errorText()}
-            error={errorText() != ''}
-            value={value()}
-            onChange={(event) => onChange(event.target.value)}
-          />
+          <div style={{ display: 'flex', 'flex-direction': 'row', 'align-items': 'center' }}>
+            <TextField
+              fullWidth
+              required
+              multiline
+              label="Trust Anchor"
+              name="trust-anchor"
+              type="text"
+              rows={14}
+              inputProps={{
+                style: {
+                  'font-family': '"Roboto Mono", ui-monospace, monospace',
+                  'white-space': 'pre',
+                },
+              }}
+              // disabled={readOnly()}  // disabled not working with multiline
+              helperText={errorText()}
+              error={errorText() != ''}
+              value={value()}
+              onChange={(event) => onChange(event.target.value)}
+            />
+            <div>
+              <CertQrCode value={value()} />
+            </div>
+          </div>
         </CardContent>
       </Show>
     </Card>
