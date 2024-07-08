@@ -14,7 +14,7 @@ import {
   Stack,
 } from '@suid/material'
 import { Breakpoint, createTheme, Theme, ThemeProvider } from '@suid/material/styles'
-import { For, JSX, ParentProps } from 'solid-js'
+import { For, JSX, ParentProps, Show } from 'solid-js'
 import { useNdnWorkspace } from '../Context'
 import { Portal } from 'solid-js/web'
 
@@ -23,15 +23,44 @@ import './common.scss'
 const drawerWidth = 200
 const navBarHeight = 56
 
-function RouteItem(props: { icon: JSX.Element; title: string; href: string }) {
+function RouteItem(props: { icon: JSX.Element; title: string; href: string; level?: number; trigger?: () => boolean }) {
+  const { icon, title, href, level = 0, trigger = () => true } = props
+
+  // Left margins
+  const marginLeft = `${level * 16}px`
+
   return (
     <ListItem disablePadding>
-      <ListItemButton component="a" href={props.href}>
-        <ListItemIcon sx={{ color: 'inherit' }}>{props.icon}</ListItemIcon>
-        <ListItemText primary={props.title} />
-      </ListItemButton>
+      <Show when={level >= 1 && trigger()}>
+        <ListItemButton
+          component="a"
+          href={href}
+          sx={{
+            marginLeft,
+            position: 'relative',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: '2px',
+              backgroundColor: 'white',
+            },
+          }}
+        >
+          <ListItemIcon sx={{ color: 'inherit' }}>{icon}</ListItemIcon>
+          <ListItemText primary={title} />
+        </ListItemButton>
+      </Show>
+      <Show when={level == 0 && trigger()}>
+        <ListItemButton component="a" href={href}>
+          <ListItemIcon sx={{ color: 'inherit' }}>{icon}</ListItemIcon>
+          <ListItemText primary={title} />
+        </ListItemButton>
+      </Show>
     </ListItem>
-  )
+  ) // If level < 0, not displayed
 }
 
 const ColorVariables = (props: { theme: Theme<Breakpoint> }) => (
@@ -68,7 +97,13 @@ const ColorVariables = (props: { theme: Theme<Breakpoint> }) => (
 
 export default function Root(
   props: ParentProps<{
-    routes: Array<{ icon: JSX.Element; title: string; href: string }>
+    routes: Array<{
+      icon: JSX.Element
+      title: string
+      href: string
+      level?: number
+      trigger?: () => boolean
+    }>
   }>,
 ) {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
@@ -117,7 +152,15 @@ export default function Root(
             >
               <List>
                 <For each={props.routes}>
-                  {(item) => <RouteItem icon={item.icon} href={item.href} title={item.title} />}
+                  {(item) => (
+                    <RouteItem
+                      icon={item.icon}
+                      href={item.href}
+                      title={item.title}
+                      level={item.level}
+                      trigger={item.trigger}
+                    />
+                  )}
                 </For>
               </List>
             </Drawer>
@@ -170,7 +213,9 @@ export default function Root(
             >
               <For each={props.routes}>
                 {(item) => (
-                  <BottomNavigationAction component="a" icon={item.icon} href={item.href} label={item.title} />
+                  <Show when={item.trigger ? item.trigger() : true}>
+                    <BottomNavigationAction component="a" icon={item.icon} href={item.href} label={item.title} />
+                  </Show>
                 )}
               </For>
             </BottomNavigation>
