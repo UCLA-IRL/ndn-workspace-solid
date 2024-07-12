@@ -254,7 +254,7 @@ function App() {
                   <div>
                     <img
                       // src="../images/connected.png"
-                      src = "images/connected.png" // absolute path
+                      src="images/connected.png" // absolute path
                       alt="Connected to forwarder successfully screenshot"
                       style={{ 'max-width': '30%', height: 'auto', 'margin-top': '10px' }}
                     />
@@ -267,7 +267,7 @@ function App() {
                   <div>
                     <img
                       // src="../images/registered.png"
-                      src = "images/registered.png" // absolute path
+                      src="images/registered.png" // absolute path
                       alt="Registered routes successfully screenshot"
                       style={{ 'max-width': '28%', height: 'auto', 'margin-top': '10px' }}
                     />

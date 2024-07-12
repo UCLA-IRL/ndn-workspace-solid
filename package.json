@@ -4,7 +4,7 @@
   "version": "1.2.1",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "./build-meta.bash && vite",
     "build": "./build-meta.bash && tsc && vite build",
     "lint": "eslint . --max-warnings 0",
     "preview": "vite preview",
