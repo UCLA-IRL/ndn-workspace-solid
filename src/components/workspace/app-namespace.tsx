@@ -120,7 +120,8 @@ export default function AppNamespace(props: {
               Please input the trust anchor exported by cert-dump
             </Typography>
             <Typography color="secondary" component={'p'}>
-              After following instructions on <a href="/">home page</a>, this can be obtained by: <code>ndnsec cert-dump -i /my-workspace</code>
+              After following instructions on <a href="/">home page</a>, this can be obtained by:{' '}
+              <code>ndnsec cert-dump -i /my-workspace</code>
             </Typography>
             <QrReader popupOpen={isPopupOpen()} setValue={setValue} />
           </Show>

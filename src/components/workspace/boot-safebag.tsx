@@ -85,8 +85,8 @@ export default function BootSafebag(props: {
             <Match when={nameStr().length === 0}>
               <Typography color="secondary">Please input the safebag and passphrase</Typography>
               <Typography color="secondary" component={'p'}>
-              This can be obtained by: <code>ndnsec export -i /my-workspace/alice</code>
-            </Typography>
+                This can be obtained by: <code>ndnsec export -i /my-workspace/alice</code>
+              </Typography>
             </Match>
             <Match when={pwdErrorText().length !== 0}>
               <Typography color="secondary" fontFamily='"Roboto Mono", ui-monospace, monospace'>
