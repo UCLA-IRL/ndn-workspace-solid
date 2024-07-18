@@ -117,24 +117,6 @@ function App() {
           infrastructure. Workspace then uses the State Vector Sync protocol to keep all collaborators in sync.
         </Typography>
 
-{/*         <Button
-          href="https://irl.cs.ucla.edu/data/files/submissions/Workspace.pdf"
-          variant="contained"
-          color="primary"
-          sx={{ mr: 1, mb: 1 }}
-        >
-          Workspace Paper
-        </Button>
-
-        <Button
-          href="https://irl.cs.ucla.edu/data/files/submissions/WWW_2024_Microverse_Short_Paper.pdf"
-          variant="contained"
-          color="primary"
-          sx={{ mr: 1, mb: 1 }}
-        >
-          Secure Web Objects
-        </Button> */}
-
         <Button href="https://named-data.net/" variant="contained" color="primary" sx={{ mr: 1, mb: 1 }}>
           Learn More about NDN
         </Button>
