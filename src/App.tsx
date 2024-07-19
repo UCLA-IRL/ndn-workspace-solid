@@ -148,21 +148,6 @@ function App() {
           </>
           <>
             <Typography variant="h5" sx={{ mb: 1, mt: 3, fontWeight: 100 }}>
-              Join a Workspace
-            </Typography>
-            To join an existing Workspace, perform the following steps after ensuring you are connected to the NDN
-            testbed.
-            <ol>
-              <li>Open the "Workspace" tab</li>
-              <li>Click on the "Convert" button</li>
-              <li>Enter the full trust anchor name of the workspace</li>
-              <li>Click on the "Join" button</li>
-            </ol>
-            You can now join the workspace any time from the "Workspace" tab, and start collaborating on documents in
-            the "Editor" tab.
-          </>
-          <>
-            <Typography variant="h5" sx={{ mb: 1, mt: 3, fontWeight: 100 }}>
               Create a Workspace
             </Typography>
             To create a new Workspace, you need to generate a trust anchor that identifies the Workspace and the user
@@ -222,6 +207,51 @@ function App() {
               </li>
 
               <li>Click on the "Join" button to create the workspace.</li>
+            </ol>
+          </>
+          <>
+            <Typography variant="h5" sx={{ mb: 1, mt: 3, fontWeight: 100 }}>
+              Join a Workspace
+            </Typography>
+            To join an existing workspace instance, ask the instance owner for the trust anchor, and coordinate with the
+            owner to have a username within the instance. Assuming the owner plan to name you as bob, then perform the
+            following steps to generate a certificate signing request.
+            <ol>
+              <li>
+                Generate a key and certificate for <code>/my-workspace/alice</code>
+                <code style={{ 'padding-left': '15px', display: 'block' }}>
+                  ndnsec key-gen /my-workspace/bob <br />
+                  ndnsec sign-req /my-workspace/bob &gt; bob.csr <br />
+                </code>
+              </li>
+              <li>
+                Send bob.csr to the owner, and let the owner perform the following step and send back the signed
+                certficate generated from below.
+                <code style={{ 'padding-left': '15px', display: 'block' }}>
+                  ndnsec cert-gen -s /my-workspace -i my-workspace bob.csr &gt; bob.cert
+                </code>
+              </li>
+              <li>
+                Install the certificate and export the identity into safebag.
+                <code style={{ 'padding-left': '15px', display: 'block' }}>
+                  ndnsec cert-install bob.cert <br />
+                </code>
+              </li>
+              <li>
+                Open the app, goto the workspace tab, click add profile (icon in the top right corner), the app will ask
+                you to configure trust anchor (obtained from the instance owner) and safebag, which is the combination
+                of certificate and encrypted private key.
+                <div style={{ 'padding-left': '15px' }}>
+                  Generate safebag: <code>ndnsec export -i /my-workspace/bob</code>
+                </div>
+                <small>
+                  The terminal will ask you for a passphrase for encrypting your private key. Make sure you input the
+                  same passphrase when configuring your safebag in the app.
+                </small>
+              </li>
+              <li>Click on the "Join" button to create the workspace.</li>
+              You can now join the workspace any time from the "Workspace" tab, and start collaborating on documents in
+              the "Editor" tab.
             </ol>
           </>
           <>

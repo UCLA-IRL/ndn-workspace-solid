@@ -82,19 +82,13 @@ export default function ConvertTestbed() {
 
   return (
     <Card>
-      <CardHeader
-        sx={{ textAlign: 'left' }}
-        title="Convert Testbed Cert as Workspace Identity"
-        subheader={
-          <Typography color="primary" fontFamily='"Roboto Mono", ui-monospace, monospace'>
-            /ndn/multicast/workspace-test
-          </Typography>
-        }
-      />
+      <CardHeader sx={{ textAlign: 'left' }} title="Convert Testbed Cert as Workspace Identity" />
       <Divider />
       <CardContent>
-        This page will let you convert a testbed certificate into a workspace certificate using proof-of-possession.
-        Please connect to the testbed with a valid certificate and provide the full name of the trust anchor.
+        This is designed for Workspace instances which have CAs reachable through testbed. Please refer to home page on
+        how to join normal Workspace instances. This page will let you convert a testbed certificate into a workspace
+        certificate using proof-of-possession. Please connect to the testbed with a valid certificate and provide the
+        full name of the trust anchor.
       </CardContent>
       <Divider />
       <CardContent>
