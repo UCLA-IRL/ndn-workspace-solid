@@ -1,26 +1,31 @@
 import AppTools from '../app-tools'
 import FileList from '../file-list'
 import LatexDoc from '../latex-doc'
-import NewItemModal, { ModalState } from '../new-item-modal'
+import NewItemModal, { FileType } from '../new-item-modal'
 import { Button, Paper } from '@suid/material'
 import { project } from '../../../backend/models'
-import { Accessor, Match, Setter, Show, Switch } from 'solid-js'
+import { Accessor, Match, Setter, Show, Switch, createSignal } from 'solid-js'
 import RichDoc from '../rich-doc'
 import { ViewValues } from '../types'
 import PdfViewer from '../pdf-viewer/pdf-viewer'
 import styles from './styles.module.scss'
 import { NdnSvsAdaptor } from '@ucla-irl/ndnts-aux/adaptors'
+import RenameItem from '../rename-item'
+import { ModalState } from '.'
 
 export default function ShareLatexComponent(props: {
   rootUri: string
   item: project.Item | undefined
   folderChildren: string[] | undefined
+  fileType: Accessor<FileType>
+  setFileType: Setter<FileType>
   modalState: Accessor<ModalState>
   setModalState: Setter<ModalState>
   pathIds: () => string[]
   resolveItem: (id: string) => project.Item | undefined
   deleteItem: (index: number) => void
-  createItem: (name: string, state: ModalState, blob?: Uint8Array) => void
+  renameItem: (id: string, newName: string) => void
+  createItem: (name: string, state: FileType, blob?: Uint8Array) => void
   onExportZip: () => void
   onExportFlatZip: () => void
   onCompile: () => Promise<void>
@@ -34,12 +39,28 @@ export default function ShareLatexComponent(props: {
   username: string
   yjsProvider: Accessor<NdnSvsAdaptor | undefined>
 }) {
+  const [fileId, setFileId] = createSignal('')
+
   return (
     <>
-      <Show when={props.modalState() !== ''}>
+      <Show when={props.modalState() === 'rename'}>
+        <RenameItem
+          fileType={props.fileType()}
+          fileId={fileId()}
+          onCancel={() => {
+            props.setModalState('')
+            props.setFileType('')
+          }}
+          onSubmit={props.renameItem}
+        />
+      </Show>
+      <Show when={props.modalState() === 'create'}>
         <NewItemModal
-          modalState={props.modalState()}
-          onCancel={() => props.setModalState('')}
+          fileType={props.fileType()}
+          onCancel={() => {
+            props.setModalState('')
+            props.setFileType('')
+          }}
           onSubmit={props.createItem}
         />
       </Show>
@@ -51,13 +72,34 @@ export default function ShareLatexComponent(props: {
         view={props.view}
         setView={props.setView}
         menuItems={[
-          { name: 'New folder', onClick: () => props.setModalState('folder') },
-          { name: 'New tex', onClick: () => props.setModalState('doc') },
+          {
+            name: 'New folder',
+            onClick: () => {
+              props.setFileType('folder')
+              props.setModalState('create')
+            },
+          },
+          {
+            name: 'New tex',
+            onClick: () => {
+              props.setFileType('doc')
+              props.setModalState('create')
+            },
+          },
           {
             name: 'New rich doc',
-            onClick: () => props.setModalState('richDoc'),
+            onClick: () => {
+              props.setFileType('richDoc')
+              props.setModalState('create')
+            },
           },
-          { name: 'Upload blob', onClick: () => props.setModalState('upload') },
+          {
+            name: 'Upload blob',
+            onClick: () => {
+              props.setFileType('upload')
+              props.setModalState('create')
+            },
+          },
           { name: 'divider' },
           { name: 'Download as zip', onClick: props.onExportZip },
           { name: 'Download as flat zip', onClick: props.onExportFlatZip },
@@ -82,6 +124,11 @@ export default function ShareLatexComponent(props: {
                     subItems={props.folderChildren!}
                     resolveItem={props.resolveItem}
                     deleteItem={props.deleteItem}
+                    renameItem={(id: string) => {
+                      setFileId(id)
+                      props.setFileType('') // TODO: placeholder, could further divide rename-funcionality based on file types
+                      props.setModalState('rename')
+                    }}
                   />
                 </Paper>
               </Match>

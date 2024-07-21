@@ -1,5 +1,5 @@
 import * as Y from 'yjs'
-import { ModalState } from '../new-item-modal'
+import { FileType } from '../new-item-modal'
 import { useParams, useNavigate } from '@solidjs/router'
 import { project } from '../../../backend/models'
 import { createEffect, createSignal, onCleanup } from 'solid-js'
@@ -17,6 +17,8 @@ import { PdfTeXEngine } from '../../../vendor/swiftlatex/PdfTeXEngine'
 import { LatexEnginePath } from '../../../constants'
 import { ViewValues } from '../types'
 import toast from 'solid-toast'
+
+export type ModalState = '' | 'rename' | 'create'
 
 export default function ShareLatex(props: { rootUri: string }) {
   const { rootDoc, syncAgent, booted, fw, yjsProvider } = useNdnWorkspace()!
@@ -49,6 +51,7 @@ export default function ShareLatex(props: { rootUri: string }) {
   }
 
   const [folderChildren, setFolderChildren] = createSignal<string[]>()
+  const [fileType, setFileType] = createSignal<FileType>('')
   const [modalState, setModalState] = createSignal<ModalState>('')
   const [view, setView] = createSignal<ViewValues>('Editor')
   const [compilationLog, setCompilationLog] = createSignal<string>('')
@@ -94,7 +97,30 @@ export default function ShareLatex(props: { rootUri: string }) {
     }
   }
 
-  const createItem = (name: string, state: ModalState, blob?: Uint8Array) => {
+  const renameItem = (id: string, newName: string) => {
+    /* For renaming, we
+      1. change the name (not ID) of the original blob
+      2. remove and append to cur.items, so that the person editting is not affected */
+    const cur = item()
+    const rootDocVal = rootDoc()
+    if (newName !== '' && cur?.kind === 'folder') {
+      // const to = props.rootUri + '/' + newId
+      const curItem = rootDocVal!.latex[id]
+      const curIdx = cur.items.indexOf(id)
+
+      if (curItem !== undefined) {
+        curItem!.name = newName
+        cur.items.splice(curIdx, 1)
+        cur.items.push(id) // the root document is not modified, so the person editting this file will not be affected.
+      }
+
+      // navigate(to, { replace: true })
+    }
+    setModalState('')
+    setFileType('')
+  }
+
+  const createItem = (name: string, state: FileType, blob?: Uint8Array) => {
     const cur = item() // Convenient for TS check
     const rootDocVal = rootDoc()
     if (name !== '' && cur?.kind === 'folder') {
@@ -166,6 +192,7 @@ export default function ShareLatex(props: { rootUri: string }) {
           })
       }
     }
+    setFileType('')
     setModalState('')
   }
 
@@ -371,11 +398,14 @@ export default function ShareLatex(props: { rootUri: string }) {
       rootUri={props.rootUri}
       item={item()}
       folderChildren={folderChildren()}
+      fileType={fileType}
+      setFileType={setFileType}
       modalState={modalState}
       setModalState={setModalState}
       pathIds={pathIds}
       resolveItem={resolveItem}
       deleteItem={deleteItem}
+      renameItem={renameItem}
       createItem={createItem}
       onExportZip={onExportZip}
       onExportFlatZip={onExportFlatZip}
