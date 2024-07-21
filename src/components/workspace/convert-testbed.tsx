@@ -1,4 +1,4 @@
-import { Button, Card, CardContent, CardHeader, Divider, Stack, TextField, Typography } from '@suid/material'
+import { Button, Card, CardContent, CardHeader, Divider, Stack, TextField } from '@suid/material'
 import * as main from '../../backend/main'
 import { createSignal } from 'solid-js'
 import { digestSigning } from '@ndn/packet'
