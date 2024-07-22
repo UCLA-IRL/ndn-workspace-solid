@@ -1,10 +1,22 @@
-import { Card, CardContent, CardHeader, Divider, TextField, Stack, IconButton, Typography } from '@suid/material'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  Divider,
+  TextField,
+  Stack,
+  IconButton,
+  Typography,
+  Button,
+  Backdrop,
+} from '@suid/material'
 import { ExpandLess as ExpandLessIcon, ExpandMore as ExpandMoreIcon } from '@suid/icons-material'
 import { Match, Show, Switch, createEffect, createSignal } from 'solid-js'
 import { base64ToBytes } from '../../utils'
 import { Decoder } from '@ndn/tlv'
 import { SafeBag } from '@ndn/ndnsec'
 import { Certificate } from '@ndn/keychain'
+import CertQrCode from './qr-gen'
 
 export default function BootSafebag(props: {
   setCertificate: (value: Certificate | undefined) => void
@@ -18,6 +30,7 @@ export default function BootSafebag(props: {
   const [errorText, setErrorText] = createSignal('')
   const [pwdErrorText, setPwdErrorText] = createSignal('')
   const [safeBag, setSafeBag] = createSignal<SafeBag>()
+  const [sbagQrOpen, setSbagQrOpen] = createSignal(false)
 
   // Disable when bootstrapping
   const readOnly = () => props.inProgress
@@ -111,7 +124,14 @@ export default function BootSafebag(props: {
       <Show when={expanded()}>
         <Divider />
         <CardContent>
-          <Stack spacing={2}>
+          <div
+            style={{
+              display: 'flex',
+              'flex-direction': 'column',
+              'align-items': 'flex-end',
+              'row-gap': '10px',
+            }}
+          >
             <TextField
               fullWidth
               required
@@ -144,7 +164,18 @@ export default function BootSafebag(props: {
               value={safebagText()}
               onChange={(event) => setSafebagText(event.target.value)}
             />
-          </Stack>
+            <Button onClick={() => setSbagQrOpen(true)} variant="contained">
+              {' '}
+              Show QR Code{' '}
+            </Button>
+            <Backdrop
+              sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+              open={sbagQrOpen()}
+              onClick={() => setSbagQrOpen(false)}
+            >
+              <CertQrCode value={safebagText()} />
+            </Backdrop>
+          </div>
         </CardContent>
       </Show>
     </Card>
