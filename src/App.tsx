@@ -206,6 +206,17 @@ function App() {
                 </small>
               </li>
 
+              <li>
+                For convenience, you can store trust anchors and safebags in QR code and scan them for quick fill-in. On
+                Linux-based OS's, the following command converts text to QR code (using trust anchor as example):
+                <div style={{ 'padding-left': '15px' }}>
+                  <code>ndnsec cert-dump -i /my-workspace | qrencode -o - | feh -</code> <br />
+                </div>
+                <small>
+                  To install the necessary packages, use the command <code>apt install</code>
+                </small>
+              </li>
+
               <li>Click on the "Join" button to create the workspace.</li>
             </ol>
           </>
@@ -247,6 +258,16 @@ function App() {
                 <small>
                   The terminal will ask you for a passphrase for encrypting your private key. Make sure you input the
                   same passphrase when configuring your safebag in the app.
+                </small>
+              </li>
+              <li>
+                You may also store and scan your credentials in QR Code. On Linux-based OS's, the following command
+                converts text to QR code (using trust anchor as example):
+                <div style={{ 'padding-left': '15px' }}>
+                  <code>ndnsec cert-dump -i /my-workspace | qrencode -o - | feh -</code> <br />
+                </div>
+                <small>
+                  To install the necessary packages, use the command <code>apt install</code>
                 </small>
               </li>
               <li>Click on the "Join" button to create the workspace.</li>
