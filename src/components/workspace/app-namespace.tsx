@@ -1,4 +1,14 @@
-import { Card, CardContent, CardHeader, Divider, TextField, IconButton, Typography } from '@suid/material'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  Divider,
+  TextField,
+  IconButton,
+  Typography,
+  Backdrop,
+  Button,
+} from '@suid/material'
 import {
   ExpandLess as ExpandLessIcon,
   ExpandMore as ExpandMoreIcon,
@@ -24,6 +34,7 @@ export default function AppNamespace(props: {
   const [edited, setEdited] = createSignal(false)
   //open or close video stream
   const [isPopupOpen, setPopupOpen] = createSignal(false)
+  const [taQrOpen, setTaQrOpen] = createSignal(false)
 
   // const readyToImport = () => !readOnly() && nameStr().length === 0
 
@@ -137,7 +148,14 @@ export default function AppNamespace(props: {
       <Show when={expanded()}>
         <Divider />
         <CardContent>
-          <div style={{ display: 'flex', 'flex-direction': 'row', 'align-items': 'center' }}>
+          <div
+            style={{
+              display: 'flex',
+              'flex-direction': 'column',
+              'align-items': 'flex-end',
+              'row-gap': '10px',
+            }}
+          >
             <TextField
               fullWidth
               required
@@ -158,9 +176,17 @@ export default function AppNamespace(props: {
               value={value()}
               onChange={(event) => onChange(event.target.value)}
             />
-            <div>
+            <Button onClick={() => setTaQrOpen(true)} variant="contained">
+              {' '}
+              Show QR Code{' '}
+            </Button>
+            <Backdrop
+              sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+              open={taQrOpen()}
+              onClick={() => setTaQrOpen(false)}
+            >
               <CertQrCode value={value()} />
-            </div>
+            </Backdrop>
           </div>
         </CardContent>
       </Show>

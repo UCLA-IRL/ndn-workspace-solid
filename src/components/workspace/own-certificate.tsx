@@ -1,4 +1,14 @@
-import { Card, CardContent, CardHeader, Divider, TextField, IconButton, Typography } from '@suid/material'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  Divider,
+  TextField,
+  IconButton,
+  Typography,
+  Button,
+  Backdrop,
+} from '@suid/material'
 import { ExpandLess as ExpandLessIcon, ExpandMore as ExpandMoreIcon } from '@suid/icons-material'
 import { Show, createEffect, createSignal } from 'solid-js'
 import { bytesToBase64 } from '../../utils'
@@ -10,6 +20,7 @@ export default function OwnCertificate(props: { certificate: Certificate | undef
   const [expanded, setExpanded] = createSignal(true)
   const [nameStr, setNameStr] = createSignal('')
   const [certText, setCertText] = createSignal('')
+  const [certQrOpen, setCertQrOpen] = createSignal(false)
 
   createEffect(() => {
     const cert = props.certificate
@@ -54,7 +65,7 @@ export default function OwnCertificate(props: { certificate: Certificate | undef
       <Show when={expanded()}>
         <Divider />
         <CardContent>
-          <div style={{ display: 'flex', 'flex-direction': 'row', 'align-items': 'center' }}>
+          <div style={{ display: 'flex', 'flex-direction': 'column', 'align-items': 'flex-end', 'row-gap': '10px' }}>
             <TextField
               fullWidth
               multiline
@@ -71,9 +82,17 @@ export default function OwnCertificate(props: { certificate: Certificate | undef
               }}
               value={certText()}
             />
-            <div>
+            <Button onClick={() => setCertQrOpen(true)} variant="contained">
+              {' '}
+              Show QR Code{' '}
+            </Button>
+            <Backdrop
+              sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+              open={certQrOpen()}
+              onClick={() => setCertQrOpen(false)}
+            >
               <CertQrCode value={certText()} />
-            </div>
+            </Backdrop>
           </div>
         </CardContent>
       </Show>
