@@ -207,12 +207,19 @@ function App() {
               </li>
 
               <li>
-                If you have a display, you may also store trust anchors and safebags in QR code and scan them for quick fill-in. On
-                Linux-based OS's, the following command displays texts in QR Code:
+                If you have a display, you may also store trust anchors and safebags in QR code and scan them for quick
+                fill-in. On Linux-based OS's, the following command displays texts in QR Code:
                 <div style={{ 'padding-left': '15px' }}>
-                  To install the packages, run <code>apt install qrencode feh</code>. You may need to put <code>sudo</code> at front depending on your setup <br />
-                  To display the QR code, run <code>ndnsec cert-dump -i /my-workspace | qrencode -o - | feh -</code> <br />
-                  <small>Here we use trust anchor as example, replace the first part (before the first '|') with safebag generation to get the QR code for safebag.</small>
+                  To install the packages, run <code>apt install qrencode feh</code>. You may need to put{' '}
+                  <code>sudo</code> at front depending on your setup <br />
+                  To display the QR code, run <code>
+                    ndnsec cert-dump -i /my-workspace | qrencode -o - | feh -
+                  </code>{' '}
+                  <br />
+                  <small>
+                    Here we use trust anchor as example, replace the first part (before the first '|') with safebag
+                    generation to get the QR code for safebag.
+                  </small>
                 </div>
               </li>
 
@@ -260,12 +267,19 @@ function App() {
                 </small>
               </li>
               <li>
-                If you have a display, you may also store trust anchors and safebags in QR code and scan them for quick fill-in. On
-                Linux-based OS's, the following command displays texts in QR Code:
+                If you have a display, you may also store trust anchors and safebags in QR code and scan them for quick
+                fill-in. On Linux-based OS's, the following command displays texts in QR Code:
                 <div style={{ 'padding-left': '15px' }}>
-                  To install the packages, run <code>apt install qrencode feh</code>. You may need to put <code>sudo</code> at front depending on your setup <br />
-                  To display the QR code, run <code>ndnsec cert-dump -i /my-workspace | qrencode -o - | feh -</code> <br />
-                  <small>Here we use trust anchor as example, replace the first part (before the first '|') with safebag generation to get the QR code for safebag.</small>
+                  To install the packages, run <code>apt install qrencode feh</code>. You may need to put{' '}
+                  <code>sudo</code> at front depending on your setup <br />
+                  To display the QR code, run <code>
+                    ndnsec cert-dump -i /my-workspace | qrencode -o - | feh -
+                  </code>{' '}
+                  <br />
+                  <small>
+                    Here we use trust anchor as example, replace the first part (before the first '|') with safebag
+                    generation to get the QR code for safebag.
+                  </small>
                 </div>
               </li>
               <li>Click on the "Join" button to create the workspace.</li>
