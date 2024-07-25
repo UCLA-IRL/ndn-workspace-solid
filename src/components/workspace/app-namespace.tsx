@@ -134,7 +134,13 @@ export default function AppNamespace(props: {
               After following instructions on <a href="/">home page</a>, this can be obtained by:{' '}
               <code>ndnsec cert-dump -i /my-workspace</code>
             </Typography>
-            <QrReader popupOpen={isPopupOpen()} setValue={setValue} />
+            <Backdrop
+              sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+              open={isPopupOpen()}
+              onClick={() => setPopupOpen(false)}
+            >
+              <QrReader popupOpen={isPopupOpen()} setValue={setValue} />
+            </Backdrop>
           </Show>
         }
         action={

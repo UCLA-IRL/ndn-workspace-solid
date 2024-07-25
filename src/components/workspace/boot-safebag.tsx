@@ -9,13 +9,18 @@ import {
   Button,
   Backdrop,
 } from '@suid/material'
-import { ExpandLess as ExpandLessIcon, ExpandMore as ExpandMoreIcon } from '@suid/icons-material'
+import {
+  ExpandLess as ExpandLessIcon,
+  ExpandMore as ExpandMoreIcon,
+  QrCodeScanner as QRIcon,
+} from '@suid/icons-material'
 import { Match, Show, Switch, createEffect, createSignal } from 'solid-js'
 import { base64ToBytes } from '../../utils'
 import { Decoder } from '@ndn/tlv'
 import { SafeBag } from '@ndn/ndnsec'
 import { Certificate } from '@ndn/keychain'
 import CertQrCode from './qr-gen'
+import QrReader from './qr-read'
 
 export default function BootSafebag(props: {
   setCertificate: (value: Certificate | undefined) => void
@@ -30,6 +35,7 @@ export default function BootSafebag(props: {
   const [pwdErrorText, setPwdErrorText] = createSignal('')
   const [safeBag, setSafeBag] = createSignal<SafeBag>()
   const [sbagQrOpen, setSbagQrOpen] = createSignal(false)
+  const [isPopupOpen, setPopupOpen] = createSignal(false)
 
   // Disable when bootstrapping
   const readOnly = () => props.inProgress
@@ -95,10 +101,22 @@ export default function BootSafebag(props: {
         subheader={
           <Switch>
             <Match when={nameStr().length === 0}>
-              <Typography color="secondary">Please input the safebag and passphrase</Typography>
+              <IconButton onClick={() => setPopupOpen(!isPopupOpen())}>
+                <QRIcon color="primary" />
+              </IconButton>
+              <Typography color="secondary" component={'span'}>
+                Please input the safebag and passphrase
+              </Typography>
               <Typography color="secondary" component={'p'}>
                 This can be obtained by: <code>ndnsec export -i /my-workspace/alice</code>
               </Typography>
+              <Backdrop
+                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                open={isPopupOpen()}
+                onClick={() => setPopupOpen(false)}
+              >
+                <QrReader popupOpen={isPopupOpen()} setValue={setSafebagText} />
+              </Backdrop>
             </Match>
             <Match when={pwdErrorText().length !== 0}>
               <Typography color="secondary" fontFamily='"Roboto Mono", ui-monospace, monospace'>
