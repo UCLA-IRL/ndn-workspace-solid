@@ -207,14 +207,13 @@ function App() {
               </li>
 
               <li>
-                For convenience, you can store trust anchors and safebags in QR code and scan them for quick fill-in. On
-                Linux-based OS's, the following command converts text to QR code (using trust anchor as example):
+                If you have a display, you may also store trust anchors and safebags in QR code and scan them for quick fill-in. On
+                Linux-based OS's, the following command displays texts in QR Code:
                 <div style={{ 'padding-left': '15px' }}>
-                  <code>ndnsec cert-dump -i /my-workspace | qrencode -o - | feh -</code> <br />
+                  To install the packages, run <code>apt install qrencode feh</code>. You may need to put <code>sudo</code> at front depending on your setup <br />
+                  To display the QR code, run <code>ndnsec cert-dump -i /my-workspace | qrencode -o - | feh -</code> <br />
+                  <small>Here we use trust anchor as example, replace the first part (before the first '|') with safebag generation to get the QR code for safebag.</small>
                 </div>
-                <small>
-                  To install the necessary packages, use the command <code>apt install</code>
-                </small>
               </li>
 
               <li>Click on the "Join" button to create the workspace.</li>
@@ -261,14 +260,13 @@ function App() {
                 </small>
               </li>
               <li>
-                You may also store and scan your credentials in QR Code. On Linux-based OS's, the following command
-                converts text to QR code (using trust anchor as example):
+                If you have a display, you may also store trust anchors and safebags in QR code and scan them for quick fill-in. On
+                Linux-based OS's, the following command displays texts in QR Code:
                 <div style={{ 'padding-left': '15px' }}>
-                  <code>ndnsec cert-dump -i /my-workspace | qrencode -o - | feh -</code> <br />
+                  To install the packages, run <code>apt install qrencode feh</code>. You may need to put <code>sudo</code> at front depending on your setup <br />
+                  To display the QR code, run <code>ndnsec cert-dump -i /my-workspace | qrencode -o - | feh -</code> <br />
+                  <small>Here we use trust anchor as example, replace the first part (before the first '|') with safebag generation to get the QR code for safebag.</small>
                 </div>
-                <small>
-                  To install the necessary packages, use the command <code>apt install</code>
-                </small>
               </li>
               <li>Click on the "Join" button to create the workspace.</li>
               You can now join the workspace any time from the "Workspace" tab, and start collaborating on documents in
