@@ -82,7 +82,7 @@ export default function OwnCertificate(props: { certificate: Certificate | undef
               }}
               value={certText()}
             />
-            <Button onClick={() => setCertQrOpen(true)} variant="contained">
+            <Button onClick={() => setCertQrOpen(true)} variant="contained" disabled={nameStr() === ''}>
               {' '}
               Show QR Code{' '}
             </Button>

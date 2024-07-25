@@ -163,7 +163,7 @@ export default function BootSafebag(props: {
               value={safebagText()}
               onChange={(event) => setSafebagText(event.target.value)}
             />
-            <Button onClick={() => setSbagQrOpen(true)} variant="contained">
+            <Button onClick={() => setSbagQrOpen(true)} variant="contained" disabled={nameStr() === ''}>
               {' '}
               Show QR Code{' '}
             </Button>

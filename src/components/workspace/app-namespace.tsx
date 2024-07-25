@@ -176,7 +176,7 @@ export default function AppNamespace(props: {
               value={value()}
               onChange={(event) => onChange(event.target.value)}
             />
-            <Button onClick={() => setTaQrOpen(true)} variant="contained">
+            <Button onClick={() => setTaQrOpen(true)} variant="contained" disabled={nameStr() === ''}>
               {' '}
               Show QR Code{' '}
             </Button>
