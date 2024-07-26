@@ -98,7 +98,10 @@ export default function ConvertTestbed() {
           name="trust-anchor"
           type="text"
           value={anchorNameStr()}
-          onChange={(event) => setAnchorNameStr(event.target.value)}
+          onChange={(event) => {
+            setDisabled(false) // re-activate the button
+            setAnchorNameStr(event.target.value)
+          }}
         />
       </CardContent>
       <Divider />
