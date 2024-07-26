@@ -15,6 +15,7 @@ export default function ConvertTestbed() {
   const [anchorNameStr, setAnchorNameStr] = createSignal('')
   const navigate = useNavigate()
   const { bootstrapWorkspace } = useNdnWorkspace()!
+  const [errorText, setErrorText] = createSignal('')
 
   const run = async () => {
     setDisabled(true)
@@ -34,9 +35,16 @@ export default function ConvertTestbed() {
     const workspaceAnchorName = AltUri.parseName(anchorNameStr())
 
     // Request profile
-    const caProfile = await ndncert.retrieveCaProfile({
-      caCertFullName: workspaceAnchorName,
-    })
+    let caProfile
+    try {
+      caProfile = await ndncert.retrieveCaProfile({
+        caCertFullName: workspaceAnchorName,
+      })
+    } catch (error) {
+      setErrorText('Not valid CA cert full name')
+      toast.error('CA certificate full name is not valid. Please check again.')
+      return
+    }
 
     // New identity name (node id)
     // add a random number to prevent reusing the same identity over multiple devices
@@ -98,7 +106,13 @@ export default function ConvertTestbed() {
           name="trust-anchor"
           type="text"
           value={anchorNameStr()}
-          onChange={(event) => setAnchorNameStr(event.target.value)}
+          onChange={(event) => {
+            setDisabled(false) // re-activate the button
+            setErrorText('') // clean error text
+            setAnchorNameStr(event.target.value)
+          }}
+          helperText={errorText()}
+          error={errorText() !== ''}
         />
       </CardContent>
       <Divider />
