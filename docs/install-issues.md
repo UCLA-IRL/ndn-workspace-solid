@@ -65,3 +65,10 @@ WARN  GET https://registry.npmjs.org/@codemirror/language/-/language-6.10.2.tg
   ```strict-store-pkg-content-check=false```
 
   - Try pnpm install again
+
+## Clean PNPM cache for nightly built NDNts
+
+- Use `pnpm store path` to figure out the cache path.
+- Delete all files starting with `@ndnts-nightly*` under that path.
+- Update and force install: `pnpm update`, `pnpm install --force`.
+- If there is still issue, remove `pnpm-lock.yaml` and `node_modules` folder and then repeat last step.
