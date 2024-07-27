@@ -8,6 +8,7 @@ You need [pnpm](https://pnpm.io/installation) to build this project.
 - Preview test: `pnpm build`, `pnpm preview` and then `http://localhost:4173/`
 
 Please see `bootstrap-for-tes.md` for certificates used for local test.
+Please see  `install-issues.md`  for some solutions to posssible installation issues.
 
 # Conflict of namespace
 
