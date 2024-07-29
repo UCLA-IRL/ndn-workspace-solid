@@ -65,6 +65,7 @@
     "qrcode": "^1.5.3",
     "solid-codemirror": "^2.3.1",
     "solid-js": "^1.8.18",
+    "solid-markdown": "^2.0.13",
     "solid-tiptap": "^0.7.0",
     "solid-toast": "^0.5.0",
     "uuid": "^10.0.0",
