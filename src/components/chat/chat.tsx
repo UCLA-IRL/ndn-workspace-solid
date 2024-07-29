@@ -5,9 +5,9 @@ import { chats } from '../../backend/models'
 import { createSyncedStoreSig } from '../../adaptors/solid-synced-store'
 import styles from './styles.module.scss'
 import { useNavigate } from '@solidjs/router'
+import { SolidMarkdown } from 'solid-markdown'
 
 // TODO: Do not load all messages at once
-// TODO: Support Markdown
 // TODO: Users should be able to add their own channels (currently hard-coded)
 
 export function Chat() {
@@ -85,7 +85,7 @@ export function Chat() {
                     {msg.value.sender}
                     <span>{new Date(msg.value.timestamp).toDateString()}</span>
                   </h4>
-                  <p> {msg.value.content} </p>
+                  <SolidMarkdown children={msg.value.content} />
                 </div>
               </div>
             </div>
