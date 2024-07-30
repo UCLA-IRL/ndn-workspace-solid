@@ -6,6 +6,7 @@ import { createSyncedStoreSig } from '../../adaptors/solid-synced-store'
 import styles from './styles.module.scss'
 import { useNavigate } from '@solidjs/router'
 import { SolidMarkdown } from 'solid-markdown'
+import remarkGfm from 'remark-gfm'
 
 // TODO: Do not load all messages at once
 // TODO: Users should be able to add their own channels (currently hard-coded)
@@ -85,7 +86,7 @@ export function Chat() {
                     {msg.value.sender}
                     <span>{new Date(msg.value.timestamp).toDateString()}</span>
                   </h4>
-                  <SolidMarkdown children={msg.value.content} />
+                  <SolidMarkdown children={msg.value.content} remarkPlugins={[remarkGfm]} components={{}} />
                 </div>
               </div>
             </div>

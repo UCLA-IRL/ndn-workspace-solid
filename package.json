@@ -4,7 +4,7 @@
   "version": "1.2.1",
   "type": "module",
   "scripts": {
-    "dev": "./build-meta.bash && vite",
+    "dev": "vite",
     "build": "./build-meta.bash && tsc && vite build",
     "lint": "eslint . --max-warnings 0",
     "preview": "vite preview",
@@ -63,6 +63,7 @@
     "peerjs": "^1.5.4",
     "qr-scanner": "^1.4.2",
     "qrcode": "^1.5.3",
+    "remark-gfm": "3.0.1",
     "solid-codemirror": "^2.3.1",
     "solid-js": "^1.8.18",
     "solid-markdown": "^2.0.13",
