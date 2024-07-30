@@ -5,7 +5,7 @@ import { chats } from '../../backend/models'
 import { createSyncedStoreSig } from '../../adaptors/solid-synced-store'
 import styles from './styles.module.scss'
 import { useNavigate } from '@solidjs/router'
-import { SolidMarkdown } from 'solid-markdown'
+import { SolidMarkdown, SolidMarkdownComponents } from 'solid-markdown'
 import remarkGfm from 'remark-gfm'
 
 // TODO: Do not load all messages at once
@@ -51,6 +51,15 @@ export function Chat() {
 
   const filteredMessages = () => data()?.filter((msg) => msg.value.channel === currentChannel())
 
+  /* Display */
+  const Code: SolidMarkdownComponents['code'] = (props) => {
+    return (
+      <pre class={styles.App__messageCode}>
+        <code style={{ display: 'inline' }}>{props.children}</code>
+      </pre>
+    )
+  }
+
   return (
     <div class={styles.App}>
       <div class={styles.App_header}>
@@ -81,12 +90,12 @@ export function Chat() {
                   }
                 />
                 <div class={styles.App__msgContent}>
-                  <h4>
+                  <h3 class={styles.App__header}>
                     {' '}
                     {msg.value.sender}
                     <span>{new Date(msg.value.timestamp).toDateString()}</span>
-                  </h4>
-                  <SolidMarkdown children={msg.value.content} remarkPlugins={[remarkGfm]} components={{}} />
+                  </h3>
+                  <SolidMarkdown children={msg.value.content} remarkPlugins={[remarkGfm]} components={{ code: Code }} />
                 </div>
               </div>
             </div>

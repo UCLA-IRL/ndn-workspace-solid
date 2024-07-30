@@ -75,11 +75,20 @@
 }
 
 .App__messageForeign {
-  background-color: #e0e0e0;
+  background-color: #f5f5f5;
 }
 
 .App__messageLocal {
   background-color: #d1e7dd;
+}
+
+.App__messageCode {
+  white-space: pre-wrap;
+  border: 1px solid #ddd;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  padding: 20px;
+  overflow-x: auto;
 }
 
 .App__message img {
@@ -87,6 +96,13 @@
   width: 40px;
   border-radius: 50%;
   margin-right: 15px;
+}
+
+.App__header {
+  flex-grow: 1;
+  color: black;
+  font-weight: 1000;
+  font-size: 20px;
 }
 
 .App__msgContent {
