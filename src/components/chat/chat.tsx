@@ -89,6 +89,7 @@ export function Chat() {
                       ? 'https://picsum.photos/200/300?random=1'
                       : 'https://cdn.drawception.com/images/avatars/647493-B9E.png'
                   }
+                  style="flex-shrink: 0"
                 />
                 <div class={styles.App__msgContent}>
                   <h4
