@@ -56,7 +56,7 @@ export function Chat() {
   const Code: SolidMarkdownComponents['code'] = (props) => {
     return (
       <pre class={styles.App__messageCode}>
-        <code style={{ display: 'inline' }}>{props.children}</code>
+        <code>{props.children}</code>
       </pre>
     )
   }

@@ -99,7 +99,6 @@
   background-color: #e0e0e0;
   border-radius: var(--msg-border-thin);
   padding: var(--msg-pad-normal);
-  overflow-x: auto;
 }
 
 .App__message img {
@@ -143,6 +142,7 @@
 
 .App__msgContent {
   flex-grow: 1;
+  overflow-x: auto;
 }
 
 .App__msgContent span {
