@@ -50,6 +50,7 @@ export function Chat() {
   )
 
   const filteredMessages = () => data()?.filter((msg) => msg.value.channel === currentChannel())
+  const isLocalUser = (sender: string) => sender == username()
 
   /* Display */
   const Code: SolidMarkdownComponents['code'] = (props) => {
@@ -80,22 +81,35 @@ export function Chat() {
       <div class={styles.App__messages} ref={setContainer}>
         <For each={filteredMessages()}>
           {(msg) => (
-            <div class={msg.value.sender == username() ? styles.App__messageForeign : styles.App__messageLocal}>
+            <div>
               <div class={styles.App__message}>
                 <img
                   src={
-                    msg.value.sender == username()
+                    isLocalUser(msg.value.sender)
                       ? 'https://picsum.photos/200/300?random=1'
                       : 'https://cdn.drawception.com/images/avatars/647493-B9E.png'
                   }
                 />
                 <div class={styles.App__msgContent}>
-                  <h3 class={styles.App__header}>
+                  <h4
+                    class={`${styles.App__msgHeader} 
+                      ${isLocalUser(msg.value.sender) ? styles.App__backgroundLocal : styles.App__backgroundForeign} 
+                      ${isLocalUser(msg.value.sender) ? styles.App__borderLocal : styles.App__borderForeign}`}
+                  >
                     {' '}
                     {msg.value.sender}
                     <span>{new Date(msg.value.timestamp).toDateString()}</span>
-                  </h3>
-                  <SolidMarkdown children={msg.value.content} remarkPlugins={[remarkGfm]} components={{ code: Code }} />
+                  </h4>
+                  <div
+                    class={`${styles.App_msgContentSolid} 
+                      ${isLocalUser(msg.value.sender) ? styles.App__borderLocal : styles.App__borderForeign}`}
+                  >
+                    <SolidMarkdown
+                      children={msg.value.content}
+                      remarkPlugins={[remarkGfm]}
+                      components={{ code: Code }}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
