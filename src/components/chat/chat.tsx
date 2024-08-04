@@ -5,9 +5,10 @@ import { chats } from '../../backend/models'
 import { createSyncedStoreSig } from '../../adaptors/solid-synced-store'
 import styles from './styles.module.scss'
 import { useNavigate } from '@solidjs/router'
+import { SolidMarkdown, SolidMarkdownComponents } from 'solid-markdown'
+import remarkGfm from 'remark-gfm'
 
 // TODO: Do not load all messages at once
-// TODO: Support Markdown
 // TODO: Users should be able to add their own channels (currently hard-coded)
 
 export function Chat() {
@@ -49,6 +50,16 @@ export function Chat() {
   )
 
   const filteredMessages = () => data()?.filter((msg) => msg.value.channel === currentChannel())
+  const isLocalUser = (sender: string) => sender == username()
+
+  /* Display */
+  const Code: SolidMarkdownComponents['code'] = (props) => {
+    return (
+      <pre class={styles.App__messageCode}>
+        <code>{props.children}</code>
+      </pre>
+    )
+  }
 
   return (
     <div class={styles.App}>
@@ -70,22 +81,36 @@ export function Chat() {
       <div class={styles.App__messages} ref={setContainer}>
         <For each={filteredMessages()}>
           {(msg) => (
-            <div class={msg.value.sender == username() ? styles.App__messageForeign : styles.App__messageLocal}>
+            <div>
               <div class={styles.App__message}>
                 <img
                   src={
-                    msg.value.sender == username()
+                    isLocalUser(msg.value.sender)
                       ? 'https://picsum.photos/200/300?random=1'
                       : 'https://cdn.drawception.com/images/avatars/647493-B9E.png'
                   }
+                  style="flex-shrink: 0"
                 />
                 <div class={styles.App__msgContent}>
-                  <h4>
+                  <h4
+                    class={`${styles.App__msgHeader} 
+                      ${isLocalUser(msg.value.sender) ? styles.App__backgroundLocal : styles.App__backgroundForeign} 
+                      ${isLocalUser(msg.value.sender) ? styles.App__borderLocal : styles.App__borderForeign}`}
+                  >
                     {' '}
                     {msg.value.sender}
                     <span>{new Date(msg.value.timestamp).toDateString()}</span>
                   </h4>
-                  <p> {msg.value.content} </p>
+                  <div
+                    class={`${styles.App_msgContentSolid} 
+                      ${isLocalUser(msg.value.sender) ? styles.App__borderLocal : styles.App__borderForeign}`}
+                  >
+                    <SolidMarkdown
+                      children={msg.value.content}
+                      remarkPlugins={[remarkGfm]}
+                      components={{ code: Code }}
+                    />
+                  </div>
                 </div>
               </div>
             </div>

@@ -1,3 +1,21 @@
+:root {
+  --msg-radius-thin: 5px;
+
+  --msg-pad-thin: 8px;
+  --msg-pad-normal: 16px;
+  
+  --msg-border-thin: 1px;
+  --msg-border-style: solid;
+
+  --msg-font-size-regular: 10px;
+  --msg-font-size-header: 16px;
+
+  --msg-local-border-color: #46a9ff66;
+  --msg-local-background-color: #cff0ff;
+  --msg-foreign-border-color: black;
+  --msg-foreign-background-color: #ebebeb
+}
+
 .App {
   border-radius: 5px;
   height: 100vh;
@@ -48,7 +66,7 @@
   border: none;
   color: #fff;
   border-radius: 25px;
-  font-size: 16px;
+  font-size: var(--msg-font-size-header);
   margin-left: 10px;
   cursor: pointer;
 }
@@ -68,18 +86,19 @@
 
 .App__message {
   display: flex;
-  align-items: center;
+  flex-direction: row;
+  align-items: start;
   padding: 10px;
   border-radius: 8px;
   margin-bottom: 10px;
 }
 
-.App__messageForeign {
+.App__messageCode {
+  white-space: pre-wrap;
+  border: var(--msg-border-thin) solid #ddd;
   background-color: #e0e0e0;
-}
-
-.App__messageLocal {
-  background-color: #d1e7dd;
+  border-radius: var(--msg-border-thin);
+  padding: var(--msg-pad-normal);
 }
 
 .App__message img {
@@ -89,18 +108,61 @@
   margin-right: 15px;
 }
 
+.App__msgHeader {
+  flex-grow: 1;
+  color: black;
+  font-weight: 1000;
+  font-size: var(--msg-font-size-header);
+  border-style: var(--msg-border-style);
+  border-width: var(--msg-border-thin);
+  border-top-left-radius: var(--msg-radius-thin);
+  border-top-right-radius: var(--msg-radius-thin);
+  padding: var(--msg-pad-thin);
+  padding-left: var(--msg-pad-normal);
+  padding-right: var(--msg-pad-normal);
+  margin-bottom: 0;
+  margin-top: 0;
+}
+
+.App__borderLocal {
+  border-color: var(--msg-local-border-color);
+}
+
+.App__backgroundLocal {
+  background-color: var(--msg-local-background-color);
+}
+
+.App__borderForeign {
+  border-color: var(--msg-foreign-border-color);
+}
+
+.App__backgroundForeign {
+  background-color: var(--msg-foreign-background-color);
+}
+
 .App__msgContent {
   flex-grow: 1;
+  overflow-x: auto;
 }
 
 .App__msgContent span {
   color: grey;
   font-weight: 300;
-  font-size: 10px;
+  font-size: var(--msg-font-size-regular);
 }
 
-.App__msgContent p, .App__msgContent h4 {
+.App__msgContent p {
   margin: 2px 0;
+}
+
+.App_msgContentSolid {
+  border-style: var(--msg-border-style);
+  border-width: var(--msg-border-thin);
+  border-bottom-left-radius: var(--msg-radius-thin);
+  border-bottom-right-radius: var(--msg-radius-thin);
+  border-top-width: 0;
+  padding: var(--msg-pad-normal);
+  margin-top: 0;
 }
 
 /* Webkit browsers */
@@ -123,7 +185,7 @@
   border: none;
   color: #333;
   cursor: pointer;
-  font-size: 16px;
+  font-size: var(--msg-font-size-header);
   padding: 8px 16px;
   margin-right: 8px;
   transition: background-color 0.3s;
@@ -138,7 +200,7 @@
   border: none;
   color: white;
   cursor: pointer;
-  font-size: 16px;
+  font-size: var(--msg-font-size-header);
   padding: 8px 16px;
   margin-right: 8px;
   transition: background-color 0.3s;
