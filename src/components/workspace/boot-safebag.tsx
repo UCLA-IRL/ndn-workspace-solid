@@ -50,7 +50,7 @@ export default function BootSafebag(props: {
     let wire
     try {
       wire = base64ToBytes(b64Value)
-    } catch (e) {
+    } catch {
       setErrorText(`Not valid base64 string`)
       setNameStr('')
       return
@@ -62,7 +62,7 @@ export default function BootSafebag(props: {
       userKey = cert.name.getPrefix(cert.name.length - 2)
       setSafeBag(safebag)
     } catch (e) {
-      setErrorText(`Unable to parse certificate`)
+      setErrorText(`Unable to parse certificate: ${e}`)
       setNameStr('')
       return
     }

@@ -40,7 +40,7 @@ export default function ConvertTestbed() {
       caProfile = await ndncert.retrieveCaProfile({
         caCertFullName: workspaceAnchorName,
       })
-    } catch (error) {
+    } catch {
       setErrorText('Not valid CA cert full name')
       toast.error('CA certificate full name is not valid. Please check again.')
       return

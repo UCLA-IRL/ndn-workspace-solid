@@ -28,14 +28,14 @@ export default function OwnCertificate(props: { certificate: Certificate | undef
       try {
         const userKey = cert.name.getPrefix(cert.name.length - 2)
         setNameStr(userKey.toString())
-      } catch (e) {
+      } catch {
         setNameStr('')
       }
       try {
         const b64Text = bytesToBase64(Encoder.encode(cert.data))
         const b64Breaks = b64Text.replace(/(.{64})/g, '$1\n')
         setCertText(b64Breaks)
-      } catch (e) {
+      } catch {
         setCertText('')
       }
     } else {
