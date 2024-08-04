@@ -63,7 +63,7 @@
     "peerjs": "^1.5.4",
     "qr-scanner": "^1.4.2",
     "qrcode": "^1.5.3",
-    "remark-gfm": "4.0.0",
+    "remark-gfm": "3.0.1",
     "solid-codemirror": "^2.3.1",
     "solid-js": "^1.8.19",
     "solid-markdown": "^2.0.13",
