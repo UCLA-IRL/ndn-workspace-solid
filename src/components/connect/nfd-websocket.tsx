@@ -55,7 +55,7 @@ export default function NfdWebsocket(props: { onAdd: (config: Conn) => void }) {
       })
       return
     } catch (err) {
-      console.error('Unable to decode the provided credential.')
+      console.error(`Unable to decode the provided credential: ${err}`)
       return
     }
   }

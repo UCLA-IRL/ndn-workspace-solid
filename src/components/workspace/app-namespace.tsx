@@ -52,7 +52,7 @@ export default function AppNamespace(props: {
     let wire
     try {
       wire = base64ToBytes(b64Value)
-    } catch (e) {
+    } catch {
       setErrorText(`Not valid base64 string`)
       setNameStr('')
       if (!props.readOnly) {
@@ -67,7 +67,7 @@ export default function AppNamespace(props: {
         props.setTrustAnchor(cert)
       }
     } catch (e) {
-      setErrorText(`Unable to parse certificate`)
+      setErrorText(`Unable to parse certificate: ${e}`)
       setNameStr('')
       return
     }
@@ -82,7 +82,7 @@ export default function AppNamespace(props: {
         setNameStr(rootName.toString())
         setErrorText('')
       } catch (e) {
-        setErrorText(`Invalid certificate name`)
+        setErrorText(`Invalid certificate name: ${e}`)
         setNameStr('')
         if (!props.readOnly) {
           props.setTrustAnchor(undefined)

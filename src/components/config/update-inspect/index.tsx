@@ -98,7 +98,6 @@ export default function UpdateInspect() {
             result += `    ${JSON.stringify(del)}\n`
           }
         }
-        update.ds
       } else {
         result += 'Content HEX:\n' + toHex(inner.content)
       }
