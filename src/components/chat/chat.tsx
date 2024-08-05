@@ -6,7 +6,7 @@ import { createSyncedStoreSig } from '../../adaptors/solid-synced-store'
 import styles from './styles.module.scss'
 import { useNavigate } from '@solidjs/router'
 import { SolidMarkdown, SolidMarkdownComponents } from 'solid-markdown'
-import remarkGfm from 'remark-gfm'
+import remarkGfm from 'remark-gfm-3.0.1'
 
 // TODO: Do not load all messages at once
 // TODO: Users should be able to add their own channels (currently hard-coded)
