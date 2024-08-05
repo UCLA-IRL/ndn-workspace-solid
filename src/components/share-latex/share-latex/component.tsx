@@ -1,6 +1,7 @@
 import AppTools from '../app-tools'
 import FileList from '../file-list'
 import LatexDoc from '../latex-doc'
+import MarkdownDoc from '../markdown-doc'
 import NewItemModal, { FileType } from '../new-item-modal'
 import { Button, Paper } from '@suid/material'
 import { project } from '../../../backend/models'
@@ -94,6 +95,13 @@ export default function ShareLatexComponent(props: {
             },
           },
           {
+            name: 'New Markdown doc',
+            onClick: () => {
+              props.setFileType('markdownDoc')
+              props.setModalState('create')
+            },
+          },
+          {
             name: 'Upload blob',
             onClick: () => {
               props.setFileType('upload')
@@ -143,6 +151,14 @@ export default function ShareLatexComponent(props: {
               <Match when={props.item?.kind === 'xmldoc'}>
                 <RichDoc
                   doc={(props.item as project.XmlDoc).text}
+                  subDocId={props.item!.id}
+                  provider={props.yjsProvider()!}
+                  username={props.username}
+                />
+              </Match>
+              <Match when={props.item?.kind === 'markdowndoc'}>
+                <MarkdownDoc
+                  doc={(props.item as project.MarkdownDoc).prosemirror}
                   subDocId={props.item!.id}
                   provider={props.yjsProvider()!}
                   username={props.username}
