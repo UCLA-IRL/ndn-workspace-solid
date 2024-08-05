@@ -47,6 +47,17 @@ export type XmlDoc = ItemBase & {
   text: Y.XmlFragment
 }
 
+export type MarkdownDoc = ItemBase & {
+  kind: 'markdowndoc'
+
+  /**
+   * Shared XMLFragment for Markdown used by Milkdown
+   * NOTE: The name cannot be changed due to a hard coding in Milkdown.
+   *   https://github.com/Milkdown/milkdown/blob/1723d36b5298d3f1d1caab33241258eb7a333beb/packages/plugins/plugin-collab/src/collab-service.ts#L109C44-L109C55
+   */
+  prosemirror: Y.XmlFragment
+}
+
 export type BlobFile = ItemBase & {
   kind: 'blob'
 
@@ -57,7 +68,7 @@ export type BlobFile = ItemBase & {
   blobName: string
 }
 
-export type Item = Folder | TextDoc | XmlDoc | BlobFile
+export type Item = Folder | TextDoc | XmlDoc | MarkdownDoc | BlobFile
 
 export type Items = { [docId: string]: Item }
 

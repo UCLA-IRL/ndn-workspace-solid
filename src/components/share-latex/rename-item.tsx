@@ -19,6 +19,8 @@ export default function RenameItem(props: {
         return 'Rename .xml rich document'
       case 'upload':
         return 'Rename blob file'
+      case 'markdownDoc':
+        return 'Rename .md document'
       default:
         return 'Rename file'
     }

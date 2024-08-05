@@ -169,6 +169,20 @@ export default function ShareLatex(props: { rootUri: string }) {
           cur.items.push(newId)
         }
         navigate(to, { replace: true })
+      } else if (state === 'markdownDoc') {
+        const newName = name.endsWith('.md') ? name : name + '.md'
+        if (existId === undefined) {
+          rootDocVal!.latex[newId] = {
+            id: newId,
+            kind: 'markdowndoc',
+            // fullPath: cur.fullPath + '/' + name,
+            name: newName,
+            parentId: cur.id,
+            prosemirror: new Y.XmlFragment(),
+          }
+          cur.items.push(newId)
+        }
+        navigate(to, { replace: true })
       } else if (state === 'upload' && blob !== undefined && blob.length > 0) {
         syncAgent()!
           .publishBlob('latexBlob', blob)

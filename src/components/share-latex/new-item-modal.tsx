@@ -12,7 +12,9 @@ import {
 } from '@suid/material'
 import { Show, createSignal } from 'solid-js'
 
-export type FileType = '' | 'folder' | 'doc' | 'upload' | 'richDoc'
+// NOTE: Please refer to src/backend/models/project.ts:Item.kind
+// Should we use that type? Will create more coupling, though
+export type FileType = '' | 'folder' | 'doc' | 'upload' | 'richDoc' | 'markdownDoc'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -45,6 +47,8 @@ export default function NewItemModal(props: {
         return 'New .xml rich document'
       case 'upload':
         return 'Upload blob file'
+      case 'markdownDoc':
+        return 'New .md document'
       default:
         return ''
     }
