@@ -7,7 +7,7 @@ import { project } from '../../../backend/models'
 import { Accessor, Match, Setter, Show, Switch, createSignal } from 'solid-js'
 import RichDoc from '../rich-doc'
 import { ViewValues } from '../types'
-import PdfViewer from '../pdf-viewer/pdf-viewer'
+import PDFViewer from '../simple-pdf/pdf-viewer'
 import styles from './styles.module.scss'
 import { NdnSvsAdaptor } from '@ucla-irl/ndnts-aux/adaptors'
 import RenameItem from '../rename-item'
@@ -161,7 +161,15 @@ export default function ShareLatexComponent(props: {
               'w-half': props.view() === 'Both',
             }}
           >
-            {props.pdfUrl ? <PdfViewer pdfUrl={props.pdfUrl} /> : <div />}
+            <div class={styles.pdf}>
+              {props.pdfUrl ? (
+                <div>
+                  <PDFViewer pdfUrl={props.pdfUrl} />
+                </div>
+              ) : (
+                <div />
+              )}
+            </div>
           </div>
         </Show>
         <Show when={props.view() === 'Log'}>

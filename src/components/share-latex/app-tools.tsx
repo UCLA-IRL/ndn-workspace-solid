@@ -29,7 +29,12 @@ export default function AppTools(props: {
           <MenuIcon />
         </IconButton>
         <div style={{ 'flex-grow': 1 }}>
-          <PathBread rootPath={props.rootPath} pathIds={props.pathIds} resolveName={props.resolveName} />
+          <PathBread
+            rootPath={props.rootPath}
+            pathIds={props.pathIds}
+            resolveName={props.resolveName}
+            setView={props.setView}
+          />
         </div>
         <Button onClick={props.onCompile}>Compile</Button>
         <Select
