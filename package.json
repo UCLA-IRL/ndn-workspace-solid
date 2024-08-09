@@ -37,7 +37,6 @@
     "@ndn/util": "https://ndnts-nightly.ndn.today/util.tgz",
     "@ndn/web-bluetooth-transport": "https://ndnts-nightly.ndn.today/web-bluetooth-transport.tgz",
     "@ndn/ws-transport": "https://ndnts-nightly.ndn.today/ws-transport.tgz",
-    "@pdfslick/solid": "1.5.1",
     "@reactivedata/reactive": "^0.2.2",
     "@solid-primitives/script-loader": "^2.2.0",
     "@solidjs/router": "^0.14.1",
@@ -71,6 +70,7 @@
     "solid-toast": "^0.5.0",
     "uuid": "^10.0.0",
     "y-codemirror.next": "^0.3.5",
+    "y-prosemirror": "^1.2.11",
     "yjs": "^13.6.18"
   },
   "devDependencies": {
@@ -106,9 +106,7 @@
   },
   "pnpm": {
     "patchedDependencies": {
-      "pdfjs-dist@3.11.174": "patches/pdfjs-dist@3.11.174.patch",
-      "file-system-access@1.0.4": "patches/file-system-access@1.0.4.patch",
-      "@pdfslick/solid@1.5.1": "patches/@pdfslick__solid@1.5.1.patch"
+      "file-system-access@1.0.4": "patches/file-system-access@1.0.4.patch"
     }
   }
 }
