@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "./build-meta.bash && tsc && vite build",
+    "build-win": "pwsh ./build-meta.ps1 && tsc && vite build",
     "lint": "eslint . --max-warnings 0",
     "preview": "vite preview",
     "peer-server": "peerjs --port 8000 --key peerjs --path /aincraft --allow_discovery true",
