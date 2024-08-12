@@ -201,7 +201,7 @@ export default function ShareLatex(props: { rootUri: string }) {
     const content = await zip.generateAsync({ type: 'uint8array' })
     const file = new Blob([content], { type: 'application/zip;base64' })
     const fileUrl = URL.createObjectURL(file)
-    window.open(fileUrl) // TODO: not working on Safari
+    window.location.assign(fileUrl)
   }
 
   const onExportFlatZip = async () => {
@@ -209,7 +209,7 @@ export default function ShareLatex(props: { rootUri: string }) {
     const content = await zip.generateAsync({ type: 'uint8array' })
     const file = new Blob([content], { type: 'application/zip;base64' })
     const fileUrl = URL.createObjectURL(file)
-    window.open(fileUrl) // TODO: not working on Safari
+    window.location.assign(fileUrl)
   }
 
   const [texEngine, setTexEngine] = createSignal<PdfTeXEngine>()
