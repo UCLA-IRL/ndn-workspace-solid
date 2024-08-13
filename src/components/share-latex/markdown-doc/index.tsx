@@ -9,28 +9,29 @@ import * as Y from 'yjs'
 
 import '@milkdown/theme-nord/style.css'
 
+import './style.scss'
+
 export default function MarkdownDoc(props: {
   doc: Y.XmlFragment
   provider: NdnSvsAdaptor
   username: string
   subDocId: string
 }) {
-  const [container, setContainer] = createSignal<HTMLDivElement>()
-  const [editor, setEditor] = createSignal<Editor>()
   const [collabService, setCollabService] = createSignal<CollabService>()
 
+  let ref!: HTMLDivElement
+  let editor: Editor
   onMount(async () => {
-    const editor = await Editor.make()
+    editor = await Editor.make()
       .config((ctx) => {
-        ctx.set(rootCtx, container())
+        ctx.set(rootCtx, ref)
       })
-      .config(nord)
       .use(commonmark)
       .use(history)
+      .config(nord)
       .use(collab)
       .create()
 
-    setEditor(editor)
     props.provider.bindAwareness(props.doc.doc!, props.subDocId)
 
     editor.action((ctx) => {
@@ -49,8 +50,8 @@ export default function MarkdownDoc(props: {
   onCleanup(() => {
     collabService()?.disconnect()
     props.provider.cancelAwareness()
-    editor()?.destroy()
+    editor.destroy()
   })
 
-  return <div ref={setContainer} />
+  return <div ref={ref} />
 }
