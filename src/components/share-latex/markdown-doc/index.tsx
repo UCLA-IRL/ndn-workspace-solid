@@ -4,6 +4,9 @@ import { commonmark } from '@milkdown/preset-commonmark'
 import { history } from '@milkdown/plugin-history'
 import { collab, CollabService, collabServiceCtx } from '@milkdown/plugin-collab'
 import { nord } from '@milkdown/theme-nord'
+import { cursor } from '@milkdown/plugin-cursor'
+import { indent, indentConfig } from '@milkdown/plugin-indent'
+import { clipboard } from '@milkdown/plugin-clipboard';
 import { NdnSvsAdaptor } from '@ucla-irl/ndnts-aux/adaptors'
 import * as Y from 'yjs'
 
@@ -26,9 +29,18 @@ export default function MarkdownDoc(props: {
       .config((ctx) => {
         ctx.set(rootCtx, ref)
       })
+      .config((ctx) => {
+        ctx.set(indentConfig.key, {
+          type: 'space',
+          size: 4,
+        })
+      })
+      .config(nord)
       .use(commonmark)
       .use(history)
-      .config(nord)
+      .use(cursor)
+      .use(indent)
+      .use(clipboard)
       .use(collab)
       .create()
 
