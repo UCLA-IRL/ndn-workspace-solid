@@ -34,6 +34,9 @@ export default function FileList(props: {
       <Match when={item?.kind === 'text'}>
         <DescriptionIcon />
       </Match>
+      <Match when={item?.kind === 'markdowndoc'}>
+        <DescriptionIcon />
+      </Match>
       <Match when={item?.kind === 'xmldoc'}>
         <DescriptionIcon />
       </Match>
