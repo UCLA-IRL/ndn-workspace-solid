@@ -1,7 +1,7 @@
 // This file is the main file gluing all components and maintain a global context.
 // Should be changed to something better if refactor.
-import { Producer, produce } from '@ndn/endpoint'
-import { Name } from '@ndn/packet'
+import { Producer, produce, consume } from '@ndn/endpoint'
+import { Name, Interest, Component } from '@ndn/packet'
 import * as nfdmgmt from '@ndn/nfdmgmt'
 import { getYjsDoc } from '@syncedstore/core'
 import { CertStorage } from '@ucla-irl/ndnts-aux/security'
@@ -13,6 +13,11 @@ import { Workspace } from '@ucla-irl/ndnts-aux/workspace'
 import toast from 'solid-toast'
 import { Connection, NfdWsConn, PeerJsConn, BleConn, TestbedConn, UseAutoAnnouncement } from './connection/mod.ts'
 import { Forwarder } from '@ndn/fw'
+import { BufferChunkSource, DataProducer, fetch } from '@ndn/segmented-object'
+import { concatBuffers, fromHex } from '@ndn/util'
+import { StateVector, SvSync } from '@ndn/svs'
+import { Decoder, Encoder } from '@ndn/tlv'
+import { Version } from '@ndn/naming-convention2'
 
 export const forwarder: Forwarder = Forwarder.getDefault()
 export type ConnState = 'CONNECTED' | 'DISCONNECTED' | 'CONNECTING' | 'DISCONNECTING'
@@ -159,6 +164,76 @@ export async function bootstrapWorkspace(opts: {
       items: [],
     }
     yDoc.clientID = clientID
+  }
+  // Adam Chen - Injection point 4: new member join
+  console.log('-- Injection point 4: new member join check --')
+  const appPrefixName = appPrefix.toString()
+  console.log('debug: appPrefix: ', appPrefixName)
+  console.log('debug: nodeID', nodeId)
+  const snapshotName = appPrefix.append('32=snapshot').toString()
+  console.log('debug: theoretical snapshot prefix: ', snapshotName)
+  const localYJSUpdate = await persistStore.get('localSnapshot')
+  console.log('persistent storage local yjs update: ', localYJSUpdate)
+  // localYJSUpdate = undefined
+
+  // //State Vector Testing
+  // let test = new StateVector()
+  // test.set(new Name('/user1'), 1)
+  // test.set(new Name('/user2'), 1)
+  // let svsComponent = new Component(Version.type, Encoder.encode(test))
+  // console.log('Debug: SVS test: ', svsComponent.toString())
+  // console.log('Debug: parsing SVS', Decoder.decode(svsComponent.value, StateVector))
+
+  if (!localYJSUpdate) {
+    console.log('Empty yjs local storage detected, fetching snapshot')
+    const interest = new Interest(snapshotName, Interest.CanBePrefix, Interest.MustBeFresh)
+    try {
+      const data = await consume(interest)
+      console.log(`Received data with name [${data.name}]`)
+      const targetName = data.name.getPrefix(-1)
+      // /grpPrefix/32=snapshot/54=<vector>/
+      console.log('segmented object fetcher targeting name: ', targetName.toString())
+      // code from SyncAgent
+      const buffers = []
+      try {
+        console.log('SegmentedObject fetching a snapshot at part 4')
+        const result = fetch(targetName, {
+          verifier: certStorage.verifier, // we have access to the verifier
+          modifyInterest: { mustBeFresh: true },
+          lifetimeAfterRto: 2000,
+          retxLimit: 150, // See Deliveries. 60*1000/(2*200)=150. Default minRto = 150.
+        })
+        for await (const segment of result) {
+          // Cache packets temporary disabled.
+          // this.persistStorage.set(segment.name.toString(), Encoder.encode(segment));
+          // Reassemble
+          buffers.push(segment.content)
+        }
+      } catch (e: any) {
+        console.error(`Unable to fetch ${targetName}: `, e)
+      }
+      const snapshotData = concatBuffers(buffers) //uint8array
+      persistStore.set('localSnapshot', snapshotData)
+      // TODO: SVS parsing check TLV type.
+      persistStore.set('localState', targetName.at(-1).value)
+      let aloSyncKey = '/8=local' + nodeId.toString() + '/32=sync/32=alo/8=syncVector'
+      console.log('targeting alo sync key: ', aloSyncKey)
+      // 8=local/8=ndn-workspace/8=test/8=node-1/32=sync/32=alo/8=syncVector
+      persistStore.set(aloSyncKey, targetName.at(-1).value)
+      // debug: check state vector count
+      let decodedSV = Decoder.decode(targetName.at(-1).value, StateVector)
+      let count = 0
+      for (const [id, seq] of decodedSV) {
+        count += seq
+      }
+      console.log('Written the following total state vector count into persistent storage:', count)
+      console.log('debug: state vector: ', targetName.at(-1).value)
+      await new Promise((r) => setTimeout(r, 1000))
+      // test code of this is in yjsndnadaptor. hope this works.
+    } catch (err: any) {
+      console.warn(err)
+      console.log('Aborting snapshot retrieval, falling back to SVS')
+    }
   }
 
   workspace = await Workspace.create({
