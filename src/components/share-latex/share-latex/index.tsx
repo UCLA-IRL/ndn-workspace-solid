@@ -169,6 +169,20 @@ export default function ShareLatex(props: { rootUri: string }) {
           cur.items.push(newId)
         }
         navigate(to, { replace: true })
+      } else if (state === 'markdownDoc') {
+        const newName = name.endsWith('.md') ? name : name + '.md'
+        if (existId === undefined) {
+          rootDocVal!.latex[newId] = {
+            id: newId,
+            kind: 'markdowndoc',
+            // fullPath: cur.fullPath + '/' + name,
+            name: newName,
+            parentId: cur.id,
+            prosemirror: new Y.XmlFragment(),
+          }
+          cur.items.push(newId)
+        }
+        navigate(to, { replace: true })
       } else if (state === 'upload' && blob !== undefined && blob.length > 0) {
         syncAgent()!
           .publishBlob('latexBlob', blob)
@@ -201,7 +215,7 @@ export default function ShareLatex(props: { rootUri: string }) {
     const content = await zip.generateAsync({ type: 'uint8array' })
     const file = new Blob([content], { type: 'application/zip;base64' })
     const fileUrl = URL.createObjectURL(file)
-    window.open(fileUrl) // TODO: not working on Safari
+    window.location.assign(fileUrl)
   }
 
   const onExportFlatZip = async () => {
@@ -209,7 +223,7 @@ export default function ShareLatex(props: { rootUri: string }) {
     const content = await zip.generateAsync({ type: 'uint8array' })
     const file = new Blob([content], { type: 'application/zip;base64' })
     const fileUrl = URL.createObjectURL(file)
-    window.open(fileUrl) // TODO: not working on Safari
+    window.location.assign(fileUrl)
   }
 
   const [texEngine, setTexEngine] = createSignal<PdfTeXEngine>()
