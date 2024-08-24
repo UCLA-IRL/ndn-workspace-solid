@@ -193,26 +193,13 @@ export async function bootstrapWorkspace(opts: {
       const targetName = data.name.getPrefix(-1)
       // /grpPrefix/32=snapshot/54=<vector>/
       console.log('segmented object fetcher targeting name: ', targetName.toString())
-      // code from SyncAgent
-      const buffers = []
-      try {
-        console.log('SegmentedObject fetching a snapshot at part 4')
-        const result = fetch(targetName, {
-          verifier: certStorage.verifier, // we have access to the verifier
-          modifyInterest: { mustBeFresh: true },
-          lifetimeAfterRto: 2000,
-          retxLimit: 150, // See Deliveries. 60*1000/(2*200)=150. Default minRto = 150.
-        })
-        for await (const segment of result) {
-          // Cache packets temporary disabled.
-          // this.persistStorage.set(segment.name.toString(), Encoder.encode(segment));
-          // Reassemble
-          buffers.push(segment.content)
-        }
-      } catch (e: any) {
-        console.error(`Unable to fetch ${targetName}: `, e)
-      }
-      const snapshotData = concatBuffers(buffers) //uint8array
+      // Patch: Utilize safety fetch. I think this is how it works.
+      const snapshotData = await fetch(targetName, {
+        verifier: certStorage.verifier, // we have access to the verifier
+        modifyInterest: { mustBeFresh: true },
+        lifetimeAfterRto: 2000,
+        retxLimit: 150, // See Deliveries. 60*1000/(2*200)=150. Default minRto = 150.
+      })
       persistStore.set('localSnapshot', snapshotData)
       // TODO: SVS parsing check TLV type.
       persistStore.set('localState', targetName.at(-1).value)
