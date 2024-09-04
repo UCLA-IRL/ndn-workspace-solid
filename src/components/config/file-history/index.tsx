@@ -62,7 +62,7 @@ export default function FileHistory() {
         }
         const outerData = Decoder.decode(outerWire, Data)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const inner = (agent as any).parseInnerData(outerData.content) as {
+        const inner = (await (agent as any).parseInnerData(outerData.content)) as {
           channel: string
           topic: string
           content: Uint8Array
