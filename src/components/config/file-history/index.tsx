@@ -95,6 +95,8 @@ export default function FileHistory() {
       blob = new Blob([item.text.toString()], { type: 'text/plain' })
     } else if (item?.kind === 'xmldoc') {
       blob = new Blob([item.text.toString()], { type: 'text/plain' })
+    } else if (item?.kind === 'markdowndoc') {
+      blob = new Blob([item.prosemirror.toString()], { type: 'text/plain' })
     } else {
       blob = new Blob([JSON.stringify(item)], { type: 'application/json' })
     }

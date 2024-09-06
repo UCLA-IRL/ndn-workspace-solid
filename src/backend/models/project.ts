@@ -193,6 +193,8 @@ export async function walk(
       callbackFile?.(curPath, curItem.text.toString())
     } else if (curItem.kind === 'xmldoc') {
       callbackFile?.(curPath, curItem.text.toString())
+    } else if (curItem.kind === 'markdowndoc') {
+      callbackFile?.(curPath, curItem.prosemirror.toString())
     } else if (curItem.kind === 'blob') {
       try {
         const blobName = new Name(curItem.blobName)
@@ -220,6 +222,8 @@ export async function exportFlatZip(resolveBlob: (name: Name) => Promise<Uint8Ar
       zip.file(`${curId}.tex`, curItem.text.toString())
     } else if (curItem.kind === 'xmldoc') {
       zip.file(`${curId}.xml`, curItem.text.toString())
+    } else if (curItem.kind === 'markdowndoc') {
+      zip.file(`${curId}.md`, curItem.prosemirror.toString())
     } else if (curItem.kind === 'blob') {
       try {
         const blobName = new Name(curItem.blobName)
