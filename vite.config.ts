@@ -62,4 +62,11 @@ export default defineConfig({
     // Solve the problem: Error: Unrecognized extension value in extension set ([object Object]).
     include: ['@codemirror/state', '@codemirror/view'],
   },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: 'modern-compiler',
+      }
+    }
+  }
 })
