@@ -5,6 +5,7 @@ import WorkspaceState from './workspace-state'
 import UpdateInspect from './update-inspect'
 import FileHistory from './file-history'
 import RebuildCache from './rebuild-cache'
+import YjsStateVector from './yjs-state-vector'
 
 export default function ConfigPage() {
   return (
@@ -16,6 +17,7 @@ export default function ConfigPage() {
         <UpdateInspect />
         <FileHistory />
         <RebuildCache />
+        <YjsStateVector />
       </Stack>
     </>
   )
