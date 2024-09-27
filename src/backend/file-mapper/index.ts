@@ -27,6 +27,9 @@ export class FileMapper {
     if (item.kind === 'xmldoc') {
       // ignore XML docs
       return
+    } else if (item.kind === 'markdowndoc') {
+      // ignore markdown docs
+      return
     } else if (item.kind === 'blob') {
       // Update version
       const arrBuf = await fileObj.arrayBuffer()
@@ -61,6 +64,9 @@ export class FileMapper {
   ) {
     if (item.kind === 'xmldoc') {
       // ignore XML docs
+      return
+    } else if (item.kind === 'markdowndoc') {
+      // ignore markdown docs
       return
     } else if (item.kind === 'blob') {
       const objName = new Name(remoteContent)

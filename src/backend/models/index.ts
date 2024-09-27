@@ -13,7 +13,7 @@ export type RootDocType = {
 }
 export type RootDocStore = ReturnType<typeof syncedStore<RootDocType>>
 
-export function initRootDoc(guid: string) {
+export function initRootDoc(guid: string): RootDocStore {
   return syncedStore(
     {
       latex: {},

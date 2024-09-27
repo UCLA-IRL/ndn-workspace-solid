@@ -62,7 +62,7 @@ export default function FileHistory() {
         }
         const outerData = Decoder.decode(outerWire, Data)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const inner = (agent as any).parseInnerData(outerData.content) as {
+        const inner = (await (agent as any).parseInnerData(outerData.content)) as {
           channel: string
           topic: string
           content: Uint8Array
@@ -95,6 +95,8 @@ export default function FileHistory() {
       blob = new Blob([item.text.toString()], { type: 'text/plain' })
     } else if (item?.kind === 'xmldoc') {
       blob = new Blob([item.text.toString()], { type: 'text/plain' })
+    } else if (item?.kind === 'markdowndoc') {
+      blob = new Blob([item.prosemirror.toString()], { type: 'text/plain' })
     } else {
       blob = new Blob([JSON.stringify(item)], { type: 'application/json' })
     }

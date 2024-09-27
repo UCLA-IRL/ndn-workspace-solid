@@ -47,7 +47,7 @@ type ContextType = {
 
 const NdnWorkspaceContext = createContext<ContextType>()
 
-export function NdnWorkspaceProvider(props: ParentProps<unknown>) {
+export function NdnWorkspaceProvider(props: ParentProps<Record<string, unknown>>) {
   const [rootDocSig, setRootDocSig] = createSignal<RootDocStore>()
   const [workspaceSig, setWorkspaceSig] = createSignal<Workspace>()
   const [booted, setBooted] = createSignal(false)
