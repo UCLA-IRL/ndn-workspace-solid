@@ -168,36 +168,22 @@ export async function bootstrapWorkspace(opts: {
   }
 
   // Adam Chen - Injection point 4: new member join
-  console.log('-- Injection point 4: new member join check --')
 
   // loading variables
   const appPrefixName = appPrefix.toString()
-  console.log('debug: appPrefix: ', appPrefixName)
-  console.log('debug: nodeID', nodeId)
   const snapshotName = appPrefix.append('32=snapshot').toString()
-  console.log('debug: theoretical snapshot prefix: ', snapshotName)
   const localYJSUpdate = await persistStore.get('localSnapshot')
-  console.log('persistent storage local yjs update: ', localYJSUpdate)
-  // localYJSUpdate = undefined
 
   // snapshot 1.0: timestamp check
-  // await persistStore.set('snapshotTimestamp', Encoder.encode(NNI(Date.now() - 86400001)))
   const localTimestamp = await persistStore.get('snapshotTimestamp')
-  // if (localTimestamp) {
-  //   console.log(bytesToNumber(localTimestamp), getTimestamp())
-  // }
 
   const timestampInterval = 86400000 //24hr
   if (!localYJSUpdate || !localTimestamp || Date.now() - NNI.decode(localTimestamp) > timestampInterval) {
-    console.log('Fetching Snapshot')
     const interest = new Interest(snapshotName, Interest.CanBePrefix, Interest.MustBeFresh)
     try {
       const data = await consume(interest)
-      console.log(`Received data with name [${data.name}]`)
       const targetName = data.name.getPrefix(-1)
       // /grpPrefix/32=snapshot/54=<vector>/
-      console.log('segmented object fetcher targeting name: ', targetName.toString())
-      // Patch: Utilize safety fetch. I think this is how it works.
       let snapshotData = await fetch(targetName, {
         verifier: certStorage.verifier, // we have access to the verifier
         modifyInterest: { mustBeFresh: true },
@@ -205,7 +191,7 @@ export async function bootstrapWorkspace(opts: {
         retxLimit: 150, // See Deliveries. 60*1000/(2*200)=150. Default minRto = 150.
       })
 
-      // Adam Chen Snapshot 1.0 - Snapshot Merge
+      // Snapshot 1.0 - Snapshot Merge
       // If existing and loading snapshot, merge the contents.
       if (localYJSUpdate) {
         const tempDoc = new Y.Doc()
@@ -216,24 +202,15 @@ export async function bootstrapWorkspace(opts: {
       // If no merge, load the snapshot data as-is.
       await persistStore.set('localSnapshot', snapshotData)
 
-      // Adam Chen Snapshot 1.0 - State Vector Merge
+      // Snapshot 1.0 - State Vector Merge
       const aloSyncKey = '/8=local' + nodeId.toString() + '/32=sync/32=alo/8=syncVector'
-      console.log('targeting alo sync key: ', aloSyncKey)
-      // 8=local/8=ndn-workspace/8=test/8=node-1/32=sync/32=alo/8=syncVector
-
-      let targetSVEncoded = targetName.at(-1).value
-      await persistStore.set('localState', targetSVEncoded)
-
-      // SV merge debug
-      let decodedSV = Decoder.decode(targetSVEncoded, StateVector)
-      let count = 0
-      for (const [id, seq] of decodedSV) {
-        count += seq
-      }
-      console.log('Written the following total state vector count into local state:', count)
-      console.log('debug: state vector: ', targetName.at(-1).value)
-
       // TODO: SVS parsing check TLV type.
+      let targetSVEncoded = targetName.at(-1).value
+      // load local state first with the snapshot.
+      await persistStore.set('localState', targetSVEncoded)
+      
+      // Merge the SV with the local one so that when SyncAgent starts up, 
+      // it replays from snapshot the local updates (in local storage).
       let localSVEncoded = await persistStore.get(aloSyncKey)
       if (localSVEncoded) {
         let localSV = Decoder.decode(localSVEncoded, StateVector)
@@ -243,22 +220,12 @@ export async function bootstrapWorkspace(opts: {
       }
       await persistStore.set(aloSyncKey, targetSVEncoded)
 
-      // debug: check state vector count
-      decodedSV = Decoder.decode(targetSVEncoded, StateVector)
-      count = 0
-      for (const [id, seq] of decodedSV) {
-        count += seq
-      }
-      console.log('Written the following total state vector count into persistent storage:', count)
-      console.log('debug: state vector: ', targetName.at(-1).value)
-      // await new Promise((r) => setTimeout(r, 1000))
-      // I may need to await all persiststore.set to remove this await. will test later.
     } catch (err: any) {
       console.warn(err)
       console.log('Aborting snapshot retrieval, falling back to SVS')
     }
   }
-  // Adam Chen Snapshot 1.0 init complete - timestamp update
+  // Snapshot 1.0 init complete - timestamp update
   await persistStore.set('snapshotTimestamp', Encoder.encode(NNI(Date.now())))
 
   // -- End Injection Point 4 --
