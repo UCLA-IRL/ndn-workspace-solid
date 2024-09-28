@@ -214,7 +214,7 @@ export async function bootstrapWorkspace(opts: {
         snapshotData = Y.encodeStateAsUpdate(tempDoc)
       }
       // If no merge, load the snapshot data as-is.
-      persistStore.set('localSnapshot', snapshotData)
+      await persistStore.set('localSnapshot', snapshotData)
 
       // Adam Chen Snapshot 1.0 - State Vector Merge
       const aloSyncKey = '/8=local' + nodeId.toString() + '/32=sync/32=alo/8=syncVector'
@@ -222,7 +222,7 @@ export async function bootstrapWorkspace(opts: {
       // 8=local/8=ndn-workspace/8=test/8=node-1/32=sync/32=alo/8=syncVector
 
       let targetSVEncoded = targetName.at(-1).value
-      persistStore.set('localState', targetSVEncoded)
+      await persistStore.set('localState', targetSVEncoded)
 
       // SV merge debug
       let decodedSV = Decoder.decode(targetSVEncoded, StateVector)
@@ -241,7 +241,7 @@ export async function bootstrapWorkspace(opts: {
         targetSV.mergeFrom(localSV)
         targetSVEncoded = Encoder.encode(targetSV)
       }
-      persistStore.set(aloSyncKey, targetSVEncoded)
+      await persistStore.set(aloSyncKey, targetSVEncoded)
 
       // debug: check state vector count
       decodedSV = Decoder.decode(targetSVEncoded, StateVector)
@@ -251,7 +251,7 @@ export async function bootstrapWorkspace(opts: {
       }
       console.log('Written the following total state vector count into persistent storage:', count)
       console.log('debug: state vector: ', targetName.at(-1).value)
-      await new Promise((r) => setTimeout(r, 1000))
+      // await new Promise((r) => setTimeout(r, 1000))
       // I may need to await all persiststore.set to remove this await. will test later.
     } catch (err: any) {
       console.warn(err)
