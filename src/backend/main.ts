@@ -3,7 +3,8 @@
 import { Producer, produce, consume } from '@ndn/endpoint'
 import { Name, Interest, Component } from '@ndn/packet'
 import * as nfdmgmt from '@ndn/nfdmgmt'
-import { getYjsDoc, Y } from '@syncedstore/core'
+import { getYjsDoc} from '@syncedstore/core'
+import * as Y from 'yjs'
 import { CertStorage } from '@ucla-irl/ndnts-aux/security'
 import { RootDocStore, initRootDoc, project, profiles, connections } from './models'
 import { FsStorage, InMemoryStorage, type Storage } from '@ucla-irl/ndnts-aux/storage'
@@ -16,7 +17,7 @@ import { Forwarder } from '@ndn/fw'
 import { BufferChunkSource, DataProducer, fetch } from '@ndn/segmented-object'
 import { concatBuffers, fromHex } from '@ndn/util'
 import { StateVector, SvSync } from '@ndn/svs'
-import { Decoder, Encoder } from '@ndn/tlv'
+import { Decoder, Encoder, NNI } from '@ndn/tlv'
 import { Version } from '@ndn/naming-convention2'
 
 export const forwarder: Forwarder = Forwarder.getDefault()
@@ -102,38 +103,6 @@ export async function connect(config: connections.Config) {
   toast.success('Connected to forwarder successfully!')
 }
 
-// Adam Chen snapshot 1.0 helper functions
-
-function numberToBytes(number: number) {
-  // you can use constant number of bytes by using 8 or 4
-  const len = Math.ceil(Math.log2(number) / 8)
-  const byteArray = new Uint8Array(len)
-  for (let index = 0; index < byteArray.length; index++) {
-    const byte = number & 0xff
-    byteArray[index] = byte
-    number = (number - byte) / 256
-  }
-  return byteArray
-}
-function bytesToNumber(byteArray: Uint8Array) {
-  let result = 0
-  for (let i = byteArray.length - 1; i >= 0; i--) {
-    result = result * 256 + byteArray[i]
-  }
-
-  return result
-}
-
-/**
- * Returns timestamp in seconds
- */
-function getTimestamp() {
-  // get time in seconds
-  return Math.floor(Date.now() / 1000)
-}
-
-// End helper functions
-
 // ============= Bootstrapping =============
 
 export async function bootstrapWorkspace(opts: {
@@ -212,15 +181,14 @@ export async function bootstrapWorkspace(opts: {
   // localYJSUpdate = undefined
 
   // snapshot 1.0: timestamp check
-  // console.log(bytesToNumber(numberToBytes(getTimestamp())))
-  await persistStore.set('snapshotTimestamp', numberToBytes(getTimestamp()))
+  // await persistStore.set('snapshotTimestamp', Encoder.encode(NNI(Date.now() - 86400001)))
   const localTimestamp = await persistStore.get('snapshotTimestamp')
   // if (localTimestamp) {
   //   console.log(bytesToNumber(localTimestamp), getTimestamp())
   // }
 
-  const timestampInterval = 86400 //24hr
-  if (!localYJSUpdate || !localTimestamp || getTimestamp() - bytesToNumber(localTimestamp) > timestampInterval) {
+  const timestampInterval = 86400000 //24hr
+  if (!localYJSUpdate || !localTimestamp || Date.now() - NNI.decode(localTimestamp) > timestampInterval) {
     console.log('Fetching Snapshot')
     const interest = new Interest(snapshotName, Interest.CanBePrefix, Interest.MustBeFresh)
     try {
@@ -291,7 +259,7 @@ export async function bootstrapWorkspace(opts: {
     }
   }
   // Adam Chen Snapshot 1.0 init complete - timestamp update
-  await persistStore.set('snapshotTimestamp', numberToBytes(getTimestamp()))
+  await persistStore.set('snapshotTimestamp', Encoder.encode(NNI(Date.now())))
 
   // -- End Injection Point 4 --
 
