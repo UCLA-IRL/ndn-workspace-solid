@@ -11,6 +11,7 @@ import { FsStorage, InMemoryStorage, type Storage } from '@ucla-irl/ndnts-aux/st
 import { Certificate } from '@ndn/keychain'
 import { encodeKey as encodePath, Signal as BackendSignal, openRoot } from '../utils'
 import { Workspace } from '@ucla-irl/ndnts-aux/workspace'
+import { hashFnv32a } from '@ucla-irl/ndnts-aux/utils'
 import toast from 'solid-toast'
 import { Connection, NfdWsConn, PeerJsConn, BleConn, TestbedConn, UseAutoAnnouncement } from './connection/mod.ts'
 import { Forwarder } from '@ndn/fw'
@@ -144,6 +145,12 @@ export async function bootstrapWorkspace(opts: {
 
   // Root doc using CRDT and Sync
   rootDoc = initRootDoc(project.WorkspaceDocId)
+  const yDoc = getYjsDoc(rootDoc)
+
+  // Hash node ID to Yjs client ID
+  // To make sure we don't break things, let's do this in the workspace App first before we change
+  // the aux Lib.
+  const clientID = hashFnv32a(nodeId.toString())
 
   // Load or create
   const createNewDoc: (() => Promise<void>) | undefined = async () => {
@@ -154,8 +161,6 @@ export async function bootstrapWorkspace(opts: {
     // syncedstore uses nested object, where non-top objects do not support "smart" initialization.
     // If we go to use a nested document, we need to rewrite the provider to support it.
     // I think eventually we may go this way. But for now, let's take the easiest solution.
-    const yDoc = getYjsDoc(rootDoc)
-    const clientID = yDoc.clientID
     yDoc.clientID = 1 // Set the client Id to be a common one to make the change common
     rootDoc.latex[project.RootId] = {
       id: project.RootId,
@@ -234,13 +239,15 @@ export async function bootstrapWorkspace(opts: {
     nodeId,
     persistStore,
     fw: forwarder,
-    rootDoc: getYjsDoc(rootDoc),
+    rootDoc: yDoc,
     signer: certStorage.signer,
     verifier: certStorage.verifier,
     onReset: disconnect,
     createNewDoc,
     useBundler: true,
   })
+  // Need to do this after local changes are loaded, due to Yjs limitation.
+  yDoc.clientID = clientID
 
   if (!opts.inMemory) {
     // We need to save profile for both create and join

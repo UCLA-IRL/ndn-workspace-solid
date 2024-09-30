@@ -23,6 +23,10 @@ export default function YjsStateVector() {
     const ydoc = yDoc()
     return ydoc ? getStateVector(ydoc.store) : undefined
   }
+  const missingStructs = () => {
+    const ydoc = yDoc()
+    return ydoc?.store?.pendingStructs?.missing
+  }
 
   stateVector()?.entries()
 
@@ -30,7 +34,17 @@ export default function YjsStateVector() {
     <>
       <h2>YJS Internal State Vector</h2>
       <Stack spacing={2}>
+        <h2>Rendered:</h2>
         <For each={Array.from(stateVector() ?? [])}>
+          {([uid, tim]: [number, number]) => (
+            <>
+              {uid}: {tim}
+              <br />
+            </>
+          )}
+        </For>
+        <h2>Missing updates that lead to pending:</h2>
+        <For each={Array.from(missingStructs() ?? [])}>
           {([uid, tim]: [number, number]) => (
             <>
               {uid}: {tim}
