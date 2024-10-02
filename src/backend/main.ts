@@ -172,14 +172,10 @@ export async function bootstrapWorkspace(opts: {
     yDoc.clientID = clientID
   }
 
-  // Adam Chen - Injection point 4: new member join
-
-  // loading variables
   const appPrefixName = appPrefix.toString()
   const snapshotName = appPrefix.append('32=snapshot').toString()
   const localYJSUpdate = await persistStore.get('localSnapshot')
 
-  // snapshot 1.0: timestamp check
   const localTimestamp = await persistStore.get('snapshotTimestamp')
 
   const timestampInterval = 86400000 //24hr
@@ -196,7 +192,6 @@ export async function bootstrapWorkspace(opts: {
         retxLimit: 150, // See Deliveries. 60*1000/(2*200)=150. Default minRto = 150.
       })
 
-      // Snapshot 1.0 - Snapshot Merge
       // If existing and loading snapshot, merge the contents.
       if (localYJSUpdate) {
         const tempDoc = new Y.Doc()
@@ -207,15 +202,15 @@ export async function bootstrapWorkspace(opts: {
       // If no merge, load the snapshot data as-is.
       await persistStore.set('localSnapshot', snapshotData)
 
-      // Snapshot 1.0 - State Vector Merge
+      // State Vector Merge
       const aloSyncKey = '/8=local' + nodeId.toString() + '/32=sync/32=alo/8=syncVector'
-      // TODO: SVS parsing check TLV type.
+      // TODO: SVS parsing check TLV type. Currently assumed as /54=.
       let targetSVEncoded = targetName.at(-1).value
       // load local state first with the snapshot.
       await persistStore.set('localState', targetSVEncoded)
       
       // Merge the SV with the local one so that when SyncAgent starts up, 
-      // it replays from snapshot the local updates (in local storage).
+      // it replays the local updates (in local storage), starting from snapshot's vector.
       let localSVEncoded = await persistStore.get(aloSyncKey)
       if (localSVEncoded) {
         let localSV = Decoder.decode(localSVEncoded, StateVector)
@@ -230,10 +225,8 @@ export async function bootstrapWorkspace(opts: {
       console.log('Aborting snapshot retrieval, falling back to SVS')
     }
   }
-  // Snapshot 1.0 init complete - timestamp update
+  // timestamp update
   await persistStore.set('snapshotTimestamp', Encoder.encode(NNI(Date.now())))
-
-  // -- End Injection Point 4 --
 
   workspace = await Workspace.create({
     nodeId,
