@@ -45,6 +45,8 @@ export async function disconnect() {
     return
   }
 
+  connection.face?.removeEventListener('down', reconnect)
+
   connState.value = 'DISCONNECTING'
   if (connection.config.kind !== 'peerJs') {
     await checkPrefixRegistration(true)
@@ -88,14 +90,38 @@ export async function connect(config: connections.Config) {
     connState.value = 'DISCONNECTED'
     return
   }
-  connection.face!.addEventListener('down', () => {
-    disconnect()
-  })
+
+  // Reconnect and initialize when ws breaks, but keep the
+  // face around. This means the application does not see any change.
+  connection.face?.addEventListener('down', reconnect)
 
   workspace?.fireUpdate()
   connState.value = 'CONNECTED'
 
   toast.success('Connected to forwarder successfully!')
+}
+
+async function reconnect() {
+  toast.promise(
+    new Promise<void>((resolve, reject) => {
+      connection?.face?.addEventListener(
+        'up',
+        async () => {
+          resolve()
+
+          // The sleep here is needed otherwise prefix registration fails
+          setTimeout(() => checkPrefixRegistration(false), 500)
+        },
+        { once: true },
+      )
+      connection?.face?.addEventListener('close', () => reject(), { once: true })
+    }),
+    {
+      loading: 'Disconnected from forwarding, attempting to reconnect ...',
+      success: () => 'Reconnected to forwarder!',
+      error: 'Failed to reconnect to forwarder',
+    },
+  )
 }
 
 // ============= Bootstrapping =============
