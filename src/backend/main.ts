@@ -1,9 +1,10 @@
 // This file is the main file gluing all components and maintain a global context.
 // Should be changed to something better if refactor.
-import { Producer, produce } from '@ndn/endpoint'
-import { Name } from '@ndn/packet'
+import { Producer, produce, consume } from '@ndn/endpoint'
+import { Name, Interest, Component } from '@ndn/packet'
 import * as nfdmgmt from '@ndn/nfdmgmt'
-import { getYjsDoc } from '@syncedstore/core'
+import { getYjsDoc} from '@syncedstore/core'
+import * as Y from 'yjs'
 import { CertStorage } from '@ucla-irl/ndnts-aux/security'
 import { RootDocStore, initRootDoc, project, profiles, connections } from './models'
 import { FsStorage, InMemoryStorage, type Storage } from '@ucla-irl/ndnts-aux/storage'
@@ -14,6 +15,11 @@ import { hashFnv32a } from '@ucla-irl/ndnts-aux/utils'
 import toast from 'solid-toast'
 import { Connection, NfdWsConn, PeerJsConn, BleConn, TestbedConn, UseAutoAnnouncement } from './connection/mod.ts'
 import { Forwarder } from '@ndn/fw'
+import { BufferChunkSource, DataProducer, fetch } from '@ndn/segmented-object'
+import { concatBuffers, fromHex } from '@ndn/util'
+import { StateVector, SvSync } from '@ndn/svs'
+import { Decoder, Encoder, NNI } from '@ndn/tlv'
+import { Version } from '@ndn/naming-convention2'
 
 export const forwarder: Forwarder = Forwarder.getDefault()
 export type ConnState = 'CONNECTED' | 'DISCONNECTED' | 'CONNECTING' | 'DISCONNECTING'
@@ -191,6 +197,62 @@ export async function bootstrapWorkspace(opts: {
     }
     yDoc.clientID = clientID
   }
+
+  const appPrefixName = appPrefix.toString()
+  const snapshotName = appPrefix.append('32=snapshot').toString()
+  const localYJSUpdate = await persistStore.get('localSnapshot')
+
+  const localTimestamp = await persistStore.get('snapshotTimestamp')
+
+  const timestampInterval = 86400000 //24hr
+  if (!localYJSUpdate || !localTimestamp || Date.now() - NNI.decode(localTimestamp) > timestampInterval) {
+    const interest = new Interest(snapshotName, Interest.CanBePrefix, Interest.MustBeFresh)
+    try {
+      const data = await consume(interest)
+      const targetName = data.name.getPrefix(-1)
+      // /grpPrefix/32=snapshot/54=<vector>/
+      let snapshotData = await fetch(targetName, {
+        verifier: certStorage.verifier, // we have access to the verifier
+        modifyInterest: { mustBeFresh: true },
+        lifetimeAfterRto: 2000,
+        retxLimit: 150, // See Deliveries. 60*1000/(2*200)=150. Default minRto = 150.
+      })
+
+      // If existing and loading snapshot, merge the contents.
+      if (localYJSUpdate) {
+        const tempDoc = new Y.Doc()
+        Y.applyUpdate(tempDoc, localYJSUpdate)
+        Y.applyUpdate(tempDoc, snapshotData)
+        snapshotData = Y.encodeStateAsUpdate(tempDoc)
+      }
+      // If no merge, load the snapshot data as-is.
+      await persistStore.set('localSnapshot', snapshotData)
+
+      // State Vector Merge
+      const aloSyncKey = '/8=local' + nodeId.toString() + '/32=sync/32=alo/8=syncVector'
+      // TODO: SVS parsing check TLV type. Currently assumed as /54=.
+      let targetSVEncoded = targetName.at(-1).value
+      // load local state first with the snapshot.
+      await persistStore.set('localState', targetSVEncoded)
+      
+      // Merge the SV with the local one so that when SyncAgent starts up, 
+      // it replays the local updates (in local storage), starting from snapshot's vector.
+      let localSVEncoded = await persistStore.get(aloSyncKey)
+      if (localSVEncoded) {
+        let localSV = Decoder.decode(localSVEncoded, StateVector)
+        let targetSV = Decoder.decode(targetSVEncoded, StateVector)
+        targetSV.mergeFrom(localSV)
+        targetSVEncoded = Encoder.encode(targetSV)
+      }
+      await persistStore.set(aloSyncKey, targetSVEncoded)
+
+    } catch (err: any) {
+      console.warn(err)
+      console.log('Aborting snapshot retrieval, falling back to SVS')
+    }
+  }
+  // timestamp update
+  await persistStore.set('snapshotTimestamp', Encoder.encode(NNI(Date.now())))
 
   workspace = await Workspace.create({
     nodeId,
