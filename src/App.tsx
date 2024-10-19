@@ -1,5 +1,5 @@
 import { Button, Paper, Typography } from '@suid/material'
-import { useNdnWorkspace, initTestbed } from './Context'
+import { useNdnWorkspace } from './Context'
 import { useNavigate } from '@solidjs/router'
 
 function isSafari() {
@@ -9,8 +9,6 @@ function isSafari() {
 function App() {
   const { currentConnConfig } = useNdnWorkspace()!
   const navigate = useNavigate()
-
-  initTestbed()
 
   const configToDescription = () => {
     const config = currentConnConfig()
