@@ -3,7 +3,7 @@
 import { Producer, produce, consume } from '@ndn/endpoint'
 import { Name, Interest, Component } from '@ndn/packet'
 import * as nfdmgmt from '@ndn/nfdmgmt'
-import { getYjsDoc} from '@syncedstore/core'
+import { getYjsDoc } from '@syncedstore/core'
 import * as Y from 'yjs'
 import { CertStorage } from '@ucla-irl/ndnts-aux/security'
 import { RootDocStore, initRootDoc, project, profiles, connections } from './models'
@@ -234,18 +234,17 @@ export async function bootstrapWorkspace(opts: {
       let targetSVEncoded = targetName.at(-1).value
       // load local state first with the snapshot.
       await persistStore.set('localState', targetSVEncoded)
-      
-      // Merge the SV with the local one so that when SyncAgent starts up, 
+
+      // Merge the SV with the local one so that when SyncAgent starts up,
       // it replays the local updates (in local storage), starting from snapshot's vector.
-      let localSVEncoded = await persistStore.get(aloSyncKey)
+      const localSVEncoded = await persistStore.get(aloSyncKey)
       if (localSVEncoded) {
-        let localSV = Decoder.decode(localSVEncoded, StateVector)
-        let targetSV = Decoder.decode(targetSVEncoded, StateVector)
+        const localSV = Decoder.decode(localSVEncoded, StateVector)
+        const targetSV = Decoder.decode(targetSVEncoded, StateVector)
         targetSV.mergeFrom(localSV)
         targetSVEncoded = Encoder.encode(targetSV)
       }
       await persistStore.set(aloSyncKey, targetSVEncoded)
-
     } catch (err: any) {
       console.warn(err)
       console.log('Aborting snapshot retrieval, falling back to SVS')
