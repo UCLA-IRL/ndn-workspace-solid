@@ -1,7 +1,7 @@
 // This file is the main file gluing all components and maintain a global context.
 // Should be changed to something better if refactor.
 import { Producer, produce, consume } from '@ndn/endpoint'
-import { Name, Interest, Component } from '@ndn/packet'
+import { Name, Interest } from '@ndn/packet'
 import * as nfdmgmt from '@ndn/nfdmgmt'
 import { getYjsDoc } from '@syncedstore/core'
 import * as Y from 'yjs'
@@ -15,11 +15,9 @@ import { hashFnv32a } from '@ucla-irl/ndnts-aux/utils'
 import toast from 'solid-toast'
 import { Connection, NfdWsConn, PeerJsConn, BleConn, TestbedConn, UseAutoAnnouncement } from './connection/mod.ts'
 import { Forwarder } from '@ndn/fw'
-import { BufferChunkSource, DataProducer, fetch } from '@ndn/segmented-object'
-import { concatBuffers, fromHex } from '@ndn/util'
-import { StateVector, SvSync } from '@ndn/svs'
+import { fetch } from '@ndn/segmented-object'
+import { StateVector } from '@ndn/svs'
 import { Decoder, Encoder, NNI } from '@ndn/tlv'
-import { Version } from '@ndn/naming-convention2'
 
 export const forwarder: Forwarder = Forwarder.getDefault()
 export type ConnState = 'CONNECTED' | 'DISCONNECTED' | 'CONNECTING' | 'DISCONNECTING'
@@ -198,7 +196,7 @@ export async function bootstrapWorkspace(opts: {
     yDoc.clientID = clientID
   }
 
-  const appPrefixName = appPrefix.toString()
+  // const appPrefixName = appPrefix.toString()
   const snapshotName = appPrefix.append('32=snapshot').toString()
   const localYJSUpdate = await persistStore.get('localSnapshot')
 
@@ -245,7 +243,7 @@ export async function bootstrapWorkspace(opts: {
         targetSVEncoded = Encoder.encode(targetSV)
       }
       await persistStore.set(aloSyncKey, targetSVEncoded)
-    } catch (err: any) {
+    } catch (err) {
       console.warn(err)
       console.log('Aborting snapshot retrieval, falling back to SVS')
     }
