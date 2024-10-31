@@ -5,6 +5,7 @@ import CollaborationCursor from '@tiptap/extension-collaboration-cursor'
 import Highlight from '@tiptap/extension-highlight'
 import { Color } from '@tiptap/extension-color'
 import TextStyle from '@tiptap/extension-text-style'
+import Link from '@tiptap/extension-link'
 import * as Y from 'yjs'
 import { createSignal, onCleanup, onMount } from 'solid-js'
 import { Card, CardContent, Divider, IconButton, Stack } from '@suid/material'
@@ -24,6 +25,7 @@ import {
   FormatClear as FormatClearIcon,
   Undo as UndoIcon,
   Redo as RedoIcon,
+  Link as LinkIcon,
 } from '@suid/icons-material'
 import { H1Icon, H2Icon, H3Icon, H4Icon } from './icons'
 import CmdIcon from './cmd-icon'
@@ -59,6 +61,13 @@ export default function RichDoc(props: {
       }),
       Collaboration.configure({
         fragment: props.doc,
+      }),
+      Link.configure({
+        HTMLAttributes: {
+          // These are default values, but we want to make sure they are set
+          rel: 'noopener noreferrer nofollow',
+          target: '_blank',
+        },
       }),
       Highlight,
       TextStyle,
