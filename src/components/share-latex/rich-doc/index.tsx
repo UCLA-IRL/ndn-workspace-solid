@@ -25,7 +25,6 @@ import {
   FormatClear as FormatClearIcon,
   Undo as UndoIcon,
   Redo as RedoIcon,
-  Link as LinkIcon,
 } from '@suid/icons-material'
 import { H1Icon, H2Icon, H3Icon, H4Icon } from './icons'
 import CmdIcon from './cmd-icon'
