@@ -21,6 +21,7 @@
     "@material/web": "^2.2.0",
     "@milkdown/core": "^7.5.0",
     "@milkdown/ctx": "^7.5.0",
+    "@milkdown/exception": "^7.5.0",
     "@milkdown/plugin-clipboard": "^7.5.0",
     "@milkdown/plugin-collab": "^7.5.0",
     "@milkdown/plugin-cursor": "^7.5.0",
@@ -88,6 +89,7 @@
     "uuid": "^10.0.0",
     "y-codemirror.next": "^0.3.5",
     "y-prosemirror": "^1.2.12",
+    "y-protocols": "^1.0.6",
     "yjs": "^13.6.20"
   },
   "devDependencies": {
@@ -104,7 +106,7 @@
     "eslint-plugin-solid": "^0.14.3",
     "peer": "^1.0.2",
     "prettier": "^3.3.3",
-    "sass": "^1.80.4",
+    "sass": "^1.80.5",
     "solid-devtools": "^0.30.1",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.12.2",

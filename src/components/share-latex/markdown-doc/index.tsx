@@ -2,7 +2,7 @@ import { createSignal, onCleanup, onMount } from 'solid-js'
 import { Editor, rootCtx } from '@milkdown/core'
 import { commonmark } from '@milkdown/preset-commonmark'
 import { history } from '@milkdown/plugin-history'
-import { collab, CollabService, collabServiceCtx } from '@milkdown/plugin-collab'
+import { collab, CollabService, collabServiceCtx } from '../../../adaptors/milkdown-plugin-synced-store/collab-service'
 import { nord } from '@milkdown/theme-nord'
 import { cursor } from '@milkdown/plugin-cursor'
 import { indent, indentConfig, IndentConfigOptions } from '@milkdown/plugin-indent'
@@ -52,7 +52,7 @@ export default function MarkdownDoc(props: {
 
       collabSrv
         // bind doc and awareness
-        .bindDoc(props.doc.doc!)
+        .bindFragment(props.doc)
         .setAwareness(props.provider.awareness!)
         // connect yjs with milkdown
         .connect()
