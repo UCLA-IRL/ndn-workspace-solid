@@ -1,0 +1,51 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Yu"
+  given-names: "Tianyuan"
+  orcid: "https://orcid.org/0000-0002-6722-1938"
+- family-names: "Ma"
+  given-names: "Xinyu"
+  orcid: "https://orcid.org/0000-0002-7575-1058"
+- family-names: "Patil"
+  given-names: "Varun"
+  orcid: "https://orcid.org/0000-0002-5404-0070"
+- family-names: "Kocaoğullar"
+  given-names: "Yekta"
+  orcid: "https://orcid.org/0000-0002-6929-0734"
+- family-names: "Zhang"
+  given-names: "Lixia"
+  orcid: "https://orcid.org/0000-0003-0701-757X"
+title: "NDN Workspace"
+version: 1.3.7
+doi: 10.1109/MetaCom62920.2024.00027
+date-released: 2023-11-15
+url: "https://github.com/UCLA-IRL/ndn-workspace-solid"
+preferred-citation:
+  type: conference-paper
+  authors:
+  - family-names: "Yu"
+    given-names: "Tianyuan"
+    orcid: "https://orcid.org/0000-0002-6722-1938"
+  - family-names: "Ma"
+    given-names: "Xinyu"
+    orcid: "https://orcid.org/0000-0002-7575-1058"
+  - family-names: "Patil"
+    given-names: "Varun"
+    orcid: "https://orcid.org/0000-0002-5404-0070"
+  - family-names: "Kocaoğullar"
+    given-names: "Yekta"
+    orcid: "https://orcid.org/0000-0002-6929-0734"
+  - family-names: "Zhang"
+    given-names: "Lixia"
+    orcid: "https://orcid.org/0000-0003-0701-757X"
+  doi: "10.1109/MetaCom62920.2024.00027"
+  conference:
+    name: "2024 IEEE International Conference on Metaverse Computing, Networking, and Applications (MetaCom)"
+  month: 8
+  start: 89 # First page number
+  end: 96 # Last page number
+  title: "Exploring the Design of Collaborative Applications via the Lens of NDN Workspace"
+  year: 2024
+  publisher: "IEEE"
+  url: "https://doi.org/10.1109/MetaCom62920.2024.00027"
