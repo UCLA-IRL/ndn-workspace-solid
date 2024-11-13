@@ -197,7 +197,8 @@ export async function bootstrapWorkspace(opts: {
   }
 
   // const appPrefixName = appPrefix.toString()
-  const snapshotName = appPrefix.append('32=snapshot').toString()
+  const snapshotTopic = 'snapshot'
+  const snapshotName = appPrefix.append('32=' + snapshotTopic).toString()
   const localYJSUpdate = await persistStore.get('localSnapshot')
 
   const localTimestamp = await persistStore.get('snapshotTimestamp')
