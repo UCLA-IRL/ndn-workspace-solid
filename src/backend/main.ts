@@ -111,10 +111,14 @@ async function reconnect() {
       connection?.face?.addEventListener(
         'up',
         async () => {
-          resolve()
-
-          // The sleep here is needed otherwise prefix registration fails
-          setTimeout(() => checkPrefixRegistration(false), 500)
+          try {
+            if (!(await checkPrefixRegistration(false))) {
+              throw new Error('Failed to register prefixes')
+            }
+            resolve()
+          } catch (e) {
+            reject(e)
+          }
         },
         { once: true },
       )
@@ -298,124 +302,125 @@ export async function stopWorkspace() {
   bootstrapping = false
 }
 
-async function checkPrefixRegistration(cancel: boolean) {
-  if (!connection || !workspace) {
-    return
+async function checkPrefixRegistration(cancel: boolean): Promise<boolean> {
+  if (!connection?.face?.running || !workspace) {
+    return false
   }
+
+  if (UseAutoAnnouncement) {
+    return true
+  }
+
   if (cancel) {
-    if (!UseAutoAnnouncement) {
-      // Unregister prefixes
-      try {
-        await nfdmgmt.invoke(
-          'rib/unregister',
-          {
-            name: nodeId!,
-            origin: 65, // client
+    // Unregister prefixes
+    try {
+      await nfdmgmt.invoke(
+        'rib/unregister',
+        {
+          name: nodeId!,
+          origin: 65, // client
+        },
+        {
+          cOpts: {
+            fw: forwarder,
           },
-          {
-            cOpts: {
-              fw: forwarder,
-            },
-            prefix: connection.commandPrefix,
-            signer: connection.cmdSigner,
+          prefix: connection.commandPrefix,
+          signer: connection.cmdSigner,
+        },
+      )
+      await nfdmgmt.invoke(
+        'rib/unregister',
+        {
+          name: appPrefix!,
+          origin: 65, // client
+        },
+        {
+          cOpts: {
+            fw: forwarder,
           },
-        )
-        await nfdmgmt.invoke(
-          'rib/unregister',
-          {
-            name: appPrefix!,
-            origin: 65, // client
-          },
-          {
-            cOpts: {
-              fw: forwarder,
-            },
-            prefix: connection.commandPrefix,
-            signer: connection.cmdSigner,
-          },
-        )
-      } catch {
-        // Ignore errors
-      }
-
-      // Stop serving certificate
-      nfdCertProducer?.close()
-      nfdCertProducer = undefined
-
-      toast.success('Unregistered routes successfully!')
+          prefix: connection.commandPrefix,
+          signer: connection.cmdSigner,
+        },
+      )
+    } catch {
+      // Ignore errors
     }
+
+    // Stop serving certificate
+    nfdCertProducer?.close()
+    nfdCertProducer = undefined
+
+    toast.success('Unregistered routes successfully!')
+    return true
   } else {
     // Note: UseAutoAnnouncement works, the following code is kept for test.
     // Differences:
     // - UseAutoAnnouncement does not cut the connection and notify the user when he uses
     //   an invalid certificate to connect to a testbed node.
     // - UseAutoAnnouncement will announce sync prefixes
-    if (!UseAutoAnnouncement) {
-      // Serve the certificate back to the forwarder
-      if (nfdCertProducer) {
-        nfdCertProducer?.close()
-      }
-      if (connection.nfdCert) {
-        nfdCertProducer = produce(connection.nfdCert.name, async () => connection?.nfdCert?.data, { fw: forwarder })
-      }
 
-      // Register prefixes
-      try {
-        let cr = await nfdmgmt.invoke(
-          'rib/register',
-          {
-            name: appPrefix!,
-            origin: 65, // client
-            cost: 0,
-            flags: 0x02, // CAPTURE
-          },
-          {
-            cOpts: {
-              fw: forwarder,
-            },
-            prefix: connection.commandPrefix,
-            signer: connection.cmdSigner,
-          },
-        )
-        if (cr.statusCode !== 200) {
-          console.error(`Unable to register route: ${cr.statusCode} ${cr.statusText}`)
-          toast.error(`Unable to register route: ${cr.statusCode} ${cr.statusText}`)
-          // Cut connection
-          return await disconnect()
-        }
+    // Serve the certificate back to the forwarder
+    if (nfdCertProducer) {
+      nfdCertProducer?.close()
+    }
+    if (connection.nfdCert) {
+      nfdCertProducer = produce(connection.nfdCert.name, async () => connection?.nfdCert?.data, { fw: forwarder })
+    }
 
-        cr = await nfdmgmt.invoke(
-          'rib/register',
-          {
-            name: nodeId!,
-            origin: 65, // client
-            cost: 0,
-            flags: 0x02, // CAPTURE
-          },
-          {
-            cOpts: {
-              fw: forwarder,
-            },
-            prefix: connection.commandPrefix,
-            signer: connection.cmdSigner,
-          },
-        )
-        if (cr.statusCode !== 200) {
-          console.error(`Unable to register route: ${cr.statusCode} ${cr.statusText}`)
-          toast.error(`Unable to register route: ${cr.statusCode} ${cr.statusText}`)
-          // Cut connection
-          return await disconnect()
-        }
+    const bail = async (cr: nfdmgmt.ControlResponse) => {
+      console.error(`Unable to register route: ${cr.statusCode} ${cr.statusText}`)
+      toast.error(`Unable to register route: ${cr.statusCode} ${cr.statusText}`)
+      await disconnect() // cut connection
+      return false
+    }
 
-        toast.success('Registered routes successfully!')
-      } catch {
-        toast.error(
-          'Unable to register route with no response.' +
-            "Most likey because your certificate is not allowed to register this workspace's prefix",
-        )
-        // Cut connection
-        return await disconnect()
-      }
+    // Register prefixes
+    try {
+      let cr = await nfdmgmt.invoke(
+        'rib/register',
+        {
+          name: appPrefix!,
+          origin: 65, // client
+          cost: 0,
+          flags: 0x02, // CAPTURE
+        },
+        {
+          cOpts: {
+            fw: forwarder,
+          },
+          prefix: connection.commandPrefix,
+          signer: connection.cmdSigner,
+        },
+      )
+      if (cr.statusCode !== 200) return bail(cr)
+
+      cr = await nfdmgmt.invoke(
+        'rib/register',
+        {
+          name: nodeId!,
+          origin: 65, // client
+          cost: 0,
+          flags: 0x02, // CAPTURE
+        },
+        {
+          cOpts: {
+            fw: forwarder,
+          },
+          prefix: connection.commandPrefix,
+          signer: connection.cmdSigner,
+        },
+      )
+      if (cr.statusCode !== 200) return bail(cr)
+
+      toast.success('Registered routes successfully!')
+      return true
+    } catch (e) {
+      // This probably happens because the Interest expired, rather
+      // than an explicit failure. Log and retry infinitely.
+      // If the connection disconnects during a retry, this function
+      // will exit immediately.
+      console.error(e)
+      return checkPrefixRegistration(cancel)
     }
   }
 }

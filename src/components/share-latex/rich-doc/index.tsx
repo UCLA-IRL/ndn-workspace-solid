@@ -203,7 +203,7 @@ export default function RichDoc(props: {
         </Stack>
       </CardContent>
       <Divider />
-      <CardContent sx={{ flex: 1, backgroundColor: "#FFFFFF" }}>
+      <CardContent sx={{ flex: 1, backgroundColor: '#FFFFFF' }}>
         <div id="editor" class={styles.editor} ref={setContainer} />
       </CardContent>
     </Card>
