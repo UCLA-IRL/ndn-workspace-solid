@@ -6,7 +6,7 @@ import * as ndncert from '@ndn/ndncert'
 import * as keychain from '@ndn/keychain'
 import { useNavigate } from '@solidjs/router'
 import { useNdnWorkspace } from '../../Context'
-import { AltUri } from '@ndn/naming-convention2'
+import { AltUri, Timestamp } from '@ndn/naming-convention2'
 import { ValidityPeriod } from '@ndn/packet'
 import toast from 'solid-toast'
 
@@ -46,12 +46,12 @@ export default function ConvertTestbed() {
       return
     }
 
-    // New identity name (node id)
+    // New identity name (node id + timestamp as demuxer)
     // add a random number to prevent reusing the same identity over multiple devices
     const appPrefix = workspaceAnchorName.getPrefix(workspaceAnchorName.length - 5)
-    const testbedName = pofp.name.at(pofp.name.length - 5).text
-    const username = testbedName + '-' + Math.floor(Math.random() * 256).toString()
-    const nodeId = appPrefix.append(username)
+    const testbedName = pofp.name.at(pofp.name.length - 5)
+    const usernameTimestamp = Timestamp.create(Date.now())
+    const nodeId = appPrefix.append(testbedName).append(usernameTimestamp)
 
     // Generate key pair
     const keyName = keychain.CertNaming.makeKeyName(nodeId)
@@ -74,7 +74,6 @@ export default function ConvertTestbed() {
 
     try {
       await bootstrapWorkspace({
-        // createNew: init,
         trustAnchor: caProfile.cert,
         ownCertificate: cert,
         prvKey: new Uint8Array(prvKeyBits),

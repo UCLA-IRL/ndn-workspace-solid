@@ -5,7 +5,7 @@ import { useNdnWorkspace } from '../../../Context'
 import { getNamespace } from '@ucla-irl/ndnts-aux/sync-agent'
 import { SequenceNum } from '@ndn/naming-convention2'
 import { Decoder } from '@ndn/tlv'
-import { Data } from '@ndn/packet'
+import { Data, Name } from '@ndn/packet'
 import { toHex } from '@ndn/util'
 
 // TODO: Make it to utils
@@ -25,7 +25,9 @@ export default function UpdateInspect() {
     const agent = syncAgent()
     if (!agent) return
     try {
-      const nodeId = agent.appPrefix.append(nodeIdStr())
+      // TODO: Support naming convention
+      const nodeIdComp = Name.from(nodeIdStr())
+      const nodeId = agent.appPrefix.append(...nodeIdComp.comps)
       const seqNum = parseInt(seqStr())
       const appPrefix = agent.appPrefix
       const aloSyncPrefix = appPrefix.append(getNamespace().syncKeyword, getNamespace().atLeastOnceKeyword)
