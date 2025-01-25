@@ -276,7 +276,6 @@ export async function bootstrapWorkspace(opts: {
     onReset: disconnect,
     createNewDoc,
     useBundler: true,
-    snapshotInterval: 5,
   })
   // Need to do this after local changes are loaded, due to Yjs limitation.
   yDoc.clientID = clientID
