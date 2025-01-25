@@ -232,19 +232,29 @@ export async function bootstrapWorkspace(opts: {
       await persistStore.set('localSnapshot', snapshotData)
 
       // State Vector Merge
+      // Extract state vector from the snapshot
       const aloSyncKey = '/8=local' + nodeId.toString() + '/32=sync/32=alo/8=syncVector'
-      // TODO: SVS parsing check TLV type. Currently assumed as /54=.
+      // TODO: SVS parsing check TLV type. Currently assumed as /54=, using ".value" to extract the encoded state vector
       let targetSVEncoded = targetName.at(-1).value
-      // load local state first with the snapshot.
-      await persistStore.set('localState', targetSVEncoded)
 
-      // Merge the SV with the local one so that when SyncAgent starts up,
-      // it replays the local updates (in local storage), starting from snapshot's vector.
-      const localSVEncoded = await persistStore.get(aloSyncKey)
-      if (localSVEncoded) {
-        const localSV = Decoder.decode(localSVEncoded, StateVector)
+      // Merge targetSV with local YJS state vector, then save to local YJS save
+      const localYJS_SVEncoded = await persistStore.get('localState')
+      let mergedYJS_SVEncoded = targetSVEncoded //default case
+      if (localYJS_SVEncoded) {
+        const localYJS_SV = Decoder.decode(localYJS_SVEncoded, StateVector)
         const targetSV = Decoder.decode(targetSVEncoded, StateVector)
-        targetSV.mergeFrom(localSV)
+        targetSV.mergeFrom(localYJS_SV)
+        mergedYJS_SVEncoded = Encoder.encode(targetSV)
+      }
+      await persistStore.set('localState', mergedYJS_SVEncoded)
+
+      // Merge the SV with the local ALO one so that when SyncAgent starts up,
+      // it replays the local updates (in local storage), starting from snapshot's vector.
+      const localALO_SVEncoded = await persistStore.get(aloSyncKey)
+      if (localALO_SVEncoded) {
+        const localALO_SV = Decoder.decode(localALO_SVEncoded, StateVector)
+        const targetSV = Decoder.decode(targetSVEncoded, StateVector)
+        targetSV.mergeFrom(localALO_SV)
         targetSVEncoded = Encoder.encode(targetSV)
       }
       await persistStore.set(aloSyncKey, targetSVEncoded)
@@ -266,6 +276,7 @@ export async function bootstrapWorkspace(opts: {
     onReset: disconnect,
     createNewDoc,
     useBundler: true,
+    snapshotInterval: 5,
   })
   // Need to do this after local changes are loaded, due to Yjs limitation.
   yDoc.clientID = clientID
