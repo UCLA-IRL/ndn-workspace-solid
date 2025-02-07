@@ -207,7 +207,7 @@ export async function bootstrapWorkspace(opts: {
 
   const localTimestamp = await persistStore.get('snapshotTimestamp')
 
-  const timestampInterval = 86400000 //24hr
+  const timestampInterval = 900000 //15min //86400000 //24hr
   if (!localYJSUpdate || !localTimestamp || Date.now() - NNI.decode(localTimestamp) > timestampInterval) {
     const interest = new Interest(snapshotName, Interest.CanBePrefix, Interest.MustBeFresh)
     try {
@@ -238,23 +238,23 @@ export async function bootstrapWorkspace(opts: {
       let targetSVEncoded = targetName.at(-1).value
 
       // Merge targetSV with local YJS state vector, then save to local YJS save
-      const localYJS_SVEncoded = await persistStore.get('localState')
-      let mergedYJS_SVEncoded = targetSVEncoded //default case
-      if (localYJS_SVEncoded) {
-        const localYJS_SV = Decoder.decode(localYJS_SVEncoded, StateVector)
+      const localYjsSVEncoded = await persistStore.get('localState')
+      let mergedYjsSVEncoded = targetSVEncoded //default case
+      if (localYjsSVEncoded) {
+        const localYjsSV = Decoder.decode(localYjsSVEncoded, StateVector)
         const targetSV = Decoder.decode(targetSVEncoded, StateVector)
-        targetSV.mergeFrom(localYJS_SV)
-        mergedYJS_SVEncoded = Encoder.encode(targetSV)
+        targetSV.mergeFrom(localYjsSV)
+        mergedYjsSVEncoded = Encoder.encode(targetSV)
       }
-      await persistStore.set('localState', mergedYJS_SVEncoded)
+      await persistStore.set('localState', mergedYjsSVEncoded)
 
       // Merge the SV with the local ALO one so that when SyncAgent starts up,
       // it replays the local updates (in local storage), starting from snapshot's vector.
-      const localALO_SVEncoded = await persistStore.get(aloSyncKey)
-      if (localALO_SVEncoded) {
-        const localALO_SV = Decoder.decode(localALO_SVEncoded, StateVector)
+      const localAloSVEncoded = await persistStore.get(aloSyncKey)
+      if (localAloSVEncoded) {
+        const localAloSV = Decoder.decode(localAloSVEncoded, StateVector)
         const targetSV = Decoder.decode(targetSVEncoded, StateVector)
-        targetSV.mergeFrom(localALO_SV)
+        targetSV.mergeFrom(localAloSV)
         targetSVEncoded = Encoder.encode(targetSV)
       }
       await persistStore.set(aloSyncKey, targetSVEncoded)
