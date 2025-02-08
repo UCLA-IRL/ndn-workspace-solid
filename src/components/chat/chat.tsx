@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For, on } from 'solid-js'
+import {batch, createEffect, createSignal, For, on} from 'solid-js'
 import { boxed } from '@syncedstore/core'
 import { useNdnWorkspace } from '../../Context'
 import { chats } from '../../backend/models'
@@ -28,6 +28,8 @@ export function Chat() {
   }
 
   const handleSubmit = () => {
+    if (!messageTerm().trim()) return
+
     data()?.push(
       boxed({
         sender: username(),
@@ -39,18 +41,28 @@ export function Chat() {
     setMessageTerm('')
   }
 
+  const filteredMessages = () => data()?.filter((msg) => msg.value.channel === currentChannel())
+
   createEffect(
-    on(data, () => {
+    on(filteredMessages, () => {
       const div = container()
       if (div) {
-        // NOTES: Xinyu: This looks strange but let's keep it.
-        div.scrollTop = div.scrollHeight
+        setTimeout(() => {
+          div.scrollTop = div.scrollHeight
+        }, 0)
       }
     }),
   )
 
-  const filteredMessages = () => data()?.filter((msg) => msg.value.channel === currentChannel())
   const isLocalUser = (sender: string) => sender == username()
+
+  const userPfpId = (sender: string) => {
+    let hash = 0;
+    for (let i = 0; i < sender.length; i++) {
+      hash = (hash * 31 + sender.charCodeAt(i)) >>> 0;  // Ensure the hash is always a 32-bit unsigned integer
+    }
+    return hash % 1024;
+  }
 
   /* Display */
   const Code: SolidMarkdownComponents['code'] = (props) => {
@@ -71,12 +83,12 @@ export function Chat() {
                 class={currentChannel() === channel ? styles.ActiveChannelButton : styles.ChannelButton}
                 onClick={() => setCurrentChannel(channel)}
               >
-                {channel}
+                #{channel}
               </button>
             )}
           </For>
         </div>
-        <h2 style={{ color: '#333' }}>#{currentChannel()} Channel</h2>
+        <h2 class={styles.ChannelHeading}>#{currentChannel()} Channel</h2>
       </div>
       <div class={styles.App__messages} ref={setContainer}>
         <For each={filteredMessages()}>
@@ -84,11 +96,7 @@ export function Chat() {
             <div>
               <div class={styles.App__message}>
                 <img
-                  src={
-                    isLocalUser(msg.value.sender)
-                      ? 'https://picsum.photos/200/300?random=1'
-                      : 'https://cdn.drawception.com/images/avatars/647493-B9E.png'
-                  }
+                  src={`https://picsum.photos/id/${userPfpId(msg.value.sender)}/128/128`}
                   style="flex-shrink: 0"
                 />
                 <div class={styles.App__msgContent}>
@@ -99,7 +107,11 @@ export function Chat() {
                   >
                     {' '}
                     {msg.value.sender}
-                    <span>{new Date(msg.value.timestamp).toDateString()}</span>
+                    {' '}
+                    <span>{new Date(msg.value.timestamp).toLocaleString(undefined, {
+                      dateStyle: 'medium',
+                      timeStyle: 'short'
+                    })}</span>
                   </h4>
                   <div
                     class={`${styles.App_msgContentSolid} 
@@ -122,6 +134,15 @@ export function Chat() {
           name="message"
           placeholder={`Message the ${currentChannel()} channel`}
           onChange={(event) => setMessageTerm(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+              event.preventDefault()
+              batch(() => {
+                setMessageTerm((event.target as HTMLTextAreaElement).value)
+                handleSubmit()
+              })
+            }
+          }}
           value={messageTerm()}
         />
         <button class={styles.App__button} onClick={handleSubmit}>
