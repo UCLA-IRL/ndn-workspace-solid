@@ -1,15 +1,15 @@
-import {batch, createEffect, createSignal, For, on} from 'solid-js'
+import {batch, createEffect, createMemo, createSignal, For, on} from 'solid-js'
 import { boxed } from '@syncedstore/core'
 import { useNdnWorkspace } from '../../Context'
 import { chats } from '../../backend/models'
 import { createSyncedStoreSig } from '../../adaptors/solid-synced-store'
+import { AddChannelDialog } from "./add-channel-dialog.tsx";
 import styles from './styles.module.scss'
 import { useNavigate } from '@solidjs/router'
 import { SolidMarkdown, SolidMarkdownComponents } from 'solid-markdown'
 import remarkGfm from 'remark-gfm'
 
 // TODO: Do not load all messages at once
-// TODO: Users should be able to add their own channels (currently hard-coded)
 
 export function Chat() {
   const { rootDoc, syncAgent, booted } = useNdnWorkspace()!
@@ -21,7 +21,26 @@ export function Chat() {
   const [messageTerm, setMessageTerm] = createSignal('')
   const [container, setContainer] = createSignal<HTMLDivElement>()
   const [currentChannel, setCurrentChannel] = createSignal('general')
-  const channels = ['general', 'paper_writing', 'code_discussion', 'help'] // Define your channels here
+  const [isAddChannelDialogOpen, setIsAddChannelDialogOpen] = createSignal(false)
+  const [persistedChannels, setPersistedChannels] = createSignal<string[]>(['general'])
+
+  const channels = createMemo(() => {
+    const messageData = data();
+    if (!messageData) return persistedChannels();
+
+    const uniqueChannels = new Set(persistedChannels());
+    messageData.forEach(msg => {
+      if (msg.value.channel) {
+        uniqueChannels.add(msg.value.channel);
+      }
+    });
+
+    return Array.from(uniqueChannels).sort();
+  });
+
+  const filteredMessages = createMemo(() =>
+    data()?.filter((msg) => msg.value.channel === currentChannel())
+  );
 
   if (!booted()) {
     navigate('/profile', { replace: true })
@@ -41,8 +60,6 @@ export function Chat() {
     setMessageTerm('')
   }
 
-  const filteredMessages = () => data()?.filter((msg) => msg.value.channel === currentChannel())
-
   createEffect(
     on(filteredMessages, () => {
       const div = container()
@@ -53,6 +70,17 @@ export function Chat() {
       }
     }),
   )
+
+  const addChannel = (channelName: string) => {
+    const trimmedName = channelName.trim()
+    if (trimmedName && !channels().includes(trimmedName)) {
+      setPersistedChannels([...persistedChannels(), trimmedName])
+      setCurrentChannel(trimmedName)
+    }
+    else {
+      alert('Channel name cannot be empty or already exist')
+    }
+  }
 
   const isLocalUser = (sender: string) => sender == username()
 
@@ -77,7 +105,7 @@ export function Chat() {
     <div class={styles.App}>
       <div class={styles.App_header}>
         <div>
-          <For each={channels}>
+          <For each={channels()}>
             {(channel) => (
               <button
                 class={currentChannel() === channel ? styles.ActiveChannelButton : styles.ChannelButton}
@@ -87,6 +115,7 @@ export function Chat() {
               </button>
             )}
           </For>
+          <button class={styles.AddChannelButton} onClick={() => setIsAddChannelDialogOpen(true)}>+</button>
         </div>
         <h2 class={styles.ChannelHeading}>#{currentChannel()} Channel</h2>
       </div>
@@ -149,6 +178,15 @@ export function Chat() {
           Send
         </button>
       </div>
+
+      <AddChannelDialog
+        open={isAddChannelDialogOpen()}
+        onClose={() => setIsAddChannelDialogOpen(false)}
+        onConfirm={(channelName) => {
+          addChannel(channelName)
+          setIsAddChannelDialogOpen(false)
+        }}
+      />
     </div>
   )
 }

@@ -221,6 +221,23 @@
   }
 }
 
+.AddChannelButton {
+  background-color: #ddd;
+  border: none;
+  border-radius: 20px;
+  color: black;
+  cursor: pointer;
+  font-size: var(--msg-font-size-header);
+  padding: 6px 14px;
+  margin-right: 8px;
+  margin-bottom: 8px;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: #eee;
+  }
+}
+
 .ChannelHeading {
   border-left: 3px solid #223387;
   color: #333;
