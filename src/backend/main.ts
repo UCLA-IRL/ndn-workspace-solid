@@ -313,7 +313,7 @@ export async function stopWorkspace() {
 }
 
 async function checkPrefixRegistration(cancel: boolean): Promise<boolean> {
-  if (!connection?.face?.running || !workspace) {
+  if (!connection?.face?.running || !workspace || nodeId === undefined || appPrefix === undefined) {
     return false
   }
 
@@ -327,7 +327,7 @@ async function checkPrefixRegistration(cancel: boolean): Promise<boolean> {
       await nfdmgmt.invoke(
         'rib/unregister',
         {
-          name: nodeId!,
+          name: nodeId,
           origin: 65, // client
         },
         {
@@ -341,7 +341,7 @@ async function checkPrefixRegistration(cancel: boolean): Promise<boolean> {
       await nfdmgmt.invoke(
         'rib/unregister',
         {
-          name: appPrefix!,
+          name: appPrefix,
           origin: 65, // client
         },
         {
@@ -389,7 +389,7 @@ async function checkPrefixRegistration(cancel: boolean): Promise<boolean> {
       let cr = await nfdmgmt.invoke(
         'rib/register',
         {
-          name: appPrefix!,
+          name: appPrefix,
           origin: 65, // client
           cost: 0,
           flags: 0x02, // CAPTURE
@@ -407,7 +407,7 @@ async function checkPrefixRegistration(cancel: boolean): Promise<boolean> {
       cr = await nfdmgmt.invoke(
         'rib/register',
         {
-          name: nodeId!,
+          name: nodeId,
           origin: 65, // client
           cost: 0,
           flags: 0x02, // CAPTURE

@@ -6,9 +6,8 @@ import { StateVector } from '@ndn/svs'
 export const reprStateVector = (sv?: StateVector): Record<string, number> => {
   if (!sv) return {}
   const ret = {} as Record<string, number>
-  let unknownNum = 0
   for (const [id, seq] of sv) {
-    ret[id.get(-1)?.text ?? `Unknown-${++unknownNum}`] = seq
+    ret[`${id.get(-2)?.text}-${id.get(-1)?.text}`] = seq
   }
   return ret
 }

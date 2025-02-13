@@ -16,7 +16,8 @@ export function Chat() {
   const navigate = useNavigate()
   const messages = createSyncedStoreSig(() => rootDoc()?.chats)
   const data = () => messages()?.value
-  const username = () => syncAgent()?.nodeId.at(-1).text ?? ''
+  // TODO: This depends on the namespace design. Fix this.
+  const username = () => syncAgent()?.nodeId.at(-2).text ?? ''
 
   const [messageTerm, setMessageTerm] = createSignal('')
   const [container, setContainer] = createSignal<HTMLDivElement>()
@@ -130,8 +131,8 @@ export function Chat() {
                 />
                 <div class={styles.App__msgContent}>
                   <h4
-                    class={`${styles.App__msgHeader} 
-                      ${isLocalUser(msg.value.sender) ? styles.App__backgroundLocal : styles.App__backgroundForeign} 
+                    class={`${styles.App__msgHeader}
+                      ${isLocalUser(msg.value.sender) ? styles.App__backgroundLocal : styles.App__backgroundForeign}
                       ${isLocalUser(msg.value.sender) ? styles.App__borderLocal : styles.App__borderForeign}`}
                   >
                     {' '}
@@ -143,7 +144,7 @@ export function Chat() {
                     })}</span>
                   </h4>
                   <div
-                    class={`${styles.App_msgContentSolid} 
+                    class={`${styles.App_msgContentSolid}
                       ${isLocalUser(msg.value.sender) ? styles.App__borderLocal : styles.App__borderForeign}`}
                   >
                     <SolidMarkdown

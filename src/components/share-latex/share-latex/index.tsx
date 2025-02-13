@@ -4,15 +4,12 @@ import { useParams, useNavigate } from '@solidjs/router'
 import { project } from '../../../backend/models'
 import { createEffect, createSignal, onCleanup } from 'solid-js'
 import { observeDeep } from '@syncedstore/core'
-import { Interest, Name, digestSigning } from '@ndn/packet'
+import { Name } from '@ndn/packet'
 import { v4 as uuidv4 } from 'uuid'
 import { useNdnWorkspace } from '../../../Context'
 import { FileMapper } from '../../../backend/file-mapper'
 import { createInterval } from '../../../utils'
 import ShareLatexComponent from './component'
-import { Encoder } from '@ndn/tlv'
-import * as segObj from '@ndn/segmented-object'
-import { consume } from '@ndn/endpoint'
 import { PdfTeXEngine } from '../../../vendor/swiftlatex/PdfTeXEngine'
 import { LatexEnginePath } from '../../../constants'
 import { ViewValues } from '../types'
@@ -21,7 +18,7 @@ import toast from 'solid-toast'
 export type ModalState = '' | 'rename' | 'create'
 
 export default function ShareLatex(props: { rootUri: string }) {
-  const { rootDoc, syncAgent, booted, fw, yjsProvider } = useNdnWorkspace()!
+  const { rootDoc, syncAgent, booted, yjsProvider } = useNdnWorkspace()!
   const navigate = useNavigate()
   const params = useParams<{ itemId: string }>()
   const itemId = () => params.itemId
@@ -289,47 +286,6 @@ export default function ShareLatex(props: { rootUri: string }) {
 
     const fileUrl = URL.createObjectURL(blob)
     setPdfUrl(fileUrl)
-  }
-
-  // Preservec unused
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _onCompileRemote = async () => {
-    const agent = syncAgent()
-    if (!agent) {
-      return
-    }
-    const zip = await project.exportAsZip(async (name) => await agent.getBlob(name), rootDoc()!.latex)
-    const blobFile = await zip.generateAsync({ type: 'uint8array' })
-
-    // TODO: Disable the button when compiling is in progress
-    // TODO: Remove this temporary blob after finish (so is the object URL)
-    const reqName = await agent.publishBlob('zipToCompile', blobFile, undefined, false)
-    const reqNameEncoder = new Encoder()
-    reqName.encodeTo(reqNameEncoder)
-
-    const interest = new Interest(
-      '/ndn/workspace-compiler/request',
-      Interest.MustBeFresh,
-      Interest.Lifetime(60000),
-      reqNameEncoder.output,
-    )
-    await digestSigning.sign(interest)
-    const retWire = await consume(interest, { fw })
-    const retText = new TextDecoder().decode(retWire.content)
-    const result = JSON.parse(retText)
-
-    if (result.status === 'error') {
-      console.error('Request failed')
-      console.log(result.stdout)
-      console.log(result.stderr)
-    } else {
-      console.info('Request finished')
-      const reqId = result.id
-      const pdfContent = await segObj.fetch(`/ndn/workspace-compiler/result/${reqId}`)
-      const file = new Blob([pdfContent], { type: 'application/pdf;base64' })
-      const fileUrl = URL.createObjectURL(file)
-      window.open(fileUrl)
-    }
   }
 
   const onMapFolder = async () => {
