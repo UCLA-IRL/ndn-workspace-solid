@@ -86,7 +86,6 @@ export default function ShareLatex(props: { rootUri: string }) {
 
   const resolveItem = (id: string) => {
     const rootDocVal = rootDoc()
-    console.log(rootDocVal)
     return rootDocVal?.latex[id]
   }
 
@@ -98,8 +97,6 @@ export default function ShareLatex(props: { rootUri: string }) {
       if (curItem !== undefined) {
         curItem!.deleted = true
       }
-      console.log(curItem ? curItem.deleted : null)
-      console.log(rootDocVal)
       cur.items.splice(index, 1)
       // The root document is not modified, so the person editting this file will not be affected.
     }
