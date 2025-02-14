@@ -28,9 +28,13 @@
 
 .App_header {
   background: #fafafa;
+  border-bottom: 3px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   padding: 15px 25px;
   margin: 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Message input section styling */
@@ -61,7 +65,7 @@
 
 /* Send Message button Styling */
 .App__button {
-  background: #007bff;
+  background: #223387;
   padding: 10px 20px;
   border: none;
   color: #fff;
@@ -163,6 +167,8 @@
   border-top-width: 0;
   padding: var(--msg-pad-normal);
   margin-top: 0;
+  background-color: inherit;
+  color: #333;
 }
 
 /* Webkit browsers */
@@ -182,11 +188,13 @@
 
 .ChannelButton {
   background-color: transparent;
-  border: none;
+  border-radius: 20px;
   color: #333;
   cursor: pointer;
   font-size: var(--msg-font-size-header);
-  padding: 8px 16px;
+  outline: 1px solid #223387;
+  padding: 6px 16px;
+  margin-bottom: 8px;
   margin-right: 8px;
   transition: background-color 0.3s;
 
@@ -196,16 +204,45 @@
 }
 
 .ActiveChannelButton {
-  background-color: #007bff;
+  background-color: #223387;
   border: none;
+  border-radius: 20px;
   color: white;
   cursor: pointer;
   font-size: var(--msg-font-size-header);
-  padding: 8px 16px;
+  outline: 1px solid #223387;
+  padding: 6px 16px;
   margin-right: 8px;
+  margin-bottom: 8px;
   transition: background-color 0.3s;
 
   &:hover {
     background-color: #0056b3;
   }
+}
+
+.AddChannelButton {
+  background-color: #ddd;
+  border: none;
+  border-radius: 20px;
+  color: black;
+  cursor: pointer;
+  font-size: var(--msg-font-size-header);
+  padding: 6px 14px;
+  margin-right: 8px;
+  margin-bottom: 8px;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: #eee;
+  }
+}
+
+.ChannelHeading {
+  border-left: 3px solid #223387;
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  padding-left: 12px;
 }
