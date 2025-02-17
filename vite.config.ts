@@ -3,6 +3,7 @@ import solid from 'vite-plugin-solid'
 import suidPlugin from '@suid/vite-plugin'
 // import devtools from 'solid-devtools/vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   build: {
@@ -15,6 +16,7 @@ export default defineConfig({
     //   autoname: true,
     // }),
     solid(),
+    tailwindcss(),
     VitePWA({
       strategies: 'injectManifest',
       srcDir: 'src/workers',
