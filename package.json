@@ -74,6 +74,7 @@
     "eventemitter3": "^5.0.1",
     "file-system-access": "^1.0.4",
     "jose": "^5.9.6",
+    "js-cookie": "^3.0.5",
     "jszip": "^3.10.1",
     "peerjs": "^1.5.4",
     "postcss": "^8.4.49",

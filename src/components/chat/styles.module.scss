@@ -198,6 +198,10 @@
   margin-right: 8px;
   transition: background-color 0.3s;
 
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+
   &:hover {
     background-color: #f4f4f4;
   }
@@ -215,6 +219,10 @@
   margin-right: 8px;
   margin-bottom: 8px;
   transition: background-color 0.3s;
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
 
   &:hover {
     background-color: #0056b3;
@@ -245,4 +253,39 @@
   font-weight: 600;
   margin: 0;
   padding-left: 12px;
+}
+
+.HideChannelButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  color: #555;
+  font-size: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  line-height: 1;
+  margin-left: 0.5rem;
+
+  vertical-align: middle;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.HideChannelButton:hover {
+  background-color: #f9f9f9;
+}
+
+.HideChannelButton:active {
+  transform: scale(0.95);
+}
+
+.HideChannelButton:focus {
+  outline: 2px solid #0096ff;
+  outline-offset: 2px;
 }
