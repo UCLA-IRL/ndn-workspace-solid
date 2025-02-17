@@ -36,7 +36,7 @@ export function Chat() {
 
     const uniqueChannels: Set<string> = new Set();
     messageData.forEach(msg => {
-      if (msg.value.channel && !hiddenChannels().includes(msg.value.channel)) {
+      if (msg.value.channel) {
         uniqueChannels.add(msg.value.channel);
       }
     });
