@@ -21,6 +21,9 @@ export type ItemBase = {
 
   /** The kind of the item. Used to determine which page is used to view it. */
   kind: string
+
+  /** Whether the file has been deleted or not. Used to distinguish between current and historical files of the same name. */
+  deleted: boolean
 }
 
 export type Folder = ItemBase & {
