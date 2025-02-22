@@ -159,11 +159,12 @@ export async function bootstrapWorkspace(opts: {
   nodeId = opts.ownCertificate.name.getPrefix(opts.ownCertificate.name.length - 4)
 
   if (opts.inMemory) {
-    persistStore = new InMemoryStorage()
+    // This is due to JSR failed to handle [Symbol.dispose] properly.
+    persistStore = new InMemoryStorage() as unknown as Storage
   } else {
     const handle = await openRoot()
     const subFolder = await handle.getDirectoryHandle(encodePath(nodeId.toString()), { create: true })
-    persistStore = new FsStorage(subFolder)
+    persistStore = new FsStorage(subFolder) as unknown as Storage
   }
 
   // NOTE: CertStorage does not have a producer to serve certificates. This reuses the SyncAgent's responder.
