@@ -17,3 +17,43 @@
 :focus {
   outline: none;
 }
+
+// Taken from the example at https://milkdown.dev/docs/guide/collaborative-editing
+.ProseMirror > .ProseMirror-yjs-cursor:first-child {
+  margin-top: 16px;
+}
+.ProseMirror p:first-child,
+.ProseMirror h1:first-child,
+.ProseMirror h2:first-child,
+.ProseMirror h3:first-child,
+.ProseMirror h4:first-child,
+.ProseMirror h5:first-child,
+.ProseMirror h6:first-child {
+  margin-top: 16px;
+}
+
+.ProseMirror-yjs-cursor {
+  position: absolute;
+  border-left: 2px solid black;
+  border-color: orange;
+  word-break: normal;
+  pointer-events: none;
+}
+
+.ProseMirror-yjs-cursor > div {
+  position: absolute;
+  top: -1em;
+  left: -2px;
+  font-size: 10pt;
+  background-color: orange;
+  border-radius: 2px;
+  border-radius: 3px;
+  padding: 1px 3px;
+  font-style: normal;
+  font-weight: normal;
+  line-height: normal;
+  user-select: none;
+  color: black;
+  white-space: nowrap;
+  animation: fade90 2s forwards;
+}
