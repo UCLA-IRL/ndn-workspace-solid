@@ -91,7 +91,12 @@ export default function ShareLatex(props: { rootUri: string }) {
 
   const deleteItem = (index: number) => {
     const cur = item()
+    const rootDocVal = rootDoc()
     if (cur?.kind === 'folder') {
+      const curItem = rootDocVal!.latex[cur.items[index]]
+      if (curItem !== undefined) {
+        curItem!.deleted = true
+      }
       cur.items.splice(index, 1)
       // The root document is not modified, so the person editting this file will not be affected.
     }
@@ -134,6 +139,7 @@ export default function ShareLatex(props: { rootUri: string }) {
             kind: 'folder',
             // fullPath: cur.fullPath + '/' + name,
             name: name,
+            deleted: false,
             parentId: cur.id,
             items: [],
           }
@@ -149,6 +155,7 @@ export default function ShareLatex(props: { rootUri: string }) {
             kind: 'text',
             // fullPath: cur.fullPath + '/' + name,
             name: name,
+            deleted: false,
             parentId: cur.id,
             text: new Y.Text(),
           }
@@ -163,6 +170,7 @@ export default function ShareLatex(props: { rootUri: string }) {
             kind: 'xmldoc',
             // fullPath: cur.fullPath + '/' + name,
             name: newName,
+            deleted: false,
             parentId: cur.id,
             text: new Y.XmlFragment(),
           }
@@ -177,6 +185,7 @@ export default function ShareLatex(props: { rootUri: string }) {
             kind: 'markdowndoc',
             // fullPath: cur.fullPath + '/' + name,
             name: newName,
+            deleted: false,
             parentId: cur.id,
             prosemirror: new Y.XmlFragment(),
           }
@@ -193,6 +202,7 @@ export default function ShareLatex(props: { rootUri: string }) {
                 kind: 'blob',
                 // fullPath: cur.fullPath + '/' + name,
                 name: name,
+                deleted: false,
                 parentId: cur.id,
                 blobName: blobName.toString(),
               }
