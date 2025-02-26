@@ -1,9 +1,9 @@
-import {batch, createEffect, createMemo, createSignal, For, on} from 'solid-js'
+import { batch, createEffect, createMemo, createSignal, For, on } from 'solid-js'
 import { boxed } from '@syncedstore/core'
 import { useNdnWorkspace } from '../../Context'
 import { chats } from '../../backend/models'
 import { createSyncedStoreSig } from '../../adaptors/solid-synced-store'
-import { AddChannelDialog } from "./add-channel-dialog.tsx";
+import { AddChannelDialog } from './add-channel-dialog.tsx'
 import styles from './styles.module.scss'
 import { useNavigate } from '@solidjs/router'
 import { SolidMarkdown, SolidMarkdownComponents } from 'solid-markdown'
@@ -25,22 +25,20 @@ export function Chat() {
   const [persistedChannels, setPersistedChannels] = createSignal<string[]>(['general'])
 
   const channels = createMemo(() => {
-    const messageData = data();
-    if (!messageData) return persistedChannels();
+    const messageData = data()
+    if (!messageData) return persistedChannels()
 
-    const uniqueChannels = new Set(persistedChannels());
-    messageData.forEach(msg => {
+    const uniqueChannels = new Set(persistedChannels())
+    messageData.forEach((msg) => {
       if (msg.value.channel) {
-        uniqueChannels.add(msg.value.channel);
+        uniqueChannels.add(msg.value.channel)
       }
-    });
+    })
 
-    return Array.from(uniqueChannels).sort();
-  });
+    return Array.from(uniqueChannels).sort()
+  })
 
-  const filteredMessages = createMemo(() =>
-    data()?.filter((msg) => msg.value.channel === currentChannel())
-  );
+  const filteredMessages = createMemo(() => data()?.filter((msg) => msg.value.channel === currentChannel()))
 
   if (!booted()) {
     navigate('/profile', { replace: true })
@@ -76,8 +74,7 @@ export function Chat() {
     if (trimmedName && !channels().includes(trimmedName)) {
       setPersistedChannels([...persistedChannels(), trimmedName])
       setCurrentChannel(trimmedName)
-    }
-    else {
+    } else {
       alert('Channel name cannot be empty or already exist')
     }
   }
@@ -85,11 +82,11 @@ export function Chat() {
   const isLocalUser = (sender: string) => sender == username()
 
   const userPfpId = (sender: string) => {
-    let hash = 0;
+    let hash = 0
     for (let i = 0; i < sender.length; i++) {
-      hash = (hash * 31 + sender.charCodeAt(i)) >>> 0;  // Ensure the hash is always a 32-bit unsigned integer
+      hash = (hash * 31 + sender.charCodeAt(i)) >>> 0 // Ensure the hash is always a 32-bit unsigned integer
     }
-    return hash % 1024;
+    return hash % 1024
   }
 
   /* Display */
@@ -115,7 +112,9 @@ export function Chat() {
               </button>
             )}
           </For>
-          <button class={styles.AddChannelButton} onClick={() => setIsAddChannelDialogOpen(true)}>+</button>
+          <button class={styles.AddChannelButton} onClick={() => setIsAddChannelDialogOpen(true)}>
+            +
+          </button>
         </div>
         <h2 class={styles.ChannelHeading}>#{currentChannel()} Channel</h2>
       </div>
@@ -124,10 +123,7 @@ export function Chat() {
           {(msg) => (
             <div>
               <div class={styles.App__message}>
-                <img
-                  src={`https://picsum.photos/id/${userPfpId(msg.value.sender)}/128/128`}
-                  style="flex-shrink: 0"
-                />
+                <img src={`https://picsum.photos/id/${userPfpId(msg.value.sender)}/128/128`} style="flex-shrink: 0" />
                 <div class={styles.App__msgContent}>
                   <h4
                     class={`${styles.App__msgHeader} 
@@ -135,12 +131,13 @@ export function Chat() {
                       ${isLocalUser(msg.value.sender) ? styles.App__borderLocal : styles.App__borderForeign}`}
                   >
                     {' '}
-                    {msg.value.sender}
-                    {' '}
-                    <span>{new Date(msg.value.timestamp).toLocaleString(undefined, {
-                      dateStyle: 'medium',
-                      timeStyle: 'short'
-                    })}</span>
+                    {msg.value.sender}{' '}
+                    <span>
+                      {new Date(msg.value.timestamp).toLocaleString(undefined, {
+                        dateStyle: 'medium',
+                        timeStyle: 'short',
+                      })}
+                    </span>
                   </h4>
                   <div
                     class={`${styles.App_msgContentSolid} 

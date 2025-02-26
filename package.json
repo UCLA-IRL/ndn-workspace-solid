@@ -56,9 +56,9 @@
     "@suid/icons-material": "^0.8.1",
     "@suid/material": "^0.18.0",
     "@syncedstore/core": "^0.6.0",
-    "@tailwindcss/postcss": "^4.0.8",
+    "@tailwindcss/postcss": "^4.0.9",
     "@tailwindcss/typography": "^0.5.16",
-    "@tailwindcss/vite": "^4.0.8",
+    "@tailwindcss/vite": "^4.0.9",
     "@tiptap/core": "^2.11.5",
     "@tiptap/extension-collaboration": "^2.11.5",
     "@tiptap/extension-collaboration-cursor": "^2.11.5",
@@ -87,35 +87,36 @@
     "solid-markdown": "^2.0.14",
     "solid-tiptap": "^0.7.0",
     "solid-toast": "^0.5.0",
-    "tailwindcss": "^4.0.8",
+    "tailwindcss": "^4.0.9",
     "uuid": "^11.1.0",
     "y-codemirror.next": "^0.3.5",
-    "y-prosemirror": "^1.2.15",
+    "y-prosemirror": "^1.2.16",
     "y-protocols": "^1.0.6",
     "yjs": "^13.6.23"
   },
   "devDependencies": {
+    "@eslint/js": "^9.21.0",
     "@suid/vite-plugin": "^0.3.1",
     "@types/diff": "^7.0.1",
     "@types/qrcode": "^1.5.5",
     "@types/uuid": "^10.0.0",
     "@types/web-bluetooth": "^0.0.20",
     "@types/wicg-file-system-access": "^2023.10.5",
-    "@typescript-eslint/parser": "^8.24.1",
+    "@typescript-eslint/parser": "^8.25.0",
     "eslint": "9.20.1",
-    "eslint-config-prettier": "^10.0.1",
+    "eslint-config-prettier": "^10.0.2",
     "eslint-plugin-prettier": "^5.2.3",
     "eslint-plugin-solid": "^0.14.5",
     "peer": "^1.0.2",
     "prettier": "^3.5.2",
-    "sass": "^1.85.0",
+    "sass": "^1.85.1",
     "solid-devtools": "^0.33.0",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.24.1",
+    "typescript-eslint": "^8.25.0",
     "typescript-event-target": "^1.1.1",
-    "vite": "^6.1.1",
+    "vite": "^6.2.0",
     "vite-plugin-pwa": "^0.21.1",
-    "vite-plugin-solid": "^2.11.2",
+    "vite-plugin-solid": "^2.11.4",
     "wait-your-turn": "^1.0.1",
     "workbox-cacheable-response": "^7.3.0",
     "workbox-core": "^7.3.0",
@@ -128,6 +129,11 @@
   "pnpm": {
     "patchedDependencies": {
       "file-system-access@1.0.4": "patches/file-system-access@1.0.4.patch"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "bufferutil",
+      "esbuild"
+    ]
   }
 }
