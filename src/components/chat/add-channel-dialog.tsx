@@ -1,4 +1,13 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Checkbox, FormControlLabel } from '@suid/material'
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  Checkbox,
+  FormControlLabel,
+} from '@suid/material'
 import { createSignal } from 'solid-js'
 
 interface AddChannelDialogProps {
@@ -29,7 +38,15 @@ export function AddChannelDialog(props: AddChannelDialogProps) {
     <Dialog open={props.open} onClose={handleClose}>
       <DialogTitle>Add New Channel</DialogTitle>
       <DialogContent>
-        <div style={{ display: 'flex', 'flex-direction': 'column', gap: '1rem', 'min-width': '300px', 'margin-top': '1rem' }}>
+        <div
+          style={{
+            display: 'flex',
+            'flex-direction': 'column',
+            gap: '1rem',
+            'min-width': '300px',
+            'margin-top': '1rem',
+          }}
+        >
           <TextField
             autoFocus
             label="Channel Name"
@@ -38,23 +55,14 @@ export function AddChannelDialog(props: AddChannelDialogProps) {
             fullWidth
           />
           <FormControlLabel
-            control={
-              <Checkbox
-                checked={confirmed()}
-                onChange={(_, checked) => setConfirmed(checked)}
-              />
-            }
+            control={<Checkbox checked={confirmed()} onChange={(_, checked) => setConfirmed(checked)} />}
             label="I understand that this channel cannot be deleted after the first message is sent and cannot be renamed"
           />
         </div>
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Cancel</Button>
-        <Button
-          onClick={handleSubmit}
-          disabled={!channelName().trim() || !confirmed()}
-          color="primary"
-        >
+        <Button onClick={handleSubmit} disabled={!channelName().trim() || !confirmed()} color="primary">
           Create Channel
         </Button>
       </DialogActions>

@@ -41,6 +41,7 @@ export default function FileHistory() {
       parentId: undefined,
       kind: 'folder',
       items: [],
+      deleted: false,
     }
     yDoc.clientID = clientID
     for (const [idStr, seq] of Object.entries(svJson)) {
