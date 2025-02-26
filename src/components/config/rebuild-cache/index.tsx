@@ -44,6 +44,7 @@ export default function RebuildCache() {
         parentId: undefined,
         kind: 'folder',
         items: [],
+        deleted: false,
       }
       yDoc.clientID = clientID
 
