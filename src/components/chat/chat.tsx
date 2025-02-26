@@ -1,11 +1,11 @@
-import {batch, createEffect, createMemo, createSignal, For, on} from 'solid-js'
+import { batch, createEffect, createMemo, createSignal, For, on } from 'solid-js'
 import { boxed } from '@syncedstore/core'
 import { useNdnWorkspace } from '../../Context'
 import { chats } from '../../backend/models'
 import { createSyncedStoreSig } from '../../adaptors/solid-synced-store'
-import { useChatState } from "./chat-state-store.tsx";
-import { AddChannelDialog } from "./add-channel-dialog.tsx";
-import { ToggleChannelVisibilityDialog } from "./toggle-visibility-dialog.tsx";
+import { useChatState } from './chat-state-store.tsx'
+import { AddChannelDialog } from './add-channel-dialog.tsx'
+import { ToggleChannelVisibilityDialog } from './toggle-visibility-dialog.tsx'
 import styles from './styles.module.scss'
 import { useNavigate } from '@solidjs/router'
 import { SolidMarkdown, SolidMarkdownComponents } from 'solid-markdown'
@@ -19,7 +19,10 @@ export function Chat() {
   const messages = createSyncedStoreSig(() => rootDoc()?.chats)
   const data = () => messages()?.value
   const username = () => syncAgent()?.nodeId.at(-1).text ?? ''
-  const { chatState: hiddenChannels, updateChatState: setHiddenChannels } = useChatState<string[]>(`${syncAgent()?.nodeId}/hiddenChannels`, [])
+  const { chatState: hiddenChannels, updateChatState: setHiddenChannels } = useChatState<string[]>(
+    `${syncAgent()?.nodeId}/hiddenChannels`,
+    [],
+  )
 
   const [messageTerm, setMessageTerm] = createSignal('')
   const [container, setContainer] = createSignal<HTMLDivElement>()
@@ -29,28 +32,26 @@ export function Chat() {
   const [persistedChannels, setPersistedChannels] = createSignal<string[]>(['general'])
 
   const channels = createMemo<string[]>((): string[] => {
-    const messageData = data();
+    const messageData = data()
     if (!messageData) {
       return Array.from(new Set(persistedChannels()).difference(new Set(hiddenChannels())))
     }
 
-    const uniqueChannels: Set<string> = new Set();
-    messageData.forEach(msg => {
+    const uniqueChannels: Set<string> = new Set()
+    messageData.forEach((msg) => {
       if (msg.value.channel) {
-        uniqueChannels.add(msg.value.channel);
+        uniqueChannels.add(msg.value.channel)
       }
-    });
+    })
 
     const finalChannels: Set<string> = uniqueChannels
       .union(new Set(persistedChannels()))
       .difference(new Set(hiddenChannels()))
 
-    return Array.from(finalChannels).sort();
-  });
+    return Array.from(finalChannels).sort()
+  })
 
-  const filteredMessages = createMemo(() =>
-    data()?.filter((msg) => msg.value.channel === currentChannel())
-  );
+  const filteredMessages = createMemo(() => data()?.filter((msg) => msg.value.channel === currentChannel()))
 
   if (!booted()) {
     navigate('/profile', { replace: true })
@@ -94,8 +95,7 @@ export function Chat() {
     if (trimmedName && !channels().includes(trimmedName) && !hiddenChannels().includes(trimmedName)) {
       setPersistedChannels([...persistedChannels(), trimmedName])
       setCurrentChannel(trimmedName)
-    }
-    else {
+    } else {
       alert('Channel name cannot be empty or already exist')
     }
   }
@@ -112,11 +112,11 @@ export function Chat() {
   const isLocalUser = (sender: string) => sender == username()
 
   const userPfpId = (sender: string) => {
-    let hash = 0;
+    let hash = 0
     for (let i = 0; i < sender.length; i++) {
-      hash = (hash * 31 + sender.charCodeAt(i)) >>> 0;  // Ensure the hash is always a 32-bit unsigned integer
+      hash = (hash * 31 + sender.charCodeAt(i)) >>> 0 // Ensure the hash is always a 32-bit unsigned integer
     }
-    return hash % 1024;
+    return hash % 1024
   }
 
   /* Display */
@@ -140,29 +140,33 @@ export function Chat() {
               >
                 #{channel}
                 <span
-                  title={"Hide channel"}
+                  title={'Hide channel'}
                   class={styles.HideChannelButton}
-                  aria-label={"Hide channel"}
+                  aria-label={'Hide channel'}
                   onClick={(event) => {
                     event.stopPropagation()
                     hideChannel(channel)
-                  }
-                }>x</span>
+                  }}
+                >
+                  x
+                </span>
               </button>
             )}
           </For>
           <button
             class={styles.AddChannelButton}
             onClick={() => setIsAddChannelDialogOpen(true)}
-            title={"New channel"}
-            aria-label={"New channel"}>
+            title={'New channel'}
+            aria-label={'New channel'}
+          >
             +
           </button>
           <button
             class={styles.AddChannelButton}
             onClick={() => setIsToggleVisibilityDialogOpen(true)}
-            title={"Unhide channels"}
-            aria-label={"Un-hide channels"}>
+            title={'Unhide channels'}
+            aria-label={'Un-hide channels'}
+          >
             &#x2630;
           </button>
         </div>
@@ -186,12 +190,13 @@ export function Chat() {
                       ${isLocalUser(msg.value.sender) ? styles.App__borderLocal : styles.App__borderForeign}`}
                   >
                     {' '}
-                    {msg.value.sender}
-                    {' '}
-                    <span>{new Date(msg.value.timestamp).toLocaleString(undefined, {
-                      dateStyle: 'medium',
-                      timeStyle: 'short'
-                    })}</span>
+                    {msg.value.sender}{' '}
+                    <span>
+                      {new Date(msg.value.timestamp).toLocaleString(undefined, {
+                        dateStyle: 'medium',
+                        timeStyle: 'short',
+                      })}
+                    </span>
                   </h4>
                   <div
                     class={`${styles.App_msgContentSolid} 

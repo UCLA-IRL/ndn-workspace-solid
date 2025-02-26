@@ -1,10 +1,20 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, List, ListItem, Checkbox, FormControlLabel } from '@suid/material'
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  List,
+  ListItem,
+  Checkbox,
+  FormControlLabel,
+} from '@suid/material'
 import { createSignal, createEffect, For } from 'solid-js'
 
 interface ToggleChannelVisibilityDialogProps {
   open: boolean
-  channels: () => string[]  // visible channels
-  hiddenChannels: () => string[]  // hidden channels
+  channels: () => string[] // visible channels
+  hiddenChannels: () => string[] // hidden channels
   setHiddenChannels: (channels: string[]) => void
   onClose: () => void
 }
@@ -25,7 +35,7 @@ export function ToggleChannelVisibilityDialog(props: ToggleChannelVisibilityDial
     if (checked) {
       setSelectedChannels([...selectedChannels(), channel])
     } else {
-      setSelectedChannels(selectedChannels().filter(c => c !== channel))
+      setSelectedChannels(selectedChannels().filter((c) => c !== channel))
     }
   }
 
@@ -37,9 +47,7 @@ export function ToggleChannelVisibilityDialog(props: ToggleChannelVisibilityDial
 
     // Calculate which channels should be hidden (all channels minus selected ones)
     const allChannels = [...props.channels(), ...props.hiddenChannels()]
-    const newHiddenChannels = allChannels.filter(
-      channel => !selectedChannels().includes(channel)
-    )
+    const newHiddenChannels = allChannels.filter((channel) => !selectedChannels().includes(channel))
     props.setHiddenChannels(newHiddenChannels)
     props.onClose()
   }
@@ -55,12 +63,7 @@ export function ToggleChannelVisibilityDialog(props: ToggleChannelVisibilityDial
   }
 
   return (
-    <Dialog
-      open={props.open}
-      onClose={props.onClose}
-      fullWidth
-      maxWidth="sm"
-    >
+    <Dialog open={props.open} onClose={props.onClose} fullWidth maxWidth="sm">
       <DialogTitle>Toggle Channel Visibility</DialogTitle>
       <DialogContent>
         <List sx={{ minWidth: '300px' }}>
